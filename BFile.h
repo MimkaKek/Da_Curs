@@ -97,12 +97,12 @@ class InBinary {
          * Что делает: считывает из файла бит. Этот бит заносит в n и возвращает указатель на n. 
          * В случае ошибки - возвращает nullptr.
          */
-        char*      ReadBin(size_t* n);
+        char*       ReadBin(size_t* n);
         
-        /* Что делает: считывает из файла бит и заносит в. 
+        /* Что делает: считывает из файла бит и заносит в переменную. 
          * В случае успеха - true. Иначе - false.
          */
-        bool operator >>(InBinary& file, size_t const &bit);
+        bool operator >> (InBinary& file, size_t const &bit);
     private:
         
         ifstream    in;
