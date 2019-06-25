@@ -1,9 +1,7 @@
 #ifndef MAIN_HELP_H
 #define MAIN_HELP_H
 
-#include <iostream>
-#include <sstream>
-#include <vector>
+
 #include "Globals.h"
 
 /*	Имя: ShowArc
