@@ -20,16 +20,20 @@
 //	TODO Проверка на совпадения и несовпедения имен			/Т_Т\
 
 int main(int argc, char *argv[]) {
-	std::vector<std::string> filenames;
+	std::vector<std::string> fileNames;
 	std::vector<std::pair<char,bool>> usedKeys = {{'c', false}, {'d', false}, {'k', false}, {'l', false}, 
 												  {'r', false}, {'t', false}, {'1', false}, {'9', false}};
 	for (int i = 1; i < argc; ++i) {
-		std::string keyFile;
+		std::string keyFile, kkk;
 		std::stringstream tmp(argv[i]);
 		tmp >> keyFile;
+		std::stringstream secondTmp(keyFile);
+		int length = keyFile.size();
+		char file[length];
+		secondTmp >> file;
 		if (keyFile[0] == '-') {//ага ключ(и)
-			for (int j = 1; j < keyFile.size(); ++j) {//TODO какая-то херня с векторами в кейсах
-				switch (keyFile[j]) {
+			for (int j = 1; j < keyFile.size(); ++j) {
+				switch (keyFile[j]) {//TODO блядский свич не пашет с чарами. оставить '' или продолжить хавать кактус?
 					case /*usedKeys[0].first*/'c': {
 						if (!usedKeys[3].second || !usedKeys[5].second) {
 							usedKeys[0].second = true;
@@ -109,23 +113,37 @@ int main(int argc, char *argv[]) {
 		}
 		else {// ага файлы и папки
 			bool got = false;
-			for (int j = 0; j < filenames.size(); ++j) {
-				if (filenames[j] == keyFile) {
+			for (int j = 0; j < fileNames.size(); ++j) {
+				if (fileNames[j] == keyFile) {//для избежания работы над одним и темже файлом несколько раз
 					got = true;
 					break;
 				}
 			}
 			if (!got) {
-				filenames.push_back(keyFile);
+				fileNames.push_back(keyFile);
 			}
 		}
 	}
-	for (int i = 0; i < usedKeys.size(); i++) {//енто тесто
-		std::cout << usedKeys[i].first << "\t" << usedKeys[i].second << std::endl;
+	if (fileNames.empty()) {
+		std::cout << "Compressed data not written to a terminal." << std::endl;
+		return 0;
 	}
-	for (int i = 0; i < filenames.size(); i++) {
-		std::cout << filenames[i] << "\t";
+	/* TODO надо ли здесь упростить usedKeys до простого вектора булов? или так и оставим?
+	 * TODO мож их вообще в глобалы отправить?
+	std::vector<bool> keys(usedKeys.size());
+	for (int i = 0; i < keys.size(); ++i) {
+		keys[i] = usedKeys[i].second;
+	}*/
+	for (int i = 0; i < fileNames.size(); i++) {//проверка на файлы и папки и дальнейшая работа с ними
+		if (IsDirectory(fileNames[i]) && !usedKeys[4].second) {
+			std::cout << fileNames[i] << " is a directory -- ignored" << std::endl;
+		}
+		else if (IsDirectory(fileNames[i])) {//TODO есть 2 варианта для этих двух элсов: 1) преобразовать в один-единый 2) внутри работы с директориями юзать работу с файлами 
+			WorkWithDirectory(fileNames[i], usedKeys/*keys*/);
+		}
+		else {
+			WorkWithFile(fileNames[i], usedKeys/*keys*/);
+		}
 	}
-	std::cout << std::endl;
 	return 0;
 }
