@@ -17,11 +17,18 @@ void ShowArc(std::string archiveName);
 
 void DifferensOfSizes(std::string archiveName);
 
-/*	Имя: GetFiles
- * 	Что делает: получает вектор файлов из заданной дирректории, которые надо компрессить/декомпрессить (ключ r)
+/*	Имя: WorkWithDirectory
+ * 	Что делает: работает (смотри WorkWithFile) с директорией (ключ r) 
  */
  
-std::vector<std::string> GetFiles(std::string directory);
+void WorkWithDirectory(std::string directory, std::vector<std::pair<char,bool>>/*std::vector<bool>*/);
+
+/*	Имя: WorkWithDirectory
+ * 	Что делает: работает с файлом 
+ * 	(определяет наличие файла, компресить его или декомпресить, выполняет прочие ключи)
+ */
+
+void WorkWithFile(std::string file, std::vector<std::pair<char,bool>>/*std::vector<bool>*/);
 
 /*	Имя: CheckIntegrity
  * 	Что делает: Проверяет целостность сжатого файла (ключ t)
@@ -29,5 +36,11 @@ std::vector<std::string> GetFiles(std::string directory);
  */
 
 void CheckIntegrity(std::string archiveName);
+
+/*	Имя: IsDirectory
+ * 	Что делает: Проверяет, является ли файл директорией
+ */
+
+bool IsDirectory(std::string);
 
 #endif
