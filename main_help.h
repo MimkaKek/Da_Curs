@@ -21,14 +21,14 @@ void DifferensOfSizes(std::string archiveName);
  * 	Что делает: работает (смотри WorkWithFile) с директорией (ключ r) 
  */
  
-void WorkWithDirectory(std::string directory, std::vector<std::pair<char,bool>>/*std::vector<bool>*/);
+void WorkWithDirectory(std::string directoryName, std::vector<bool> keys);
 
 /*	Имя: WorkWithDirectory
  * 	Что делает: работает с файлом 
  * 	(определяет наличие файла, компресить его или декомпресить, выполняет прочие ключи)
  */
 
-void WorkWithFile(std::string file, std::vector<std::pair<char,bool>>/*std::vector<bool>*/);
+void WorkWithFile(std::string fileName, std::vector<bool> keys);
 
 /*	Имя: CheckIntegrity
  * 	Что делает: Проверяет целостность сжатого файла (ключ t)
@@ -41,6 +41,12 @@ void CheckIntegrity(std::string archiveName);
  * 	Что делает: Проверяет, является ли файл директорией
  */
 
-bool IsDirectory(std::string);
+bool IsDirectory(std::string directoryName);
+
+/*	Имя: IsArchive
+ *	Что делает: проверяет, является ли файл архивом
+ */
+
+bool IsArchive(std::string fileName);
 
 #endif
