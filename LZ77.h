@@ -46,4 +46,3 @@ public:
 
 	virtual ~LZ77();
 };
-
