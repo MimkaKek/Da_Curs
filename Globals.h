@@ -7,7 +7,6 @@
 #include <dirent.h>
 #include <errno.h>
 
-//TODO надо ли делать класс для эрров и варнингов?
-//TODO makefile я так понимаю будем пилить совместно
+extern std::vector<bool> keys;
 
 #endif
