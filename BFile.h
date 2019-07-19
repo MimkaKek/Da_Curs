@@ -1,6 +1,7 @@
 #ifndef BFILE_H
 #define BFILE_H
 
+#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -18,7 +19,7 @@ class OutBinary {
          * Что делает: открывает файл. 
          * В случае успеха - true. Иначе - false.
          */
-        bool        Open(std::string name);
+        bool        Open(std::string* name);
         
         /* Имя: Close();
          * Что делает: закрывает файл. 
@@ -30,7 +31,7 @@ class OutBinary {
          * Что делает: записывает файл объект obj размером size байт.
          * В случае успеха - true. Иначе - false.
          */
-        bool        Write(char* obj, size_t size);
+        bool        Write(const char* obj, size_t size);
         
         /* Имя: WriteBin(size_t bit);
          * Что делает: записывает файл нужный бит. 
@@ -46,8 +47,8 @@ class OutBinary {
         
         std::ofstream    out;
         
-        char        head;
-        char        block;
+        unsigned char    head;
+        unsigned char    block;
 };
 
 
@@ -66,7 +67,7 @@ class InBinary {
          * Что делает: открывает файл. 
          * В случае успеха - true. Иначе - false.
          */
-        bool        Open(std::string name);
+        bool        Open(std::string* name);
         
         /* Имя: Close();
          * Что делает: закрывает файл. 
@@ -90,13 +91,13 @@ class InBinary {
         /* Что делает: считывает из файла бит и заносит в переменную.
          * В случае успеха - true. Иначе - false.
          */
-        friend bool operator >> (InBinary& file, size_t &bit);
+        friend bool operator >> (InBinary& iFile, char &bit);
     private:
         
         std::ifstream    in;
         
-        char        head;
-        char        block;
+        unsigned char    head;
+        unsigned char    block;
 };
 
 #endif /* BFILE_H */

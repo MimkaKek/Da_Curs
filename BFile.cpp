@@ -1,23 +1,21 @@
 #include "BFile.h"
 
 OutBinary::OutBinary() {
-    head = 0;
-    head |= 1 << 7;
+    head = 1 << 7;
     block = 0;
 }
 
-bool OutBinary::Open(std::string name) {
+bool OutBinary::Open(std::string* name) {
     if(out.is_open()) {
         return false;
     }
     else {
-        out.open(name.c_str(), std::ofstream::out);
+        out.open(name->c_str(), std::ofstream::out);
         if(!out) {
             return false;
         }
         else {
-            head = 0;
-            head |= 1 << 7;
+            head = 1 << 7;
             block = 0;
             return true;
         }
@@ -40,9 +38,11 @@ bool OutBinary::Close() {
     }
 }
 
-bool OutBinary::Write(char* obj, size_t size) {
+bool OutBinary::Write(const char* obj, size_t size) {
     if(out.is_open()) {
-        
+        if(!(head & (1 << 7))) {
+            out << block;
+        }
         out.write(obj, size);
         return true;
     }
@@ -52,6 +52,7 @@ bool OutBinary::Write(char* obj, size_t size) {
 }
 
 bool OutBinary::WriteBin(size_t bit) {
+    
     if(out.is_open()) {
         if(bit) {
             block |= head;
@@ -60,7 +61,7 @@ bool OutBinary::WriteBin(size_t bit) {
         if(!head) {
             out << block;
             block = 0;
-            head |= 1 << 7;
+            head = 1 << 7;
         }
         return true;
     }
@@ -70,6 +71,7 @@ bool OutBinary::WriteBin(size_t bit) {
 }
 
 bool operator << (OutBinary& file, size_t const &bit) {
+    
     if(file.out.is_open()) {
         if(bit) {
             file.block |= file.head;
@@ -78,7 +80,7 @@ bool operator << (OutBinary& file, size_t const &bit) {
         if(!file.head) {
             file.out << file.block;
             file.block = 0;
-            file.head |= 1 << 7;
+            file.head = 1 << 7;
         }
         return true;
     }
@@ -93,12 +95,12 @@ InBinary::InBinary() {
     block = 0;
 }
 
-bool InBinary::Open(std::string name) {
+bool InBinary::Open(std::string* name) {
     if(in.is_open()) {
         return false;
     }
     else {
-        in.open(name.c_str(), std::ofstream::in);
+        in.open(name->c_str(), std::ofstream::in);
         if(!in) {
             return false;
         }
@@ -129,33 +131,31 @@ bool InBinary::Read(char* obj, size_t size) {
 }
 
 bool InBinary::ReadBin(char* n) {
-    if(!in.eof()) {
-        if(!head) {
-            in >> block;
-            head |= 1 << 7;
+    if(!head) {
+        if(in >> block) {
+            head = 1 << 7;
+        }    
+        else {
+            return false;
         }
-        ((block & head) != 0) ? (*n = 1) : (*n = 0);
-        head >>= 1;
-        return true;
     }
-    else {
-        return false;
-    }
+    ((block & head) != 0) ? (bit = 1) : (bit = 0);
+    head >>= 1;
+    return true;
 }
 
-bool operator >> (InBinary& file, size_t &bit) {
-    if(!file.in.eof()) {
-        if(!file.head) {
-            file.in >> file.block;
-            file.head |= 1 << 7;
+bool operator >> (InBinary& iFile, char& bit) {
+    if(!iFile.head) {
+        if(iFile.in >> iFile.block) {
+            iFile.head = 1 << 7;
+        }    
+        else {
+            return false;
         }
-        ((file.block & file.head) != 0) ? (bit = 1) : (bit = 0);
-        file.head >>= 1;
-        return true;
     }
-    else {
-        return false;
-    }
+    ((iFile.block & iFile.head) != 0) ? (bit = 1) : (bit = 0);
+    iFile.head >>= 1;
+    return true;
 }
 
 
