@@ -3,51 +3,51 @@
 TLZW::TLZW(int compressionRatio) {
 	unsigned long long int fileSize = GetSize(); // TODO SLAVA
 	if (compressionRatio == DECOMPRESS) {
-		this->compressionTree = new TPrefix('d', 0);
-		return;
+		fileSize = 0;
 	}
-	if (fileSize < LOW_BORDER && fileSize > 3) {
+	else if (fileSize < LOW_BORDER && fileSize > 3) {
 		switch (compressionRatio) {
 			case FAST:
 				fileSize /= 3;
 				break;
 			case NORMAL:
-				fileSize *= (double) 2 / 3;
+				fileSize *= (2.0 / 3.0);
 				break;
 		}
 	}
 	else if (fileSize >= LOW_BORDER && fileSize < MEDIUM_BORDER) {
 		switch (compressionRatio) {
 			case FAST:
-				fileSize /= 100;
+				fileSize /= LOW_FAST;
 				break;
 			case NORMAL:
-				fileSize /= 10;
+				fileSize /= LOW_MEDIUM;
 				break;
 		}
 	}
 	else if (fileSize >= MEDIUM_BORDER && fileSize < HIGH_BORDER) {
 		switch (compressionRatio) {
 			case FAST:
-				fileSize /= 1000000;
+				fileSize /= MEDIUM_FAST;
 				break;
 			case NORMAL:
-				fileSize /= 1000;
+				fileSize /= MEDIUM_MEDIUM;
 				break;
 		}
 	}
-	else {
+	else if (fileSize >= HIGH_BORDER) {
 		switch (compressionRatio) {
 			case FAST:
-				fileSize = HIGH_BORDER / 1000000000000LLU;
+				fileSize = HIGH_BORDER / HIGH_FAST;
 				break;
 			case NORMAL:
-				fileSize = HIGH_BORDER / 1000000;
+				fileSize = HIGH_BORDER / HIGH_MEDIUM;
 				break;
 			case HIGH:
 				fileSize = HIGH_BORDER;
 				break;
 		}
 	}
-	this->compressionTree = new TPrefix('c', fileSize);
+	this->compressionTree = new TPrefix(fileSize);
+	return;
 }

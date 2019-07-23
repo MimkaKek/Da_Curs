@@ -1,10 +1,9 @@
 #pragma once
-class Compressor
-{
+class ICompressor {
 public:
-	Compressor();
+	ICompressor();
 	virtual void Compress()=0;
 	virtual void Decompress()=0;
-	virtual ~Compressor();
+	virtual ~ICompressor();
 };
 

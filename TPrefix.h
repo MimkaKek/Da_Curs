@@ -1,20 +1,29 @@
+#ifndef TPREFIX_H
+#define TPREFIX_H
+
 #include "Globals.h"
+
+enum UpdateResult {
+	OK,
+	FULL,
+	MEMORY_ERROR
+};
 
 // класс для префиксного дерева в LZW
 class TPrefix {
 public:
 
 	/* Конструктор корня */
-	TPrefix(char, unsigned int);
+	TPrefix(unsigned long long int);
 
 	/* Конструктор для прочих узлов */
-	TPrefix(unsigned int)
-
-	/* особый апдейт для корня */
-	void UpdateForRoot();
+	TPrefix()
 
 	/* Добавление новых узлов в дерево */
-	void Update(char);
+	bool Update(char);
+
+	/* особый апдейт для корня */
+	int UpdateForRoot();
 
 	/* очистка дерева после переполнения */
 	void Clear();
@@ -25,21 +34,23 @@ public:
 private:
 
 	/* вектор потомков и путей в них */
-	std::vector<std::pair<char, TPrefix*>> next;
+	std::vector<std::pair<unsigned char, TPrefix*>> next;
 
 	/* номер слова в таблице */
-	unsigned int numberOfWord;
+	unsigned long long int numberOfWord;
 
 	/* последняя буква из файла */
-	static char lastLetter;
+	static unsigned char lastLetter;
 
 	/* номер последнего добавленного слова */
-	static unsigned int lastNumber;
+	static unsigned long long int lastNumber;
 
 	/* максимальная граница кол-ва слов перед созданием нового дерева */
-	static const unsigned int border; //TODO а статик константу не надо капитализировать?
+	static const unsigned long long int border; //TODO а статик константу не надо капитализировать?
 	
 	static FILE read; //TODO а так можно?
 
 	static FILE write;
 };
+
+#endif
