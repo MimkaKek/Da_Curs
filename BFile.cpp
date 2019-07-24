@@ -15,6 +15,7 @@ bool OutBinary::Open(std::string* name) {
             return false;
         }
         else {
+            this->name = *name;
             head = 1 << 7;
             block = 0;
             return true;
@@ -70,6 +71,11 @@ bool OutBinary::WriteBin(size_t bit) {
     }
 }
 
+unsigned long long OutBinary::SizeFile() {
+    std::ifstream in(name, std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
+}
+
 bool operator << (OutBinary& file, size_t const &bit) {
     
     if(file.out.is_open()) {
@@ -105,6 +111,7 @@ bool InBinary::Open(std::string* name) {
             return false;
         }
         else {
+            this->name = *name;
             head = 0;
             block = 0;
             return true;
@@ -142,6 +149,11 @@ bool InBinary::ReadBin(char* n) {
     ((block & head) != 0) ? (bit = 1) : (bit = 0);
     head >>= 1;
     return true;
+}
+
+unsigned long long InBinary::SizeFile() {
+    std::ifstream in(name, std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
 }
 
 bool operator >> (InBinary& iFile, char& bit) {

@@ -10,34 +10,33 @@
 class OutBinary {
     public:
         
-        /* Имя: OutBinary()
-         * Что делает: задаёт начальные значения. Файл не будет открыт.
+        /* Что делает: задаёт начальные значения. Файл не будет открыт.
          */
         OutBinary();
         
-        /* Имя: Open(std::string name)
-         * Что делает: открывает файл. 
+        /* Что делает: открывает файл. 
          * В случае успеха - true. Иначе - false.
          */
         bool        Open(std::string* name);
         
-        /* Имя: Close();
-         * Что делает: закрывает файл. 
+        /* Что делает: закрывает файл. 
          * В случае успеха - true. Иначе - false.
          */
         bool        Close();
         
-        /* Имя: Write(void* obj, size_t size);
-         * Что делает: записывает файл объект obj размером size байт.
+        /* Что делает: записывает файл объект obj размером size байт.
          * В случае успеха - true. Иначе - false.
          */
         bool        Write(const char* obj, size_t size);
         
-        /* Имя: WriteBin(size_t bit);
-         * Что делает: записывает файл нужный бит. 
+        /* Что делает: записывает файл нужный бит. 
          * В случае успеха - true. Иначе - false.
          */
         bool        WriteBin(size_t bit);
+        
+        /* Что делает: возврашает размер файла в виде числа байт.
+         */
+        unsigned long long SizeFile();
         
         /* Что делает: записывает файл нужный бит. 
          * В случае успеха - true. Иначе - false.
@@ -47,6 +46,7 @@ class OutBinary {
         
         std::ofstream    out;
         
+        std::string      name;
         unsigned char    head;
         unsigned char    block;
 };
@@ -58,44 +58,47 @@ class OutBinary {
 class InBinary {
     public:
         
-        /* Имя: InBinary()
-         * Что делает: задаёт начальные значения. Файл не будет открыт.
+        /* Что делает: задаёт начальные значения. Файл не будет открыт.
          */
         InBinary();
         
-        /* Имя: Open(std::string name)
-         * Что делает: открывает файл. 
-         * В случае успеха - true. Иначе - false.
+        /* Что делает: открывает файл. 
+         * В случае успеха - true. 
+         * Иначе - false.
          */
         bool        Open(std::string* name);
         
-        /* Имя: Close();
-         * Что делает: закрывает файл. 
-         * В случае успеха - true. Иначе - false.
+        /* Что делает: закрывает файл. 
+         * В случае успеха - true. 
+         * Иначе - false.
          */
         bool        Close();
         
-        /* Имя: Read(char* obj, size_t size);
-         * Что делает: считывает из файла size байт. 
+        /* Что делает: считывает из файла size байт. 
          * В случае успеха - возвращает true.
          * В случае неудачи - возвращает false.
          */
         bool        Read(char* obj, size_t size);
         
-        /* Имя: ReadBin(char* n);
-         * Что делает: считывает из файла бит. Этот бит заносит в n и возвращает true. 
+        /* Что делает: считывает из файла бит. Этот бит заносит в n и возвращает true. 
          * В случае ошибки - возвращает false.
          */
         bool        ReadBin(char* n);
         
+        /* Что делает: возврашает размер файла в виде числа байт.
+         */
+        unsigned long long SizeFile();
+        
         /* Что делает: считывает из файла бит и заносит в переменную.
-         * В случае успеха - true. Иначе - false.
+         * В случае успеха - true. 
+         * Иначе - false.
          */
         friend bool operator >> (InBinary& iFile, char &bit);
     private:
         
         std::ifstream    in;
         
+        std::string      name;
         unsigned char    head;
         unsigned char    block;
 };

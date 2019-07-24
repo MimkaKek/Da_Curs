@@ -1,5 +1,15 @@
 #include "Arithmetic.h"
 
+Arithmetic::Arithmetic() {
+    alphabet = 0;
+}
+
+Arithmetic::~Arithmetic() {
+    for(int i = 0; i < probability.size(); ++i) {
+        delete probability[i];
+    }
+}
+
 void Arithmetic::Compress(std::string name) {
     //TODO алгоритм сжатия
     std::cout << "1";
@@ -13,46 +23,69 @@ void Arithmetic::Decompress(std::string name) {
 }
 
 void Arithmetic::GenerateTable(std::string* name) {
-    //TODO переписать чтения файла, чтобы избегать игнора пробелов и прочих символов
+    
     std::ifstream iFile(name->c_str(), std::ios_base::in);
-    unsigned long count = 0;
+    unsigned long nBytes = 0;
     char symb;
-    while(!iFile.eof()) {
-        iFile.symb;
-        std::map<const char, long double>::iterator iter = probability.find(symb);
+    while(iFile.get(symb)) {
+        
+        TTable::iterator iter = probability.begin();
+        
+        while(iter != probability.end() && (*iter)->first != symb) {
+            ++iter;
+        }
+        
         if(iter == probability.end()) {
-            probability.insert(std::pair<const char, long double> (symb, 1));
-            ++nSymbs;
+            std::pair<const char, long double>* tmp = new std::pair<const char, long double>(symb, 1);
+            probability.push_back(tmp);
+            ++alphabet;
         }
         else {
-            ++iter->second;
+            TTable::iterator prev = iter;
+            
+            --prev;
+            ++(*iter)->second;
+            
+            while((*prev)->second < (*iter)->second) {
+                
+                std::pair<const char, long double>* tmp = *prev;
+                *prev = *iter;
+                *iter = tmp;
+                
+                if(prev == probability.begin()) {
+                    break;
+                }
+                else {
+                    --prev;
+                }
+                --iter;
+            }
         }
-        ++count;
+        
+        ++nBytes;
     }
     
     iFile.close();
     
-    for(std::map<const char, long double>::iterator iter = probability.begin(); iter != probability.end(); ++iter) {
-        iter->second = iter->second / count;
+    for(int i = 0; i < probability.size(); ++i) {
+        probability[i]->second = probability[i]->second / nBytes;
     }
     
     return;
 }
 
-void Arithmetic::GetTable(std::string* name) {
-    //TODO переписать чтения файла, чтобы избегать игнора пробелов и прочих символов
-    std::ifstream iFile(name->c_str(), std::ios_base::in);
-    char nSymbs;
-    char symb;
-    iFile >> nSymbs;
-    while(!iFile.eof() && nSymbs) {
-        iFile >> symb;
-        std::map<const char, long double>::iterator iter = probability.find(symb);
-        if(iter == probability.end()) {
-            probability.insert(std::pair<const char, long double> (symb, 1));
-        }
-        else {
-            ++iter->second;
-        }
+void Arithmetic::GetTable() {
+    char symb = 0;
+    long double prob = 0;
+    input.get(alphabet);
+    unsigned long tmp = alphabet;
+    while(!input.eof() && alphabet) {
+        input.get(symb);
+        input >> prob;
+        std::pair<const char, long double>* tmp = new std::pair<const char, long double>(symb, prob);
+        probability.push_back(tmp);
+        --alphabet;
     }
+    alphabet = tmp;
+    return;
 }
