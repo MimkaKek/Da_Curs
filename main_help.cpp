@@ -4,7 +4,7 @@
 bool KeyManager(std::string gotKeys) {
 	for (int j = 1; j < gotKeys.size(); ++j) {
 		switch (gotKeys[j]) {
-			case 'c': {
+			case 'c':
 				if (!keys[3] || !keys[5]) {
 					keys[0] = true;
 				}
@@ -12,8 +12,7 @@ bool KeyManager(std::string gotKeys) {
 					keys[2] = false;
 				}
 				break;
-			}
-			case 'd': {
+			case 'd':
 				if (!keys[3] || !keys[5]) {
 					keys[1] = true;
 				}
@@ -22,14 +21,12 @@ bool KeyManager(std::string gotKeys) {
 					keys[7] = false;
 				}
 				break;
-			}
-			case 'k': {
+			case 'k':
 				if (!keys[0] || !keys[3] || !keys[5]) {
 					keys[2] = true;
 				}
 				break;
-			}
-			case 'l': {
+			case 'l':
 				keys[3] = true;
 				keys[0] = false;
 				keys[1] = false;
@@ -38,12 +35,10 @@ bool KeyManager(std::string gotKeys) {
 				keys[6] = false;
 				keys[7] = false;
 				break;
-			}
-			case 'r': {
+			case 'r':
 				keys[4] = true;
 				break;
-			}
-			case 't': {
+			case 't':
 				if (!keys[3]) {
 					keys[5] = true;
 				}
@@ -55,8 +50,7 @@ bool KeyManager(std::string gotKeys) {
 					keys[7] = false;
 				}
 				break;
-			}
-			case '1': {
+			case '1':
 				if (!keys[1] && !keys[3] && !keys[5]) {
 					keys[6] = true;
 				}
@@ -64,8 +58,7 @@ bool KeyManager(std::string gotKeys) {
 					keys[7] = false;
 				}
 				break;
-			}
-			case '9': {
+			case '9':
 				if (!keys[1] && !keys[3] && !keys[5]) {
 					keys[7] = true;
 				}
@@ -73,27 +66,24 @@ bool KeyManager(std::string gotKeys) {
 					keys[6] = false;
 				}
 				break;
-			}
-			default: {
+			default:
 				std::cout << "No such key '" << gotKeys[j] << "'" << std::endl << "Fuck you" << std::endl;
 				return false;
-			}
 		}
 	}
 	return true;
 }
 
-void ShowResult(std::string fileName) {
-	//TODO наверное зависит от Славиной работы с файлами
+void ShowResult(std::string fileName) {//TODO
+	
 	return;
 }
 
-void DifferensOfSizes(std::string archiveName) {
+void DifferensOfSizes(std::string archiveName) {//TODO
 	if (!IsArchive(archiveName)) {
 		std::cout << archiveName << " is not an archive" << std::endl;
 		return;
 	}
-	//TODO наверное зависит от Славиной работы с файлами
 	//TODO делает свои дела
 	return;
 }
@@ -104,9 +94,9 @@ void WorkWithDirectory(std::string directoryName) {
 		PrintErrors(directoryName);
 		return;
 	}
-	struct dirent directoryFile = readdir(directory);
+	struct dirent* directoryFile = readdir(directory);
 	while (directoryFile != NULL) {
-		string tmp = directoryName + "/" + string(directoryFile->d_name);
+		std::string tmp = directoryName + std::string(directoryFile->d_name);
 		if (IsDirectory(tmp)) {
 			WorkWithDirectory(tmp);
 		}
@@ -122,56 +112,91 @@ void WorkWithDirectory(std::string directoryName) {
 	return;
 }
 
-void WorkWithFile(std::string fileName) {
+void WorkWithFile(std::string fileName) {//TODO
 	if (keys[3]) {//-l
 		DifferensOfSizes(fileName);
-		return;
+		std::cout << "info" << std::endl;//TEST
 	}
-	if (keys[5]) {//-t
+	else if (keys[5]) {//-t
 		CheckIntegrity(fileName);
-		return;
+		std::cout << "integrity" << std::endl;//TEST
 	}
-	if (keys[1]) {//-d
-		// TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Decompress который примет параметры для печати в out 
-		// или сохранению обоих файлов
-		return;
+	else if (keys[1]) {//-d
+		//TODO
+		/*FILE* tmp = Decompress(fileName);
+		std::string tmpName = tmp->name;
+		if (keys[0]) {//-c
+			ShowResult(tmpName);
+			Delete(tmpName);
+			return;
+		}
+		Save(tmpName);
+		if (!keys[2]) {//-k
+			Delete(fileName);
+		}*/
+		std::cout << "decompress" << std::endl;//TEST
 	}
-	if (keys[6]) {//-1
-		// TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Compress который примет параметры для печати в out 
-		// или сохранению обоих файлов и будет быстро сжимать
-		return;
+	else if (keys[6]) {//-1
+		//TODO
+		/*FILE* tmp = Compress(fileName, FAST);
+		std::string tmpName = tmp->name;
+		if (keys[0]) {//-c
+			ShowResult(tmpName);
+			Delete(tmpName);
+			return;
+		}
+		Save(tmpName);
+		if (!keys[2]) {//-k
+			Delete(fileName);
+		}*/
+		std::cout << FAST << std::endl;//TEST
 	}
-	if (keys[7]) {//-9
-		// TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Compress который примет параметры для печати в out 
-		// или сохранению обоих файлов и будет охрененно сжимать
-		return;
+	else if (keys[7]) {//-9
+		//TODO
+		/*FILE* tmp = Compress(fileName, HIGH);
+		std::string tmpName = tmp->name;
+		if (keys[0]) {//-c
+			ShowResult(tmpName);
+			Delete(tmpName);
+			return;
+		}
+		Save(tmpName);
+		if (!keys[2]) {//-k
+			Delete(fileName);
+		}*/
+		std::cout << HIGH << std::endl;//TEST
 	}
-	if (keys[2]) {//-k
-		//TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Compress который примет параметры для сохранения обоих файлов
-		// и будет средне сжимать
+	else if (keys[2]) {//-k
+		//TODO
+		/*FILE* tmp = Compress(fileName, NORMAL);
+		std::string tmpName = tmp->name;
+		Save(tmpName);*/
+		std::cout << NORMAL << "\t-k" << std::endl;//TEST
 	}
 	else if (keys[0]) {//-c
-		// TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Compress который примет параметры для печати в out 
-		// и будет средне сжимать
+		//TODO
+		/*FILE* tmp = Compress(fileName, NORMAL);
+		std::string tmpName = tmp->name;
+		ShowResult(tmpName);
+		Delete(tmpName);*/
+		std::cout << NORMAL << "\t-c" << std::endl;//TEST
 	}
 	else {//нет ключей => обычная архивация
-		// TODO наверное зависит от Славиной работы с файлами
-		// TODO какой-нибудь Compress который будет средне сжимать
+		//TODO
+		/*FILE* tmp = Compress(fileName, NORMAL);
+		std::string tmpName = tmp->name;
+		Save(tmpName);
+		Delete(fileName);*/
+		std::cout << NORMAL << " NORMAL" << std::endl;//TEST
 	}
 	return;
 }
 
-void CheckIntegrity(std::string archiveName) {
+void CheckIntegrity(std::string archiveName) { //TODO
 	if (!IsArchive(archiveName)) {
 		std::cout << archiveName << " is not an archive" << std::endl;
 		return;
 	}
-	//TODO наверное зависит от Славиной работы с файлами
 	//TODO делает свои дела
 	return;
 }
@@ -192,36 +217,52 @@ bool IsDirectory(std::string directoryName) {
 
 void PrintErrors(std::string directoryName) {
 	switch (errno) {
-		case ENOTDIR: {
-			std::cout << "Oh, thats not a directory" << directoryName << std::endl;
+		case ENOTDIR://TEST
+			std::cout << "Oh, thats not a directory\t" << directoryName << std::endl;
 			break;
-		}
-		case EACCES: {
+		case EACCES:
 			std::cout << "No permission for directory " << directoryName << "\t Try it next time" << std::endl;
 			break;
-		}
-		case EBADF: {
+		case EBADF:
 			std::cout << "Not a valid descriptor for directory " << directoryName << "\t Try it next time" << std::endl;
 			break;
-		}
-		case EMFILE: {
+		case EMFILE:
 			std::cout << "Too many files opened in system. Can't open directory" << directoryName
 					  << "\t Try it next time" << std::endl;
 			break;
-		}
-		case ENOMEM: {
+		case ENOMEM:
 			std::cout << "Not enought memory for opening directory " << directoryName << "\t Try it next time" << std::endl;
 			break;
-		}
-		case ENOENT: {
+		/*case ENOENT: TODO перенести этот кейс в другое место и добавить файлы
 			std::cout << "No directory with name " << directoryName << std::endl;
-			break;
-		}
+			break;*/
 	}
 	return;
 }
 
 bool IsArchive(std::string fileName) {
 	int size = fileName.length() - 1;
-	return (fileName[size - 2] == '.' && fileName[size - 1] == 'g' && fileName[size] == 'z')
+	return (fileName[size - 2] == '.' && fileName[size - 1] == 'g' && fileName[size] == 'z');
+}
+
+void Save(std::string fileName) {//TODO
+	//TODO найти в той же дирректории файл с таким же именем
+	if (true/*нашел*/) {
+		std::cout << fileName << " already exists; do you wish to overwrite (y or n)? ";
+		char answer;
+		std::cin >> answer;
+		if (answer == 'y') {
+			//TODO
+		}
+		else {
+			std::cout << "\tnot overwritten" << std::endl;
+		}
+	}
+	return;
+}
+
+void Delete(std::string fileName) {
+	std::string command = "rm " + fileName;
+	system(command.c_str());
+	return;
 }

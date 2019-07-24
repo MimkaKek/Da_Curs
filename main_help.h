@@ -61,4 +61,16 @@ void PrintErrors(std::string directoryName);
 
 bool IsArchive(std::string fileName);
 
+/*	Имя: Save
+ *	Что делает: Сохраняет файлы, проверяя не существует ли уже файла с таким именем
+ */
+
+void Save(std::string fileName);
+
+/*	Имя: Delete
+ *	Что делает: Удаляет ненужный файл
+ */
+
+void Delete(std::string fileName);
+
 #endif
