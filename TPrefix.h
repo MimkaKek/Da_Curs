@@ -3,12 +3,6 @@
 
 #include "Globals.h"
 
-enum UpdateResult {
-	OK,
-	FULL,
-	MEMORY_ERROR
-};
-
 // класс для префиксного дерева в LZW
 class TPrefix {
 public:
@@ -26,7 +20,7 @@ public:
 	int UpdateForRoot();
 
 	/* очистка дерева после переполнения */
-	void Clear();
+	void Clear(bool);
 
 	/* Деструктор */
 	~TPrefix();

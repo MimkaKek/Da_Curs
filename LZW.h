@@ -17,6 +17,12 @@ enum VariousDividers {
 	HIGH_MEDIUM		= 	1000000
 };
 
+enum UpdateResult {
+	OK,
+	FULL,
+	MEMORY_ERROR
+};
+
 class TLZW: public ICompressor {
 public:
 
@@ -30,13 +36,13 @@ public:
 	 *	Что делает: Принимает решение о степени сжатия
 	 */
 	
-	void Compress(std::string) override;
+	bool Compress(std::string) override;
 
 	/*	Имя: Decompress
 	 *	Что делает: Расжимает данные
 	 */
 	
-	void Decompress() override;
+	bool Decompress() override;
 
 	~TLZW();
 
@@ -51,7 +57,7 @@ private:
 	/* Дерево компрессии */
 	TPrefix* compressionTree;
 
-	/*дерево декомрессии*/
-	std::map<unsigned int, std::string> decompressionTree;
+	/* дерево декомрессии */
+	std::map<unsigned long long int, std::string> decompressionTree;
 	
 };

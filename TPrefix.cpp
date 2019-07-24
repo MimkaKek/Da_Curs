@@ -12,10 +12,9 @@ TPrefix::TPrefix(unsigned long long int highBorder) {
 	this->numberOfWord = -1;
 	this->lastLetter = 0;
 	this->lastNumber = 1;
-	this->next(ASCII_SIMBOLS);
-	for (int i = 0; i < UCHAR_HAS; ++i) {
-		this->next[i] = {(unsigned char) i, new TPrefix()}
-		//this->next.push_back({(unsigned char) i, new TPrefix()});
+	this->next.reserve(ASCII_SIMBOLS);
+	for (int i = 0; i < CHAR_HAS; ++i) {
+		this->next[i] = {(unsigned char) i, new TPrefix()};
 	}
 	return;
 }
@@ -53,7 +52,7 @@ int TPrefix::UpdateForRoot() {
 	}
 	bool needNew = true;
 	if (letter != EOF) {
-		for (int i = 0; i < UCHAR_HAS; ++i) {
+		for (int i = 0; i < this->next.size(); ++i) {
 			if (this->next[i].first == letter) {
 				needNew = false;
 				PushInFile(this->next[(int) letter].second->numberOfWord);
@@ -91,13 +90,24 @@ int TPrefix::UpdateForRoot() {
 	return 0;
 }
 
-void TPrefix::Clear() {
-	
+void TPrefix::Clear(bool root) {
+	for (int i = 0; i < this->next.size(); ++i) {
+		if (root) {
+			this->next[i].Clear(false);
+		}
+		else {
+			delete this->next[i].second;
+		}
+	}
+	if (!root) {
+		this->next.clear();
+		this->next.shrink_to_fit();
+	}
+	return;
 }
 
 TPrefix::~TPrefix() {
 	for (int i = 0; i < this->next.size(); ++i) {
-		delete this->next[i];
+		delete this->next[i].second;
 	}
-	return;
 }

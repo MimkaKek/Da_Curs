@@ -6,6 +6,7 @@
 #include <vector>
 #include <dirent.h>
 #include <errno.h>
+#include <map>
 
 /* ключи																	
  * -c вывод архива в out
