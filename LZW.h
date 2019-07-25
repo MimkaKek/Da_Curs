@@ -3,9 +3,24 @@
 #include "TPrefix.h"
 
 enum Borders {
-	LOW_BORDER	  =					10000,
-	MEDIUM_BORDER = 	  100000000000LLU,
-	HIGH_BORDER	  = 256204778801521550LLU
+	LOW_BORDER		=	10000,
+	MEDIUM_BORDER	=	100000000000LLU,
+	HIGH_BORDER		=	256204778801521550LLU
+};
+
+enum VariousDividers {
+	LOW_FAST 		= 	100, 
+	LOW_MEDIUM		= 	10,
+	MEDIUM_FAST		= 	1000000,
+	MEDIUM_MEDIUM	= 	1000,
+	HIGH_FAST		= 	1000000000000LLU,
+	HIGH_MEDIUM		= 	1000000
+};
+
+enum UpdateResult {
+	OK,
+	FULL,
+	MEMORY_ERROR
 };
 
 class TLZW: public ICompressor {
@@ -21,13 +36,13 @@ public:
 	 *	Что делает: Принимает решение о степени сжатия
 	 */
 	
-	void Compress(std::string) override;
+	bool Compress(std::string) override;
 
 	/*	Имя: Decompress
 	 *	Что делает: Расжимает данные
 	 */
 	
-	void Decompress() override;
+	bool Decompress() override;
 
 	~TLZW();
 
@@ -42,7 +57,7 @@ private:
 	/* Дерево компрессии */
 	TPrefix* compressionTree;
 
-	/*дерево декомрессии*/
-	std::map<unsigned int, std::string> decompressionTree;
+	/* дерево декомрессии */
+	std::map<unsigned long long int, std::string> decompressionTree;
 	
 };
