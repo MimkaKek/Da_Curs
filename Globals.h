@@ -6,6 +6,7 @@
 #include <vector>
 #include <dirent.h>
 #include <errno.h>
+#include <map>
 
 /* ключи																	
  * -c вывод архива в out
@@ -22,7 +23,7 @@ typedef std;//TEST это для меня, потом удалю
 
 extern std::vector<bool> keys;
 
-const int ASCII_SIMBOLS = 128;
+const int CHAR_HAS = 256;
 
 enum CompressionRatio {//Пусть пока будет
 	FAST,
