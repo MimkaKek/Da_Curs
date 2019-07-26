@@ -3,6 +3,9 @@
 
 
 #include "Globals.h"
+#include "LZW.h"
+#include <cstdio>
+#include <cstdlib>
 
 /* 	Имя: KeyManager
  * 	Что делает: обрабатывает полученные ключи
@@ -21,7 +24,7 @@ void ShowResult(std::string fileName);
  * 	коэффициента сжатия(%) и имя ориг файла(ключ l)
  */
 
-void DifferensOfSizes(std::string archiveName);
+bool DifferensOfSizes(InBinary* file, std::string fileName);
 
 /*	Имя: WorkWithDirectory
  * 	Что делает: работает (смотри WorkWithFile) с директорией (ключ r) 
@@ -36,13 +39,6 @@ void WorkWithDirectory(std::string directoryName);
 
 void WorkWithFile(std::string fileName);
 
-/*	Имя: CheckIntegrity
- * 	Что делает: Проверяет целостность сжатого файла (ключ t)
- * 	в случае повреждения файла выводит соответствующее сообщение иначе молчит
- */
-
-void CheckIntegrity(std::string archiveName);
-
 /*	Имя: IsDirectory
  * 	Что делает: Проверяет, является ли файл директорией
  */
@@ -53,7 +49,7 @@ bool IsDirectory(std::string directoryName);
  * Что делает: пришет что за ошибки
  */
 
-void PrintErrors(std::string directoryName);
+void PrintDirectoryErrors(std::string directoryName);
 
 /*	Имя: IsArchive
  *	Что делает: проверяет, является ли файл архивом
@@ -62,10 +58,10 @@ void PrintErrors(std::string directoryName);
 bool IsArchive(std::string fileName);
 
 /*	Имя: Save
- *	Что делает: Сохраняет файлы, проверяя не существует ли уже файла с таким именем
+ *	Что делает: Изменяет название архива на необходимое
  */
 
-void Save(std::string fileName);
+void Rename(std::string oldName, std::string nextName);
 
 /*	Имя: Delete
  *	Что делает: Удаляет ненужный файл

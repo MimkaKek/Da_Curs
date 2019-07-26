@@ -1,6 +1,5 @@
 #include <iostream>
 #include <random>
-#include <map>
 
 //генератор тестов
 //файл указывайте с помощью >>
