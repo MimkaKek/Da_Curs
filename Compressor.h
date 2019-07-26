@@ -1,4 +1,5 @@
 #pragma once
+
 class ICompressor {
 public:
 	ICompressor();
