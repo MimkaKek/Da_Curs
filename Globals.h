@@ -28,9 +28,7 @@
  * 					 2)Размер несжатого файла
  * 					 3)То что надо вашим алгоритмам
  */
-//typedef std;//TEST это для меня, потом удалю
-
-extern std::vector<bool> keys;
+typedef std;//TEST это для меня, потом удалю
 
 const int CHAR_HAS = 256;
 

@@ -1,7 +1,9 @@
 #include "LZW.h"
 
-TLZW::TLZW(int compressionRatio) {
-	unsigned long long int fileSize = GetSize(); // TODO SLAVA
+TLZW::TLZW(int compressionRatio, InBinary* from, OutBinary* to) {
+	this->ForRead = from;
+	this->ForWrite = to;
+	unsigned long long int fileSize = this->ForRead->SizeFile(); // TODO SLAVA
 	if (compressionRatio == DECOMPRESS) {
 		fileSize = 0;
 	}
@@ -48,17 +50,23 @@ TLZW::TLZW(int compressionRatio) {
 				break;
 		}
 	}
-	this->compressionTree = new TPrefix(fileSize);
+	this->CompressionTree = new TPrefix(fileSize, from, to);
 	return;
 }
 
 bool TLZW::Compress(std::string fileName) {
-	PushInFile(oldFileSize);
-	PushInFile("W");
-	int bufferState = this->UpdateForRoot();
+	char method = 'W';
+	unsigned long long int size = this->ForRead->SizeFile();
+	if (!this->ForWrite->Write(&method, sizeof(char))) {
+		return false;
+	}
+	if (!this->ForWrite->Write((char*)&size, sizeof(unsigned long long int))) {
+		return false;
+	}
+	int bufferState = this->CompressionTree->UpdateForRoot();
 	while (bufferState == FULL) {
-		this->compressionTree->Clear(true);
-		bufferState = this->UpdateForRoot();
+		this->CompressionTree->Clear(true);
+		bufferState = this->CompressionTree->UpdateForRoot();
 	}
 	if (bufferState == MEMORY_ERROR) {
 		return false;
@@ -75,24 +83,24 @@ bool TLZW::Decompress() {
 	letter = GetLetter();
 	while (letter != EOF) {
 		for (int i = 0; i < CHAR_HAS; ++i) {
-			this->decompressionTree.insert({i + 1, std::string(1, (unsigned char) i)});
+			this->DecompressionTree.insert({i + 1, std::string(1, (unsigned char) i)});
 		}
 		++alreadyRead;
-		finder = this->decompressionTree.find(letter);
-		if (finder != this->decompressionTree.end()) {
+		finder = this->DecompressionTree.find(letter);
+		if (finder != this->DecompressionTree.end()) {
 			previousWord = finder.second;
 		}
 		else {
 			previousWord = std::string(1, (unsigned char) letter);
-			this->decompressionTree.insert({wordCounter + 1, previousWord});
+			this->DecompressionTree.insert({wordCounter + 1, previousWord});
 			++wordCounter;
 		}
 		PushInFile(previousWord);
 		letter = GetLetter();
 		while (letter != 0 && letter != EOF) {
 			++alreadyRead;
-			finder = this->decompressionTree.find(letter);
-			if (finder != this->decompressionTree.end()) {
+			finder = this->DecompressionTree.find(letter);
+			if (finder != this->DecompressionTree.end()) {
 				PushInFile(finder.second);
 				presentWord = previousWord + finder.second.front();
 				previousWord = finder.second;
@@ -102,11 +110,11 @@ bool TLZW::Decompress() {
 				PushInFile(presentWord);
 				previousWord = presentWord;
 			}
-			this->decompressionTree.insert({wordCounter + 1, presentWord});
+			this->DecompressionTree.insert({wordCounter + 1, presentWord});
 			++wordCounter;
 			letter = GetLetter();
 		}
-		this->decompressionTree.clear();
+		this->DecompressionTree.clear();
 		if (letter == 0) {
 			letter = GetLetter();
 		}
@@ -118,5 +126,5 @@ bool TLZW::Decompress() {
 }
 
 TLZW::~TLZW() {
-	delete this->compressionTree;
+	delete this->CompressionTree;
 }

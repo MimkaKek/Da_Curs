@@ -49,15 +49,15 @@ public:
 private:
 	
 	/* файл из которого осуществляется считывание */
-	FILE forRead;
+	InBinary* ForRead;
 	
 	/* основной файл для записи */
-	FILE forWrite;
+	OutBinary* ForWrite;
 	
 	/* Дерево компрессии */
-	TPrefix* compressionTree;
+	TPrefix* CompressionTree;
 
 	/* дерево декомрессии */
-	std::map<unsigned long long int, std::string> decompressionTree;
+	std::map<unsigned long long int, std::string> DecompressionTree;
 	
 };

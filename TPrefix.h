@@ -9,7 +9,7 @@ class TPrefix {
 public:
 
 	/* Конструктор корня */
-	TPrefix(unsigned long long int);
+	TPrefix(unsigned long long int, InBinary*, OutBinary*);
 
 	/* Конструктор для прочих узлов */
 	TPrefix()
@@ -29,23 +29,23 @@ public:
 private:
 
 	/* вектор потомков и путей в них */
-	std::vector<std::pair<unsigned char, TPrefix*>> next;
+	std::vector<std::pair<unsigned char, TPrefix*>> Next;
 
 	/* номер слова в таблице */
-	unsigned long long int numberOfWord;
+	unsigned long long int NumberOfWord;
 
 	/* последняя буква из файла */
-	static unsigned char lastLetter;
+	static unsigned char LastLetter;
 
 	/* номер последнего добавленного слова */
-	static unsigned long long int lastNumber;
+	static unsigned long long int LastNumber;
 
 	/* максимальная граница кол-ва слов перед созданием нового дерева */
-	static const unsigned long long int border;
+	static const unsigned long long int Border;
 	
-	static FILE read; 
+	static InBinary* Read; 
 
-	static FILE write;
+	static OutBinary* Write;
 };
 
 #endif

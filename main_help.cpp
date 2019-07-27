@@ -1,7 +1,9 @@
 #include "main_help.h"
 /* main_help.cpp */
 
-bool KeyManager(std::string gotKeys) {
+//TODO MEMORY
+
+bool KeyManager(std::string gotKeys, std::vector<bool>* keys) {
 	for (int j = 1; j < gotKeys.size(); ++j) {
 		switch (gotKeys[j]) {
 			case 'c':
@@ -102,9 +104,10 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	return true;
 }
 
-void WorkWithDirectory(std::string directoryName) {
+void WorkWithDirectory(std::string directoryName, std::vector<bool> keys) {
 	DIR* directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF || errno == EMFILE || errno == ENOMEM || errno == ENOENT) {
+		//TODO
 		PrintDirectoryErrors(directoryName);
 		return;
 	}
@@ -112,10 +115,10 @@ void WorkWithDirectory(std::string directoryName) {
 	while (directoryFile != NULL) {
 		std::string tmp = directoryName + std::string(directoryFile->d_name);
 		if (IsDirectory(tmp)) {
-			WorkWithDirectory(tmp);
+			WorkWithDirectory(tmp, keys);
 		}
 		else {
-			WorkWithFile(tmp);
+			WorkWithFile(tmp, keys);
 		}
 		directoryFile = readdir(directory);
 	}
@@ -126,7 +129,7 @@ void WorkWithDirectory(std::string directoryName) {
 	return;
 }
 
-void WorkWithFile(std::string fileName) {//TODO
+void WorkWithFile(std::string fileName, std::vector<bool> keys) {//TODO
 	InBinary* file = new InBinary;
 	if (!file->Open(&fileName)) {
 		std::cout << fileName << ":\tNo such file" << std::endl;
@@ -143,6 +146,7 @@ void WorkWithFile(std::string fileName) {//TODO
 			}
 		}
 		file->Close();
+		delete file;
 	}
 	else if (keys[1] || keys[5]) {//-d или -t 
 		std::string nextName = fileName;
@@ -222,6 +226,10 @@ void WorkWithFile(std::string fileName) {//TODO
 		}
 	}
 	else {
+		if (IsArchive(fileName)) {
+			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
+			return;
+		}
 		int compressRatio = NORMAL;
 		if (keys[6]) {
 			compressRatio = FAST;
