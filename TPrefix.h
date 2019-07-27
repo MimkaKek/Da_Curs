@@ -2,6 +2,7 @@
 #define TPREFIX_H
 
 #include "Globals.h"
+#include "BFile.h"
 
 // класс для префиксного дерева в LZW
 class TPrefix {
@@ -40,9 +41,9 @@ private:
 	static unsigned long long int lastNumber;
 
 	/* максимальная граница кол-ва слов перед созданием нового дерева */
-	static const unsigned long long int border; //TODO а статик константу не надо капитализировать?
+	static const unsigned long long int border;
 	
-	static FILE read; //TODO а так можно?
+	static FILE read; 
 
 	static FILE write;
 };

@@ -107,7 +107,9 @@ bool TLZW::Decompress() {
 			letter = GetLetter();
 		}
 		this->decompressionTree.clear();
-		letter = GetLetter();
+		if (letter == 0) {
+			letter = GetLetter();
+		}
 	}
 	if (alreadyRead != fileSize) {
 		return false;

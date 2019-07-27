@@ -79,19 +79,33 @@ void ShowResult(std::string fileName) {//TODO
 	return;
 }
 
-void DifferensOfSizes(std::string archiveName) {//TODO
-	if (!IsArchive(archiveName)) {
-		std::cout << archiveName << " is not an archive" << std::endl;
-		return;
+bool DifferensOfSizes(InBinary* file, std::string fileName) {
+	char trash;
+	if (!Read(&trash, sizeof(char))) {
+		return false;
 	}
-	//TODO делает свои дела
-	return;
+	unsigned long long int uncompressed, compressed;
+	if (!Read((char*)&uncompressed, sizeof(unsigned long long int))) {
+		return false;
+	}
+	compressed = file->SizeFile();
+	double ratio;
+	if (compressed > uncompressed) {
+		ratio = uncompressed / compressed;
+	}
+	else {
+		ratio = compressed / uncompressed;
+	}
+	std::cout << "         compressed        uncompressed  ratio uncompressed_name" << std::endl;
+	printf("%19llu %19llu %6.1f\% ", compressed, uncompressed, ratio * 100);
+	std::cout << fileName << std::endl;
+	return true;
 }
 
 void WorkWithDirectory(std::string directoryName) {
 	DIR* directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF || errno == EMFILE || errno == ENOMEM || errno == ENOENT) {
-		PrintErrors(directoryName);
+		PrintDirectoryErrors(directoryName);
 		return;
 	}
 	struct dirent* directoryFile = readdir(directory);
@@ -107,115 +121,212 @@ void WorkWithDirectory(std::string directoryName) {
 	}
 	closedir(directory);
 	if (errno == EBADF) {
-		PrintErrors(directoryName);
+		PrintDirectoryErrors(directoryName);
 	}
 	return;
 }
 
 void WorkWithFile(std::string fileName) {//TODO
-	if (keys[3]) {//-l
-		DifferensOfSizes(fileName);
-		std::cout << "info" << std::endl;//TEST
-	}
-	else if (keys[5]) {//-t
-		CheckIntegrity(fileName);
-		std::cout << "integrity" << std::endl;//TEST
-	}
-	else if (keys[1]) {//-d
-		//TODO
-		/*FILE* tmp = Decompress(fileName);
-		std::string tmpName = tmp->name;
-		if (keys[0]) {//-c
-			ShowResult(tmpName);
-			Delete(tmpName);
-			return;
-		}
-		Save(tmpName);
-		if (!keys[2]) {//-k
-			Delete(fileName);
-		}*/
-		std::cout << "decompress" << std::endl;//TEST
-	}
-	else if (keys[6]) {//-1
-		//TODO
-		/*FILE* tmp = Compress(fileName, FAST);
-		std::string tmpName = tmp->name;
-		if (keys[0]) {//-c
-			ShowResult(tmpName);
-			Delete(tmpName);
-			return;
-		}
-		Save(tmpName);
-		if (!keys[2]) {//-k
-			Delete(fileName);
-		}*/
-		std::cout << FAST << std::endl;//TEST
-	}
-	else if (keys[7]) {//-9
-		//TODO
-		/*FILE* tmp = Compress(fileName, HIGH);
-		std::string tmpName = tmp->name;
-		if (keys[0]) {//-c
-			ShowResult(tmpName);
-			Delete(tmpName);
-			return;
-		}
-		Save(tmpName);
-		if (!keys[2]) {//-k
-			Delete(fileName);
-		}*/
-		std::cout << HIGH << std::endl;//TEST
-	}
-	else if (keys[2]) {//-k
-		//TODO
-		/*FILE* tmp = Compress(fileName, NORMAL);
-		std::string tmpName = tmp->name;
-		Save(tmpName);*/
-		std::cout << NORMAL << "\t-k" << std::endl;//TEST
-	}
-	else if (keys[0]) {//-c
-		//TODO
-		/*FILE* tmp = Compress(fileName, NORMAL);
-		std::string tmpName = tmp->name;
-		ShowResult(tmpName);
-		Delete(tmpName);*/
-		std::cout << NORMAL << "\t-c" << std::endl;//TEST
-	}
-	else {//нет ключей => обычная архивация
-		//TODO
-		/*FILE* tmp = Compress(fileName, NORMAL);
-		std::string tmpName = tmp->name;
-		Save(tmpName);
-		Delete(fileName);*/
-		std::cout << NORMAL << " NORMAL" << std::endl;//TEST
-	}
-	return;
-}
-
-void CheckIntegrity(std::string archiveName) { //TODO
-	if (!IsArchive(archiveName)) {
-		std::cout << archiveName << " is not an archive" << std::endl;
+	InBinary* file = new InBinary;
+	if (!file->Open(&fileName)) {
+		std::cout << fileName << ":\tNo such file" << std::endl;
+		delete file;
 		return;
 	}
-	//TODO делает свои дела
+	if (keys[3]) {//-l (L)
+		if (!IsArchive(fileName)) {
+			std::cout << fileName << " is not an archive" << std::endl;
+		}
+		else {
+			if(!DifferensOfSizes(file, fileName)) {
+				std::cout << fileName << ": can't read file" << std::endl;
+			}
+		}
+		file->Close();
+	}
+	else if (keys[1] || keys[5]) {//-d или -t 
+		std::string nextName = fileName;
+		nextName.pop_back();
+		nextName.pop_back();
+		nextName.pop_back();
+		OutBinary* decompressedFile = new OutBinary;
+		if (decompressedFile->Exist(nextName)) {//TODO EXIST
+			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char choise;
+			std::cin >> choise;
+			if (choise != 'Y' || choise != 'y') {
+				std::cout << "\tnot overwritten" << std::endl;
+				file->Close();
+				delete decompressedFile;
+				delete file;
+				return;
+			}
+		}
+		if (!decompressedFile.Open(nextName)) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			file->Close();
+			delete decompressedFile;
+			delete file;
+			return;
+		}
+		char algorithm;
+		bool success;
+		if (!decompressedFile->Read(&algorithm, sizeof(char))) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			file->Close();
+			decompressedFile->Close();
+			Delete(nextName);
+			delete decompressedFile;
+			delete file;
+			return;
+		}
+		switch (algorithm) {//TODO switch
+			case 'A':
+				Arithmetic* method = new Arithmetic();
+
+				break;
+			case 'W':
+				TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
+				success = method->Decompress();
+				break;
+			case '7':
+				LZ77* method = new LZ77();
+				
+				break;
+			default:
+				std::cout << fileName << ": not compressed data" << std::endl;
+				file->Close();
+				decompressedFile->Close();
+				Delete(nextName);
+				delete decompressedFile;
+				delete file;
+				return;
+		}
+		file->Close();
+		decompressedFile->Close();
+		delete decompressedFile;
+		delete file;
+		if (!success) {
+			Delete(nextName);
+			return;
+		}
+		if (keys[5] || keys[0]) { //-t или -c
+			if (keys[0]) { // -c
+				ShowResult(nextName);
+			}
+			Delete(nextName);
+			return;
+		}
+		if (!keys[2]) {//-k
+			Delete(fileName);
+		}
+	}
+	else {
+		int compressRatio = NORMAL;
+		if (keys[6]) {
+			compressRatio = FAST;
+		}
+		else if (keys[7]) {
+			compressRatio = HIGH;
+		}
+		OutBinary* compressionFile = new OutBinary;
+		if (compressionFile->Exist(fileName + ".gz")) {//TODO EXIST
+			std::cout << fileName + ".gz" << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char choise;
+			std::cin >> choise;
+			if (choise != 'Y' || choise != 'y') {
+				std::cout << "\tnot overwritten" << std::endl;
+				file->Close();
+				delete decompressedFile;
+				delete file;
+				return;
+			}
+		}
+		std::string LZWName			= fileName + ".LZW";
+		std::string LZ77Name		= fileName + ".LZ7";
+		std::string arithmeticName	= fileName + ".ARI";
+		unsigned long long int LZWSize, LZ77Size, arithmeticSize;
+		/* Блок с моим LZW */
+		if (!compressionFile->Open(&LZWName)) {
+			file->Close();
+			delete compressionFile;
+			delete file;
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			return;
+		}
+		TLZW* LZW = new TLZW(compressRatio, file, compressionFile)
+		if (!LZW->Compress()) {
+			file->Close();
+			compressionFile->Close();
+			Delete(LZWName);
+			delete compressionFile;
+			delete file;
+			std::cout << fileName << ": compression failed"
+			return;
+		}
+		delete LZW;
+		LZWSize = compressionFile->SizeFile();
+		compressionFile->Close();
+		file->Close();
+		/* Блок с вашими алгоритмами */ //TODO
+		/*							 */
+		
+		std::string nextName;
+		if (LZWSize > LZ77Size) {//удаление временных файлов
+			Delete(LZ77Name);
+			if (LZWSize > arithmeticSize) {
+				Delete(arithmeticName);
+				nextName = LZWName;
+			}
+			else {
+				Delete(LZWName);
+				nextName = arithmeticName;
+			}
+		}
+		else {
+			Delete(LZWName);
+			if (LZ77Size > arithmeticSize) {
+				Delete(arithmeticName);
+				nextName = LZ77Name;
+			}
+			else {
+				Delete(LZ77Name);
+				nextName = arithmeticName;
+			}
+		}
+		if (keys[0]) { // -c
+			ShowResult(nextName);
+			Delete(nextName);
+			return;
+		}
+		std::string oldName = nextName;
+		nextName.pop_back();
+		nextName.pop_back();
+		nextName.pop_back();
+		nextName += "gz";
+		Rename(oldName, nextName);
+		if (!keys[2]) {//-k
+			Delete(fileName);
+		}
+	}
 	return;
 }
 
 bool IsDirectory(std::string directoryName) {
 	DIR* directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF || errno == EMFILE || errno == ENOMEM || errno == ENOENT) {
-		PrintErrors(directoryName);
+		PrintDirectoryErrors(directoryName);
 		return false;
 	}
 	closedir(directory);
 	if (errno == EBADF) {
-		PrintErrors(directoryName);
+		PrintDirectoryErrors(directoryName);
 		return false;
 	}
 	return true;
 }
 
-void PrintErrors(std::string directoryName) {
+void PrintDirectoryErrors(std::string directoryName) {
 	switch (errno) {
 		case ENOTDIR://TEST
 			std::cout << "Oh, thats not a directory\t" << directoryName << std::endl;
@@ -245,19 +356,9 @@ bool IsArchive(std::string fileName) {
 	return (fileName[size - 2] == '.' && fileName[size - 1] == 'g' && fileName[size] == 'z');
 }
 
-void Save(std::string fileName) {//TODO
-	//TODO найти в той же дирректории файл с таким же именем
-	if (true/*нашел*/) {
-		std::cout << fileName << " already exists; do you wish to overwrite (y or n)? ";
-		char answer;
-		std::cin >> answer;
-		if (answer == 'y') {
-			//TODO
-		}
-		else {
-			std::cout << "\tnot overwritten" << std::endl;
-		}
-	}
+void Rename(std::string oldName, std::string nextName) {
+	std::string command = "mv " + oldName + " " + nextName;
+	system(command.c_str());
 	return;
 }
 
