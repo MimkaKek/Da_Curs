@@ -137,6 +137,20 @@ bool InBinary::Read(char* obj, size_t size) {
     }
 }
 
+bool InBinary::ReadBin(char* bit) {
+    if(!head) {
+        if(in >> block) {
+            head = 1 << 7;
+        }    
+        else {
+            return false;
+        }
+    }
+    ((block & head) != 0) ? (*bit = 1) : (*bit = 0);
+    head >>= 1;
+    return true;
+}
+
 unsigned long long InBinary::SizeFile() {
     std::ifstream in(name, std::ifstream::ate | std::ifstream::binary);
     return in.tellg();
