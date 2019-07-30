@@ -2,10 +2,20 @@
 #include "Compressor.h"
 #include "TPrefix.h"
 
+const std::map<unsigned long long int, std::string> ONLY_FOR_ENUMS;
+
+
+/*
 enum Borders {
 	LOW_BORDER		=	10000,
-	MEDIUM_BORDER	=	100000000000LLU,
-	HIGH_BORDER		=	256204778801521550LLU
+	MEDIUM_BORDER	=	100000000000,
+	HIGH_BORDER		=	256204778801521550
+};*/
+
+enum Borders {
+	LOW_BORDER		=	10000,
+	MEDIUM_BORDER	=	ONLY_FOR_ENUMS.max_size() / 1000000,
+	HIGH_BORDER		=	ONLY_FOR_ENUMS.max_size()
 };
 
 enum VariousDividers {
@@ -13,14 +23,8 @@ enum VariousDividers {
 	LOW_MEDIUM		= 	10,
 	MEDIUM_FAST		= 	1000000,
 	MEDIUM_MEDIUM	= 	1000,
-	HIGH_FAST		= 	1000000000000LLU,
-	HIGH_MEDIUM		= 	1000000
-};
-
-enum UpdateResult {
-	OK,
-	FULL,
-	MEMORY_ERROR
+	HIGH_FAST		= 	MEDIUM_BORDER * 10,
+	HIGH_MEDIUM		= 	LOW_BORDER * 10
 };
 
 class TLZW: public ICompressor {
@@ -30,7 +34,7 @@ public:
 	 * передаваемое число определяет степень сжатия или говорит о декомпрессии
 	 * */
 	
-	TLZW(int);
+	TLZW(int, InBinary*, OutBinary*);
 
 	/*	Имя: Compress
 	 *	Что делает: Принимает решение о степени сжатия
@@ -42,7 +46,7 @@ public:
 	 *	Что делает: Расжимает данные
 	 */
 	
-	bool Decompress() override;
+	bool Decompress(std::string fileName) override;
 
 	~TLZW();
 

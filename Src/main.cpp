@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		else {// ага файлы и папки
 			bool got = false;
 			for (int j = 0; j < fileNames.size(); ++j) {
-				if (fileNames[j] == keyFile) {//для избежания работы над одним и темже файлом несколько раз
+				if (fileNames[j] == keyFile) {//для избежания работы над одним и тем же файлом несколько раз
 					got = true;
 					break;
 				}

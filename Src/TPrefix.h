@@ -15,7 +15,7 @@ public:
 	TPrefix()
 
 	/* Добавление новых узлов в дерево */
-	bool Update(char);
+	int Update(char);
 
 	/* особый апдейт для корня */
 	int UpdateForRoot();

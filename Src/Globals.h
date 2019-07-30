@@ -32,13 +32,24 @@ typedef std;//TEST это для меня, потом удалю
 
 const int CHAR_HAS = 256;
 
-enum CompressionRatio {//Пусть пока будет
+enum CompressionRatio {
 	FAST,
 	NORMAL,
 	HIGH,
 	DECOMPRESS
 };
 
+enum Sizeof {
+	LLINT = sizeof(unsigned long long int),
+	CHAR = sizeof(char)
+};
 
+enum UpdateResult {
+	GOT_EOF,
+	OK,
+	FULL,
+	MEMORY_ERROR,
+	WRITE_ERROR
+};
 
 #endif
