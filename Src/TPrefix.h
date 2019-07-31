@@ -12,7 +12,7 @@ public:
 	TPrefix(unsigned long long int, InBinary*, OutBinary*);
 
 	/* Конструктор для прочих узлов */
-	TPrefix()
+	TPrefix();
 
 	/* Добавление новых узлов в дерево */
 	int Update(char);
@@ -29,23 +29,23 @@ public:
 private:
 
 	/* вектор потомков и путей в них */
-	std::vector<std::pair<unsigned char, TPrefix*>> Next;
+	std::vector<std::pair<char, TPrefix*>> Next;
 
 	/* номер слова в таблице */
 	unsigned long long int NumberOfWord;
 
 	/* последняя буква из файла */
-	static unsigned char LastLetter;
+	static char LastLetter;
 
 	/* номер последнего добавленного слова */
 	static unsigned long long int LastNumber;
 
 	/* максимальная граница кол-ва слов перед созданием нового дерева */
-	static const unsigned long long int Border;
+	static unsigned long long int Border;
 	
-	static InBinary* Read; 
+	static InBinary* ForRead; 
 
-	static OutBinary* Write;
+	static OutBinary* ForWrite;
 };
 
 #endif
