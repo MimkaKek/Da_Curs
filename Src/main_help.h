@@ -11,7 +11,7 @@
  * 	Что делает: обрабатывает полученные ключи
  */
 
-bool KeyManager(std::string gotKeys, std::vector<bool>* keys);
+bool KeyManager(std::string gotKeys);
 
 /*	Имя: ShowResult
  * 	Что делает: вывод результата компресии или декомпресии в out (ключ c)

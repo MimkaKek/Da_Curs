@@ -1,18 +1,24 @@
 #include "TPrefix.h"
 
+unsigned long long int TPrefix::Border;
+InBinary* TPrefix::ForRead;
+OutBinary* TPrefix::ForWrite;
+char TPrefix::LastLetter;
+unsigned long long int TPrefix::LastNumber;
+
 TPrefix::TPrefix(unsigned long long int highBorder, InBinary* from, OutBinary* to) {
 	this->Border = highBorder;
 	if (highBorder == 0) {
 		return;
 	}
-	this->read = from;
-	this->write = to;
+	this->ForRead = from;
+	this->ForWrite = to;
 	this->NumberOfWord = -1;
 	this->LastLetter = 0;
 	this->LastNumber = 1;
-	this->Next.reserve(ASCII_SIMBOLS);
+	this->Next.reserve(CHAR_HAS);
 	for (int i = 0; i < CHAR_HAS; ++i) {
-		this->Next[i] = {(unsigned char) i, new TPrefix()};
+		this->Next[i] = {(char) i, new TPrefix()};
 	}
 }
 
@@ -21,13 +27,13 @@ TPrefix::TPrefix() {
 	++this->LastNumber;
 }
 
-int TPrefix::Update(unsigned char letter) {
+int TPrefix::Update(char letter) {
 	bool needNew = true;
 	for (int i = 0; i < this->Next.size(); ++i) {
 		if (letter == this->Next[i].first) {
 			needNew = false;
 			if (!this->ForRead->Read(&letter, CHAR)) {
-				if (!this->ForWrite->Write((char*)&this->Next[i]->second->NumberOfWord, LLINT)) {
+				if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
 					return WRITE_ERROR;
 				}
 				return GOT_EOF;
@@ -53,21 +59,21 @@ int TPrefix::Update(unsigned char letter) {
 }
 
 int TPrefix::UpdateForRoot() {
-	unsigned char letter;
+	char letter;
 	bool needNew = true;
 	int result;
 	if (this->LastLetter == 0) {
-		if (!this->ForRead->Read((char)&letter, CHAR)) {
+		if (!this->ForRead->Read(&letter, CHAR)) {
 			return GOT_EOF;
 		}
 	}
 	else {
 		letter = this->LastLetter;
 	}
-	for (int i = 0; i < this->Next[i].size(); ++i) {
+	for (int i = 0; i < this->Next.size(); ++i) {
 		if (this->Next[i].first == letter) {
 			needNew = false;
-			if (!this->ForWrite->Write((char*)&this->Next[(int) letter].second->numberOfWord, LLINT)) {
+			if (!this->ForWrite->Write((char*)&this->Next[(int) letter].second->NumberOfWord, LLINT)) {
 				return WRITE_ERROR;
 			}
 			break;
@@ -78,7 +84,7 @@ int TPrefix::UpdateForRoot() {
 		if (this->Next.back().second == nullptr) {
 			return MEMORY_ERROR;
 		}
-		if (!this->ForWrite->Write((char*)&(this->LastNumber - 1), LLINT)) {
+		if (!this->ForWrite->Write((char*) (this->LastNumber - 1), LLINT)) {
 			return WRITE_ERROR;
 		}
 	}
@@ -88,7 +94,7 @@ int TPrefix::UpdateForRoot() {
 			if (letter == this->Next[i].first) {
 				needNew = false;
 				if (!this->ForRead->Read(&letter, CHAR)) {
-					if (!this->ForWrite->Write((char*)&this->Next[i]->NumberOfWord, LLINT)) {
+					if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
 						return WRITE_ERROR;
 					}
 					return GOT_EOF;
@@ -105,7 +111,7 @@ int TPrefix::UpdateForRoot() {
 			if (this->Next.back().second == nullptr) {
 				return MEMORY_ERROR;
 			}
-			if (!this->ForWrite->Write((char*)&(this->LastNumber - 1), LLINT)) {
+			if (!this->ForWrite->Write((char*) (this->LastNumber - 1), LLINT)) {
 				return WRITE_ERROR;
 			}
 			if (!this->ForRead->Read(&letter, CHAR)) {
@@ -113,7 +119,7 @@ int TPrefix::UpdateForRoot() {
 			}
 		}
 		if (this->LastNumber == this->Border) {
-			if(!this->ForWrite->Write((char*)&0, LLINT)) {
+			if(!this->ForWrite->Write((char*) 0, LLINT)) {
 				return WRITE_ERROR;
 			}
 			return FULL;
@@ -132,7 +138,7 @@ int TPrefix::UpdateForRoot() {
 void TPrefix::Clear(bool root) {
 	for (int i = 0; i < this->Next.size(); ++i) {
 		if (root) {
-			this->Next[i].Clear(false);
+			this->Next[i].second->Clear(false);
 		}
 		else {
 			delete this->Next[i].second;
