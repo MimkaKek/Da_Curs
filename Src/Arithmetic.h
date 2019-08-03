@@ -9,29 +9,30 @@ typedef std::vector<std::pair<const char, long double>*> TTable;
 
 class Arithmetic: public Compressor {    
 public:
-	
+    
                                         /* Что делает: Сжимает данные
                                          */
-	void                                Compress(std::string) override;
+    void                                Compress(std::string) override;
 
                                         /* Что делает: Расжимает данные
                                          */
-	void                                Decompress(std::string) override;
+    void                                Decompress(std::string) override;
 
 
                                         Arithmetic();
-	virtual                             ~Arithmetic();
+    virtual                            ~Arithmetic();
 
 private:
     
     void                                GenerateTable(std::string*);
-    void                                GetTable(std::string*);
+    void                                LoadTable(std::string*);
     
     std::ifstream                       input;
     std::ofstream                       output;
     
     uint_least32_t                      alphabet;
-    
+
+    std::pair<char, long double>*       cBorders;
     TTable                              probability;
 };
 
