@@ -45,28 +45,35 @@ void Arithmetic::GenerateTable(std::string* name) {
         }
         
         if(iter == probability.end()) {
+
             std::pair<const char, long double>* tmp = new std::pair<const char, long double>(symb, 1);
             probability.push_back(tmp);
+
             ++alphabet;
+            
         }
         else {
 
             ++(*iter)->second;
 
             if(iter != probability.begin()) {
+
                 TTable::iterator prev = iter;
                 --prev;
                 
                 while((*iter)->second > (*prev)->second) {
+
                     std::pair<const char, long double>* tmp = *prev;
                     *prev = *iter;
                     *iter = tmp;
+                    
                     if(prev != probability.begin()) {
                         --prev; 
                     }
                     else {
                         break;
                     }
+
                     --iter;
                 }
             }
@@ -119,12 +126,16 @@ void Arithmetic::GenerateTable(std::string* name) {
         output.write( (char*) &cBorders[i + 1].second, sizeof(long double));
         
     }
+
+    cBorders[alphabet].first = 255;
+    cBorders[alphabet].second = cBorders[alphabet - 1].second + probability[alphabet - 1]->second;
+    
     if(S_GBT) {
         std::cout << "|======================|" << std::endl;
         std::cout << "|   Table of borders   |" << std::endl;
         std::cout << "|======================|" << std::endl;
     
-        for(int i = 0; i < probability.size(); ++i) {
+        for(int i = 0; i < probability.size() + 1; ++i) {
             std::cout << "[" << cBorders[i].first << "] : [" << cBorders[i].second << "]" << std::endl;
         }
     }    
@@ -148,15 +159,15 @@ void Arithmetic::LoadTable() {
     
     input.open(name->c_str(), std::ios_base::in | std::ios_base::binary);
     
-    input.read( (char*) &alphabet, sizeof(uint_least32_t));
-    input.read( (char*) &nBytes  , sizeof(unsigned long) );
+    input.read( (char*) &alphabet, sizeof (uint_least32_t));
+    input.read( (char*) &nBytes  , sizeof (unsigned long) );
 
     if(S_LI) {
         std::cout << "alphabet is equal " << alphabet << std::endl;
         std::cout << nBytes << " bytes was readed from \"" << *name << "\"" << std::endl;
     }
     
-    cBorders = new std::pair<char, long double>[alphabet];
+    cBorders = new std::pair<char, long double>[alphabet + 1];
 
     if(S_LPT) {
         std::cout << "|======================|" << std::endl;
@@ -188,15 +199,21 @@ void Arithmetic::LoadTable() {
         std::cout << "|======================|" << std::endl;
         std::cout << "|   Table of borders   |" << std::endl;
         std::cout << "|======================|" << std::endl;
-        std::cout << "[" << cBorders[0].first << "] : [" << cBorders[0].second << "]" << std::endl;
     }
+    
     for(int i = 0; i < alphabet - 1; ++i) {
         
         cBorders[i + 1].first  = probability[i + 1]->first;
         cBorders[i + 1].second = cBorders[i].second + probability[i]->second;
 
-        if(S_LBT) {
-            std::cout << "[" << cBorders[i + 1].first << "] : [" << cBorders[i + 1].second << "]" << std::endl;
+    }
+
+    cBorders[alphabet].first = 255;
+    cBorders[alphabet].second = cBorders[alphabet - 1].second + probability[alphabet - 1]->second;
+    
+    if(S_LBT) {
+        for(int i = 0; i < alphabet + 1; ++i) {
+                std::cout << "[" << cBorders[i].first << "] : [" << cBorders[i].second << "]" << std::endl;
         }
     }
 
