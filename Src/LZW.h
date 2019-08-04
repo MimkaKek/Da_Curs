@@ -1,6 +1,7 @@
 #pragma once
-#include "Compressor.h"
+//#include "Compressor.h"
 #include "TPrefix.h"
+#include "Globals.h"
 
 const std::map<unsigned long long int, std::string> ONLY_FOR_ENUMS;
 
@@ -14,8 +15,8 @@ enum Borders {
 
 enum Borders {
 	LOW_BORDER		=	10000,
-	MEDIUM_BORDER	=	ONLY_FOR_ENUMS.max_size() / 1000000,
-	HIGH_BORDER		=	ONLY_FOR_ENUMS.max_size()
+	MEDIUM_BORDER	=	100000000000LLU,
+	HIGH_BORDER		=	256204778801521550LLU
 };
 
 enum VariousDividers {
@@ -27,7 +28,7 @@ enum VariousDividers {
 	HIGH_MEDIUM		= 	LOW_BORDER * 10
 };
 
-class TLZW: public ICompressor {
+class TLZW {
 public:
 
 	/* Конструктор класса
@@ -40,13 +41,13 @@ public:
 	 *	Что делает: Принимает решение о степени сжатия
 	 */
 	
-	bool Compress(std::string) override;
+	bool Compress(std::string);
 
 	/*	Имя: Decompress
 	 *	Что делает: Расжимает данные
 	 */
 	
-	bool Decompress(std::string fileName) override;
+	bool Decompress(std::string fileName);
 
 	~TLZW();
 

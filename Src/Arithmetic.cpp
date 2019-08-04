@@ -8,6 +8,12 @@ Arithmetic::~Arithmetic() {
     for(int i = 0; i < probability.size(); ++i) {
         delete probability[i];
     }
+
+    for(int i = 0; i < probability.size() + 1; ++i) {
+        delete cBorders[i];
+    }
+
+    delete[] cBorders;
 }
 
 void Arithmetic::Compress(std::string name) {
@@ -217,5 +223,16 @@ void Arithmetic::LoadTable() {
         }
     }
 
+    return;
+}
+
+void Arithmetic::SetNewBorders(long double lower, long double upper) {
+
+    long double k = (cBorders[alphabet] - cBorders[0]) / (upper - lower);
+
+    for(int i = 0; i < alphabet + 1; ++i) {
+        cBorders[i] = (cBorders[i] - cBorders[0]) * k + lower;
+    }
+    
     return;
 }

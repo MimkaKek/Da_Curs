@@ -100,7 +100,7 @@ bool TLZW::Decompress(std::string fileName) {
 		++alreadyRead;
 		finder = this->DecompressionTree.find(letter);
 		if (finder != this->DecompressionTree.end()) {
-			previousWord = finder.second;
+			previousWord = finder->second;
 		}
 		else {
 			previousWord = std::string(1, (unsigned char) letter);
@@ -117,13 +117,13 @@ bool TLZW::Decompress(std::string fileName) {
 		while (this->ForRead->Read((char*)&letter, LLINT) && letter != 0) {
 			finder = this->DecompressionTree.find(letter);
 			if (finder != this->DecompressionTree.end()) {
-				if (!this->ForWrite->Write((char*)finder.second.c_str(), finder.second.size())) {
+				if (!this->ForWrite->Write((char*)finder->second.c_str(), finder->second.size())) {
 					std::cout << fileName << ": can't write in file" << std::endl;
 					return false;
 				}
-				alreadyRead += finder.second.size();
-				presentWord = previousWord + finder.second.front();
-				previousWord = finder.second;
+				alreadyRead += finder->second.size();
+				presentWord = previousWord + finder->second.front();
+				previousWord = finder->second;
 			}
 			else {
 				presentWord = std::string(1, (unsigned char) letter);

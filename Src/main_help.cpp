@@ -1,7 +1,7 @@
 #include "main_help.h"
 /* main_help.cpp */
 
-bool KeyManager(std::string gotKeys, std::vector<bool>* keys) {
+bool KeyManager(std::string gotKeys) {
 	for (int j = 1; j < gotKeys.size(); ++j) {
 		switch (gotKeys[j]) {
 			case 'c':
@@ -81,7 +81,7 @@ void ShowResult(std::string fileName) {
 		return;
 	}
 	if (!file->Open(&fileName)) {
-		std::cout << fileName << : "can't read file" << std::endl;
+		std::cout << fileName << "can't read file" << std::endl;
 		delete file;
 		return;
 	}
@@ -97,11 +97,11 @@ void ShowResult(std::string fileName) {
 
 bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	char trash;
-	if (!Read(&trash, CHAR)) {
+	if (!file->Read(&trash, CHAR)) {
 		return false;
 	}
 	unsigned long long int uncompressed, compressed;
-	if (!Read((char*)&uncompressed, LLINT)) {
+	if (!file->Read((char*)&uncompressed, LLINT)) {
 		return false;
 	}
 	compressed = file->SizeFile();
@@ -113,7 +113,7 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 		ratio = compressed / uncompressed;
 	}
 	std::cout << "         compressed        uncompressed  ratio uncompressed_name" << std::endl;
-	printf("%19llu %19llu %6.1f\% ", compressed, uncompressed, ratio * 100);
+	printf("%19llu %19llu %6.1f%% ", compressed, uncompressed, ratio * 100);
 	std::cout << fileName << std::endl;
 	return true;
 }
@@ -148,6 +148,7 @@ void WorkWithDirectory(std::string directoryName, std::vector<bool> keys) {//TOD
 }
 
 void WorkWithFile(std::string fileName, std::vector<bool> keys) {
+	std::string nextName;
 	InBinary* file = new InBinary;
 	if (file == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
@@ -172,7 +173,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 	}
 	else if (keys[1] || keys[5]) {//-d или -t
 		file->Close();
-		std::string nextName = fileName;
+		nextName = fileName;
 		nextName.pop_back();
 		nextName.pop_back();
 		nextName.pop_back();
@@ -199,7 +200,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			delete file;
 			return;
 		}
-		if (!decompressedFile.Open(&nextName)) {
+		if (!decompressedFile->Open(&nextName)) {
 			std::cout << fileName << ": can't transfer data" << std::endl;
 			file->Close();
 			delete decompressedFile;
@@ -208,7 +209,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 		}
 		char algorithm;
 		bool success;
-		if (!decompressedFile->Read(&algorithm, CHAR)) {
+		if (!file->Read(&algorithm, CHAR)) {
 			std::cout << fileName << ": can't transfer data" << std::endl;
 			file->Close();
 			decompressedFile->Close();
@@ -218,11 +219,12 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			return;
 		}
 		switch (algorithm) {//TODO switch
-			case 'A':
-				Arithmetic* method = new Arithmetic();
-
+			case 'A': {
+				//Arithmetic* method = new Arithmetic(); TODO
+				std::cout << std::endl;//TEST
 				break;
-			case 'W':
+			}
+			case 'W': {
 				TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
 				if (method == nullptr) {
 					std::cout << fileName << ": unexpected memory error" << std::endl;
@@ -233,13 +235,16 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 					delete file;
 					return;
 				}
-				success = method->Decompress(std::string fileName);
+				success = method->Decompress(fileName);
+				delete method;
 				break;
-			case '7':
-				LZ77* method = new LZ77();
-				
+			}
+			case '7': {
+				//LZ77* method = new LZ77(); TODO
+				std::cout << std::endl;//TEST
 				break;
-			default:
+			}
+			default: {
 				std::cout << fileName << ": not compressed data" << std::endl;
 				file->Close();
 				decompressedFile->Close();
@@ -247,6 +252,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 				delete decompressedFile;
 				delete file;
 				return;
+			}
 		}
 		file->Close();
 		decompressedFile->Close();
@@ -274,8 +280,9 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
 			return;
 		}
-		if (file->Open(&(fileName + ".gz"))) {
-			std::cout << fileName + ".gz" << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+		nextName = fileName + ".gz";
+		if (file->Open(&nextName)) {
+			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
 			char choise;
 			std::cin >> choise;
 			file->Close();
@@ -301,7 +308,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 		if (compressionFile == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			file->Close();
-			delete file
+			delete file;
 		}
 		std::string LZWName			= fileName + ".LZW";
 		std::string LZ77Name		= fileName + ".LZ7";
@@ -331,7 +338,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			Delete(LZWName);
 			delete compressionFile;
 			delete file;
-			std::cout << "\t\tcompression failed"
+			std::cout << "\t\tcompression failed";
 			return;
 		}
 		delete LZW;
@@ -341,8 +348,8 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 		/* Блок с вашими алгоритмами */ //TODO
 		/*							 */
 		
-		std::string nextName;
-		if (LZWSize < LZ77Size) {//удаление временных файлов
+		nextName = LZWName;//TEST
+		/*if (LZWSize < LZ77Size) {//удаление временных файлов
 			Delete(LZ77Name);
 			if (LZWSize < arithmeticSize) {
 				Delete(arithmeticName);
@@ -363,7 +370,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 				Delete(LZ77Name);
 				nextName = arithmeticName;
 			}
-		}
+		}*/ //TODO
 		if (keys[0]) { // -c
 			ShowResult(nextName);
 			Delete(nextName);

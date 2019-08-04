@@ -24,13 +24,27 @@ public:
 
 private:
     
+                                        /* Что делает: Генерация таблицы вероятностей
+                                         *             и отрезков для прямой [0;1]
+                                         */
     void                                GenerateTable(std::string*);
+
+                                        /* Что делает: Считывание из файла
+                                         *             готовой таблицы вероятностей
+                                         *             и создание отрезков для прямой [0;1]
+                                         */
     void                                LoadTable(std::string*);
+
+                                        /* что делает: Задаёт новые отрезки на прямой [lower, upper],
+                                         *             которые пропорционально расположены
+                                         *             по отношению к исходным отрезкам.
+                                         */
+    void                                SetNewBorders(long double lower, long double upper);
     
     std::ifstream                       input;
     std::ofstream                       output;
     
-    uint_least32_t                      alphabet;
+    unsigned int                        alphabet;
 
     std::pair<char, long double>*       cBorders;
     TTable                              probability;
