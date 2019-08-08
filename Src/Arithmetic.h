@@ -9,29 +9,44 @@ typedef std::vector<std::pair<const char, long double>*> TTable;
 
 class Arithmetic: public Compressor {    
 public:
-	
+    
                                         /* Что делает: Сжимает данные
                                          */
-	void                                Compress(std::string) override;
+    void                                Compress(std::string) override;
 
                                         /* Что делает: Расжимает данные
                                          */
-	void                                Decompress(std::string) override;
+    void                                Decompress(std::string) override;
 
 
                                         Arithmetic();
-	virtual                             ~Arithmetic();
+    virtual                            ~Arithmetic();
 
 private:
     
+                                        /* Что делает: Генерация таблицы вероятностей
+                                         *             и отрезков для прямой [0;1]
+                                         */
     void                                GenerateTable(std::string*);
-    void                                GetTable(std::string*);
+
+                                        /* Что делает: Считывание из файла
+                                         *             готовой таблицы вероятностей
+                                         *             и создание отрезков для прямой [0;1]
+                                         */
+    void                                LoadTable(std::string*);
+
+                                        /* что делает: Задаёт новые отрезки на прямой [lower, upper],
+                                         *             которые пропорционально расположены
+                                         *             по отношению к исходным отрезкам.
+                                         */
+    void                                SetNewBorders(long double lower, long double upper);
     
     std::ifstream                       input;
     std::ofstream                       output;
     
-    uint_least32_t                      alphabet;
-    
+    unsigned int                        alphabet;
+
+    std::pair<char, long double>*       cBorders;
     TTable                              probability;
 };
 
