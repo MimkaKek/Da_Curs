@@ -30,20 +30,20 @@ bool DifferensOfSizes(InBinary* file, std::string fileName);
  * 	Что делает: работает (смотри WorkWithFile) с директорией (ключ r) 
  */
  
-void WorkWithDirectory(std::string directoryName, std::vector<bool> keys);
+void WorkWithDirectory(std::string directoryName);
 
 /*	Имя: WorkWithDirectory
  * 	Что делает: работает с файлом 
  * 	(определяет наличие файла, компресить его или декомпресить, выполняет прочие ключи)
  */
 
-void WorkWithFile(std::string fileName, std::vector<bool> keys);
+void WorkWithFile(std::string fileName);
 
 /*	Имя: IsDirectory
  * 	Что делает: Проверяет, является ли файл директорией
  */
 
-bool IsDirectory(std::string directoryName);
+bool IsDirectory(std::string directoryName, bool help);
 
 /* Имя: PrintErrors
  * Что делает: пришет что за ошибки

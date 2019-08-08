@@ -67,7 +67,7 @@ bool KeyManager(std::string gotKeys) {
 				}
 				break;
 			default:
-				std::cout << "No such key '" << gotKeys[j] << "'" << std::endl << "Fuck you" << std::endl;
+				std::cout << "invalid option -- '" << gotKeys[j] << "'" << std::endl;
 				return false;
 		}
 	}
@@ -105,20 +105,24 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 		return false;
 	}
 	compressed = file->SizeFile();
-	double ratio;
-	if (compressed > uncompressed) {
-		ratio = uncompressed / compressed * (-1);
+	double ratio = (double) compressed / uncompressed;
+	ratio = 1 - ratio;
+	if (uncompressed == 0) {
+		ratio = 0.0;
 	}
-	else {
-		ratio = compressed / uncompressed;
+	else if (ratio < -1) {
+		ratio = -1;
 	}
 	std::cout << "         compressed        uncompressed  ratio uncompressed_name" << std::endl;
-	printf("%19llu %19llu %6.1f%% ", compressed, uncompressed, ratio * 100);
-	std::cout << fileName << std::endl;
+	printf("%19llu %19llu %5.1lf", compressed, uncompressed, ratio * 100);
+	fileName.pop_back();
+	fileName.pop_back();
+	fileName.pop_back();
+	std::cout << "% " << fileName << std::endl;
 	return true;
 }
 
-void WorkWithDirectory(std::string directoryName, std::vector<bool> keys) {//TODO
+void WorkWithDirectory(std::string directoryName) {//TODO
 	DIR* directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
 		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
@@ -132,11 +136,11 @@ void WorkWithDirectory(std::string directoryName, std::vector<bool> keys) {//TOD
 	while (directoryFile != NULL) {
 		std::string tmp = directoryName + std::string(directoryFile->d_name);
 		std::cout << tmp << std::endl;//TEST
-		if (IsDirectory(tmp)) {
-			WorkWithDirectory(tmp, keys);
+		if (IsDirectory(tmp, true)) {
+			WorkWithDirectory(tmp);
 		}
 		else {
-			WorkWithFile(tmp, keys);
+			WorkWithFile(tmp);
 		}
 		directoryFile = readdir(directory);
 	}
@@ -147,7 +151,7 @@ void WorkWithDirectory(std::string directoryName, std::vector<bool> keys) {//TOD
 	return;
 }
 
-void WorkWithFile(std::string fileName, std::vector<bool> keys) {
+void WorkWithFile(std::string fileName) {
 	std::string nextName;
 	InBinary* file = new InBinary;
 	if (file == nullptr) {
@@ -172,20 +176,23 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 		delete file;
 	}
 	else if (keys[1] || keys[5]) {//-d или -t
+		std::string tmpName = fileName + ".tmp";
 		file->Close();
 		nextName = fileName;
 		nextName.pop_back();
 		nextName.pop_back();
 		nextName.pop_back();
-		if (file->Open(&nextName)) {
-			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-			char choise;
-			std::cin >> choise;
-			file->Close();
-			if (choise != 'Y' && choise != 'y') {
-				std::cout << "\tnot overwritten" << std::endl;
-				delete file;
-				return;
+		if (!keys[0] && !keys[5]) {
+			if (file->Open(&nextName)) {
+				std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+				char choise;
+				std::cin >> choise;
+				file->Close();
+				if (choise != 'Y' && choise != 'y') {
+					std::cout << "\tnot overwritten" << std::endl;
+					delete file;
+					return;
+				}
 			}
 		}
 		if (!file->Open(&fileName)) {
@@ -200,20 +207,24 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			delete file;
 			return;
 		}
-		if (!decompressedFile->Open(&nextName)) {
-			std::cout << fileName << ": can't transfer data" << std::endl;
-			file->Close();
-			delete decompressedFile;
-			delete file;
-			return;
+		if (!keys[0] && !keys[5]) {
+			if (!decompressedFile->Open(&tmpName)) {
+				std::cout << fileName << ": can't transfer data" << std::endl;
+				file->Close();
+				delete decompressedFile;
+				delete file;
+				return;
+			}
 		}
 		char algorithm;
 		bool success;
 		if (!file->Read(&algorithm, CHAR)) {
 			std::cout << fileName << ": can't transfer data" << std::endl;
 			file->Close();
-			decompressedFile->Close();
-			Delete(nextName);
+			if (!keys[0] && !keys[5]) {
+				decompressedFile->Close();
+				Delete(tmpName);
+			}
 			delete decompressedFile;
 			delete file;
 			return;
@@ -229,8 +240,10 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 				if (method == nullptr) {
 					std::cout << fileName << ": unexpected memory error" << std::endl;
 					file->Close();
-					decompressedFile->Close();
-					Delete(nextName);
+					if (!keys[0] && !keys[5]) {
+						decompressedFile->Close();
+						Delete(tmpName);
+					}
 					delete decompressedFile;
 					delete file;
 					return;
@@ -247,31 +260,33 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			default: {
 				std::cout << fileName << ": not compressed data" << std::endl;
 				file->Close();
-				decompressedFile->Close();
-				Delete(nextName);
+				if (!keys[0] && !keys[5]) {
+					decompressedFile->Close();
+					Delete(tmpName);
+				}
 				delete decompressedFile;
 				delete file;
 				return;
 			}
 		}
 		file->Close();
-		decompressedFile->Close();
+		if (!keys[0] && !keys[5]) {
+			decompressedFile->Close();
+		}
 		delete decompressedFile;
 		delete file;
 		if (!success) {
 			std::cout << "\t\tdecompressing failed" << std::endl;
-			Delete(nextName);
-			return;
-		}
-		if (keys[5] || keys[0]) { //-t или -c
-			if (keys[0]) { // -c
-				ShowResult(nextName);
+			if (!keys[0] && !keys[5]) {
+				Delete(tmpName);
 			}
-			Delete(nextName);
 			return;
 		}
-		if (!keys[2]) {//-k
+		if (!keys[0] && !keys[2] && !keys[5]) {//-c или -k или -t
 			Delete(fileName);
+		}
+		if (!keys[0] && !keys[5]) {
+			Rename(tmpName, nextName);
 		}
 	}
 	else {
@@ -281,15 +296,17 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			return;
 		}
 		nextName = fileName + ".gz";
-		if (file->Open(&nextName)) {
-			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-			char choise;
-			std::cin >> choise;
-			file->Close();
-			if (choise != 'Y' && choise != 'y') {
-				std::cout << "\tnot overwritten" << std::endl;
-				delete file;
-				return;
+		if (!keys[0]) {
+			if (file->Open(&nextName)) {
+				std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+				char choise;
+				std::cin >> choise;
+				file->Close();
+				if (choise != 'Y' && choise != 'y') {
+					std::cout << "\tnot overwritten" << std::endl;
+					delete file;
+					return;
+				}
 			}
 		}
 		if (!file->Open(&fileName)) {
@@ -315,12 +332,14 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 		std::string arithmeticName	= fileName + ".ARI";
 		unsigned long long int LZWSize, LZ77Size, arithmeticSize;
 		/* Блок с моим LZW */
-		if (!compressionFile->Open(&LZWName)) {
-			file->Close();
-			delete compressionFile;
-			delete file;
-			std::cout << fileName << ": can't transfer data" << std::endl;
-			return;
+		if (!keys[0]) {
+			if (!compressionFile->Open(&LZWName)) {
+				file->Close();
+				delete compressionFile;
+				delete file;
+				std::cout << fileName << ": can't transfer data" << std::endl;
+				return;
+			}
 		}
 		TLZW* LZW = new TLZW(compressRatio, file, compressionFile);
 		if (LZW == nullptr) {
@@ -336,6 +355,7 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 			file->Close();
 			compressionFile->Close();
 			Delete(LZWName);
+			delete LZW;
 			delete compressionFile;
 			delete file;
 			std::cout << "\t\tcompression failed";
@@ -371,30 +391,27 @@ void WorkWithFile(std::string fileName, std::vector<bool> keys) {
 				nextName = arithmeticName;
 			}
 		}*/ //TODO
-		if (keys[0]) { // -c
-			ShowResult(nextName);
-			Delete(nextName);
-			return;
-		}
 		std::string oldName = nextName;
 		nextName.pop_back();
 		nextName.pop_back();
 		nextName.pop_back();
 		nextName += "gz";
-		Rename(oldName, nextName);
-		if (!keys[2]) {//-k
-			Delete(fileName);
+		if (!keys[0]) {
+			Rename(oldName, nextName);
+			if (!keys[2]) {//-k
+				Delete(fileName);
+			}
 		}
 	}
 	return;
 }
 
-bool IsDirectory(std::string directoryName) {//TODO
+bool IsDirectory(std::string directoryName, bool help) {
 	DIR* directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
 		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
 	{
-		if (errno != ENOTDIR) {
+		if (help && errno != ENOTDIR) {
 			PrintDirectoryErrors(directoryName);
 		}
 		return false;
@@ -422,8 +439,8 @@ void PrintDirectoryErrors(std::string directoryName) {
 		case ENOMEM:
 			std::cout << "Not enought memory for opening directory " << directoryName << "\t Try it next time" << std::endl;
 			break;
-		case ENOENT: //TODO перенести этот кейс в другое место и добавить файлы
-			std::cout << "No directory with name " << directoryName << std::endl;
+		case ENOENT:
+			std::cout << "No file or directory with name " << directoryName << std::endl;
 			break;
 	}
 	return;

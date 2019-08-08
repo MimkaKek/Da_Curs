@@ -33,19 +33,24 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 	for (int i = 0; i < fileNames.size(); i++) {//проверка на файлы и папки и дальнейшая работа с ними
-		bool directory = IsDirectory(fileNames[i]);
+		bool directory = IsDirectory(fileNames[i], false);
 		if (!keys[4] && directory) {
 			std::cout << fileNames[i] << " is a directory -- ignored" << std::endl;
 		}
 		else if (directory) {
-			WorkWithDirectory(fileNames[i], keys);
+			WorkWithDirectory(fileNames[i]);
 		}
 		else {
-			WorkWithFile(fileNames[i], keys);
+			if (errno == ENOTDIR) {
+				WorkWithFile(fileNames[i]);
+			}
+			else {
+				PrintDirectoryErrors(fileNames[i]);
+			}
 		}
 	}
-	for (int i = 0; i < 8; ++i) {//TEST
-		std::cout << (keys[i] ? "+" : "-") << std::endl;
-	}
+	//TEST
+	int ti = clock();
+	//std::cout << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;
 	return 0;
 }

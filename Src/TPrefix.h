@@ -7,7 +7,6 @@
 // класс для префиксного дерева в LZW
 class TPrefix {
 public:
-
 	/* Конструктор корня */
 	TPrefix(unsigned long long int, InBinary*, OutBinary*);
 
@@ -36,6 +35,9 @@ private:
 
 	/* последняя буква из файла */
 	static char LastLetter;
+
+	/* вспомогательная переменная для чтения нужного кол-ва символов */
+	static unsigned long long int NeedToRead;
 
 	/* номер последнего добавленного слова */
 	static unsigned long long int LastNumber;
