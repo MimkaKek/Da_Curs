@@ -133,9 +133,22 @@ void WorkWithDirectory(std::string directoryName) {//TODO
 		return;
 	}
 	struct dirent* directoryFile = readdir(directory);
-	while (directoryFile != NULL) {
-		std::string tmp = directoryName + std::string(directoryFile->d_name);
-		std::cout << tmp << std::endl;//TEST
+	while (directoryFile != NULL) {//TODO какая то херня ломается в дирректории
+		if (errno == EBADF) {
+			std::cout << directoryName << ": something wrong" << std::endl;
+			return;
+		}
+		std::string tmp;
+		if (directoryName.back() == '/') {
+			tmp = directoryName + std::string(directoryFile->d_name);
+		}
+		else {
+			tmp = directoryName + "/" + std::string(directoryFile->d_name);
+		}
+		std::cout << std::endl << tmp << std::endl;//TEST
+		if (tmp[tmp.size() - 1] == '.' && tmp[tmp.size() - 2] == '/') {
+			break;
+		}
 		if (IsDirectory(tmp, true)) {
 			WorkWithDirectory(tmp);
 		}
@@ -353,12 +366,14 @@ void WorkWithFile(std::string fileName) {
 		}
 		if (!LZW->Compress(fileName)) {
 			file->Close();
-			compressionFile->Close();
-			Delete(LZWName);
+			if (!keys[0] && !keys[5]) {
+				compressionFile->Close();
+				Delete(LZWName);
+			}
 			delete LZW;
 			delete compressionFile;
 			delete file;
-			std::cout << "\t\tcompression failed";
+			std::cout << "\t\tcompression failed" << std::endl;
 			return;
 		}
 		delete LZW;

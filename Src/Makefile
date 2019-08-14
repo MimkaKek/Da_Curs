@@ -1,9 +1,13 @@
-all: main_help.o main.o TPrefix.o LZW.o BFile.o gen
+all: main_help.o main.o TPrefix.o LZW.o BFile.o gen comparator
 	g++ main_help.o main.o TPrefix.o LZW.o BFile.o -o main
 	rm *.o
 	echo DONE
 gen:
 	g++ gen.cpp -o gen
+comparator: comparator.o BFile.o
+	g++ comparator.o BFile.o -o comparator
+comparator.o:
+	g++ -c -g comparator.cpp
 main.o:
 	g++ -c -g main.cpp
 main_help.o:
@@ -21,4 +25,6 @@ LZ77.o:
 	g++ -c -g LZ77.cpp
 #clear
 c:
-	rm *.o main gen
+	rm *.o main
+ca:
+	rm *.o main gen comparator

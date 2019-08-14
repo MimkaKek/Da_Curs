@@ -52,7 +52,8 @@ enum UpdateResult {
     OK,
     FULL,
     MEMORY_ERROR,
-    WRITE_ERROR
+    WRITE_ERROR,
+    READ_ERROR
 };
 
 /* Тестовые флаги для арифметического сжатия:
@@ -71,12 +72,12 @@ enum UpdateResult {
  * |  C  |   T   |  ТАБЛИЦУ             |
  * --------------------------------------
  */
-
+/*
 char                                S_GPT = 0;
 char                                S_GBT = 0;
 char                                S_GI  = 0;
 char                                S_LPT = 0;
 char                                S_LBT = 0;
-char                                S_LI  = 0;
+char                                S_LI  = 0;*/
 
 #endif

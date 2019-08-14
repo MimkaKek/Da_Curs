@@ -51,6 +51,6 @@ int main(int argc, char *argv[]) {
 	}
 	//TEST
 	int ti = clock();
-	//std::cout << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;
+	std::cout << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;
 	return 0;
 }

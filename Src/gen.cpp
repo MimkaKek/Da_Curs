@@ -1,14 +1,21 @@
 #include <iostream>
 #include <random>
+#include <sstream>
 
 //генератор тестов
 //файл указывайте с помощью >>
 
-int main() {
+int main(int argc, char *argv[]) {
 	std::random_device rd;
 	std::mt19937 mersenne(rd());
 	unsigned long long int count;
-	std::cin >> count;
+	if (argc == 0) {
+		std::cin >> count;
+	}
+	else {
+		std::stringstream tmp(argv[1]);
+		tmp >> count;
+	}
 	int ran;
 	/* возможно я переборщил с рандомизатором
 	for (unsigned long long int i = 0; i < count; i++) {

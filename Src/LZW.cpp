@@ -4,24 +4,19 @@ TLZW::TLZW(int compressionRatio, InBinary* from, OutBinary* to) {
 	this->ForRead = from;
 	this->ForWrite = to;
 	unsigned long long int fileSize = this->ForRead->SizeFile();
-	unsigned long long int divider = std::log10(fileSize);
-	switch (compressionRatio) {
-		case FAST:
-			if (fileSize > MINIMUM_BORDER) {
+	if (fileSize > MINIMUM_BORDER) {
+		unsigned long long int divider = std::log10(fileSize) + 1;
+		switch (compressionRatio) {
+			case FAST:
 				fileSize /= pow(divider, 3);
-			}
-			break;
-		case NORMAL:
-			if (fileSize > MINIMUM_BORDER) {
+				break;
+			case NORMAL:
 				fileSize /= pow(divider, 2);
-			}
-			break;
-		case HIGH:
-			fileSize = HIGH_BORDER;
-			break;
-		case DECOMPRESS:
-			fileSize = 0;
-			break;
+				break;
+			case HIGH:
+				fileSize = HIGH_BORDER;
+				break;
+		}
 	}
 	this->CompressionTree = new TPrefix(fileSize, from, to);
 	return;
@@ -35,15 +30,15 @@ bool TLZW::Compress(std::string fileName) {
 	}
 	else if (!keys[5]) {
 		if (!this->ForWrite->Write(&method, CHAR)) {
-			std::cout << fileName << ": can't write in file." << std::endl;
+			std::cout << std::endl << "\t\t" << fileName << ": can't write in file." << std::endl;
 			return false;
 		}
 		if (!this->ForWrite->Write((char*)&size, LLINT)) {
-			std::cout << fileName << ": can't write in file." << std::endl;
+			std::cout << std::endl << "\t\t" << fileName << ": can't write in file." << std::endl;
 			return false;
 		}
 	}
-	if (size == 0) {//TODO EOF ERROR
+	if (size == 0) {
 		return true;
 	}
 	int bufferState = this->CompressionTree->UpdateForRoot();
@@ -52,11 +47,15 @@ bool TLZW::Compress(std::string fileName) {
 		bufferState = this->CompressionTree->UpdateForRoot();
 	}
 	if (bufferState == MEMORY_ERROR) {
-		std::cout << fileName << ": unexpected memory error" << std::endl;
+		std::cout << std::endl << "\t\t" << fileName << ": unexpected memory error" << std::endl;
 		return false;
 	}
 	else if (bufferState == WRITE_ERROR) {
-		std::cout << fileName << ": can't write in file" << std::endl;
+		std::cout << std::endl << "\t\t" << fileName << ": can't write in file" << std::endl;
+		return false;
+	}
+	else if (bufferState == READ_ERROR) {
+		std::cout << std::endl << "\t\t" << fileName << ": bad input" << std::endl;
 		return false;
 	}
 	return true;
@@ -71,7 +70,7 @@ bool TLZW::Decompress(std::string fileName) {
 		return false;
 	}
 	const unsigned long long int fileSize = wordCounter;
-	if (fileSize == 0) {//TODO EOF ERROR
+	if (fileSize == 0) {
 		return true;
 	}
 	std::map<unsigned long long int, std::string>::iterator finder;
