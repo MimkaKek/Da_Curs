@@ -82,14 +82,7 @@ bool TLZW::Decompress(std::string fileName) {
 		}
 		++alreadyRead;
 		finder = this->DecompressionTree.find(letter);
-		if (finder != this->DecompressionTree.end()) {
-			previousWord = finder->second;
-		}
-		else {
-			previousWord = std::string(1, (char) letter);
-			this->DecompressionTree.insert({wordCounter + 1, previousWord});
-			++wordCounter;
-		}
+		previousWord = finder->second;
 		if (keys[0]) {
 			std::cout << previousWord;
 		}
@@ -102,9 +95,6 @@ bool TLZW::Decompress(std::string fileName) {
 		if (alreadyRead == fileSize) {
 			return true;
 		}
-		/*if (!this->ForRead->Read((char*)&letter, LLINT)) {
-			break;
-		}*/
 		while (this->ForRead->Read((char*)&letter, LLINT)) {
 			if (letter == 0) {
 				break;
@@ -128,8 +118,8 @@ bool TLZW::Decompress(std::string fileName) {
 				previousWord = finder->second;
 			}
 			else {
-				presentWord = std::string(1, (char) letter);
-				++alreadyRead;
+				presentWord = previousWord + previousWord.front();
+				alreadyRead += presentWord.size();
 				if (keys[0]) {
 					std::cout << presentWord;
 				}

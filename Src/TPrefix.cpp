@@ -85,7 +85,6 @@ int TPrefix::Update(char letter) {
 int TPrefix::UpdateForRoot() {
 	this->LastNumber = CHAR_HAS + 1;
 	char letter;
-	bool needNew;
 	unsigned long long int tmpInt = 0;
 	if (!this->ForRead->Read(&letter, CHAR)) {
 		if (this->NeedToRead != 0) {
@@ -95,10 +94,8 @@ int TPrefix::UpdateForRoot() {
 	}
 	--this->NeedToRead;
 	while (true) {
-		needNew = true;
 		for (int i = 0; i < this->Next.size(); ++i) {
 			if (this->Next[i].first == letter) {
-				needNew = false;
 				if (this->LastNumber < this->Border) {
 					if (!this->ForRead->Read(&letter, CHAR)) {
 						if (this->NeedToRead != 0) {
@@ -131,165 +128,8 @@ int TPrefix::UpdateForRoot() {
 				}
 			}
 		}
-		if (needNew) {
-			this->Next.push_back({letter, new TPrefix()});
-			if (this->Next.back().second == nullptr) {
-				return MEMORY_ERROR;
-			}
-			if (keys[0]) {
-				std::cout << (char*)&this->Next.back().second->NumberOfWord;
-			}
-			else if (!keys[5]) {
-				if (!this->ForWrite->Write((char*)&this->Next.back().second->NumberOfWord, LLINT)) {
-					return WRITE_ERROR;
-				}
-			}
-			if (this->LastNumber < this->Border) {
-				if (!this->ForRead->Read(&letter, CHAR)) {
-					if (this->NeedToRead != 0) {
-						return READ_ERROR;
-					}
-					return GOT_EOF;
-				}
-				--this->NeedToRead;
-			}
-			else {
-				tmpInt = 0;
-				if (keys[0]) {
-					std::cout << (char*)&tmpInt;
-				}
-				else if (!keys[5]) {
-					if (!this->ForWrite->Write((char*)&tmpInt, LLINT)) {
-						return WRITE_ERROR;
-					}
-				}
-				return FULL;
-			}
-		}
 	}
 }
-/*
-int TPrefix::UpdateForRoot() {
-	char letter;
-	bool needNew = true;
-	int result;
-	unsigned long long int tmpInt = 0;
-	if (this->LastLetter == 0) {
-		if (!this->ForRead->Read(&letter, CHAR)) {
-			return GOT_EOF;
-		}
-		--this->NeedToRead;
-	}
-	else {
-		letter = this->LastLetter;
-	}
-	for (int i = 0; i < this->Next.size(); ++i) {
-		if (this->Next[i].first == letter) {
-			needNew = false;
-			if (keys[0]) {
-				std::cout << (char*)&this->Next[i].second->NumberOfWord;
-			}
-			else if (!keys[5]) {
-				if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
-					return WRITE_ERROR;
-				}
-			}
-			break;
-		}
-	}
-	if (needNew) {
-		this->Next.push_back({letter, new TPrefix()});
-		if (this->Next.back().second == nullptr) {
-			return MEMORY_ERROR;
-		}
-		tmpInt = this->LastNumber - 1;
-		if (keys[0]) {
-			std::cout << (char*)&tmpInt;
-		}
-		else if (!keys[5]) {
-			if (!this->ForWrite->Write((char*)&tmpInt, LLINT)) {
-				return WRITE_ERROR;
-			}
-		}
-	}
-	if (this->NeedToRead == 0) {
-		return OK;
-	}
-	while (true) {
-		needNew = true;
-		for (int i = 0; i < this->Next.size(); ++i) {
-			if (letter == this->Next[i].first) {
-				needNew = false;
-				if (!this->ForRead->Read(&letter, CHAR)) {
-					if (keys[0]) {
-						std::cout << (char*)&this->Next[i].second->NumberOfWord;
-					}
-					else if (!keys[5]) {
-						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
-							return WRITE_ERROR;
-						}
-					}
-					return GOT_EOF;
-				}
-				--this->NeedToRead;
-				result = this->Next[i].second->Update(letter);
-				if (result != OK) {
-					return result;
-				}
-				break;
-			}
-		}
-		if (needNew) {
-			this->Next.push_back({letter, new TPrefix()});
-			if (this->Next.back().second == nullptr) {
-				return MEMORY_ERROR;
-			}
-			tmpInt = this->LastNumber - 1;
-			if (keys[0]) {
-				std::cout << (char*)&tmpInt;
-			}
-			else if (!keys[5]) {
-				if (!this->ForWrite->Write((char*)&tmpInt, LLINT)) {
-					return WRITE_ERROR;
-				}	
-			}
-			if (this->NeedToRead == 0) {
-				return OK;
-			}
-			if (!this->ForRead->Read(&letter, CHAR)) {
-				return GOT_EOF;
-			}
-			--this->NeedToRead;
-		}
-		if (this->LastNumber == this->Border) {
-			tmpInt = 0;
-			if (keys[0]) {
-				std::cout << (char*)&tmpInt;
-			}
-			else if (!keys[5]) {
-				if(!this->ForWrite->Write((char*)&tmpInt, LLINT)) {
-					return WRITE_ERROR;
-				}
-			}
-			return FULL;
-		}
-		if (needNew) {
-			if(!this->ForRead->Read(&letter, CHAR)) {
-				return GOT_EOF;
-			}
-			--this->NeedToRead;
-		}
-		else {
-			letter = this->LastLetter;
-		}
-	}
-}*/
-/*if (this->NeedToRead == 0) {
-	return this->CheckEnd();
-}
-if (this->NeedToRead == 0) {
-	return OK;
-}*/
 
 void TPrefix::Clear(bool root) {
 	for (int i = 0; i < this->Next.size(); ++i) {
