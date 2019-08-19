@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
 		std::stringstream tmp(argv[1]);
 		tmp >> count;
 	}
+	count--;
 	int ran;
 	/* возможно я переборщил с рандомизатором
 	for (unsigned long long int i = 0; i < count; i++) {

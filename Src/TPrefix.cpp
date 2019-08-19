@@ -6,6 +6,7 @@ OutBinary* TPrefix::ForWrite;
 char TPrefix::LastLetter;
 unsigned long long int TPrefix::LastNumber;
 unsigned long long int TPrefix::NeedToRead;
+unsigned short int TPrefix::Bites;
 
 TPrefix::TPrefix(unsigned long long int highBorder, InBinary* from, OutBinary* to) {
 	this->Border = highBorder;
@@ -14,7 +15,17 @@ TPrefix::TPrefix(unsigned long long int highBorder, InBinary* from, OutBinary* t
 	}
 	this->ForRead = from;
 	this->ForWrite = to;
-	this->NeedToRead = this->ForRead->SizeFile() + 1;
+	highBorder = this->ForRead->SizeFile();
+	this->NeedToRead = highBorder + 1;
+	if (highBorder < std::numeric_limits<unsigned short int>::max()) {
+		this->Bites = sizeof(unsigned short int);
+	}
+	else if (highBorder < std::numeric_limits<unsigned int>::max()) {
+		this->Bites = sizeof(unsigned int);
+	}
+	else {
+		this->Bites = sizeof(unsigned long long int);
+	}
 	this->NumberOfWord = 0;
 	this->LastLetter = 0;
 	this->LastNumber = 1;
@@ -34,7 +45,7 @@ int TPrefix::Update(char letter) {
 		if (letter == this->Next[i].first) {
 			needNew = false;
 			if (this->LastNumber < this->Border) {
-				if (!this->ForRead->Read(&letter, CHAR)) {
+				if (!this->ForRead->Read(&letter, sizeof(char))) {
 					if (this->NeedToRead != 0) {
 						return READ_ERROR;
 					}
@@ -42,7 +53,7 @@ int TPrefix::Update(char letter) {
 						std::cout << (char*)&this->Next[i].second->NumberOfWord;
 					}
 					else if (!keys[5]) {
-						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
+						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
 							return WRITE_ERROR;
 						}
 					}
@@ -56,7 +67,7 @@ int TPrefix::Update(char letter) {
 					std::cout << (char*)&this->Next[i].second->NumberOfWord;
 				}
 				else if (!keys[5]) {
-					if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
+					if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
 						return WRITE_ERROR;
 					}
 				}
@@ -74,7 +85,7 @@ int TPrefix::Update(char letter) {
 			std::cout << (char*)&this->NumberOfWord;
 		}
 		else if (!keys[5]) {
-			if (!this->ForWrite->Write((char*)&this->NumberOfWord, LLINT)) {
+			if (!this->ForWrite->Write((char*)&this->NumberOfWord, this->Bites)) {
 				return WRITE_ERROR;
 			}
 		}
@@ -86,7 +97,7 @@ int TPrefix::UpdateForRoot() {
 	this->LastNumber = CHAR_HAS + 1;
 	char letter;
 	unsigned long long int tmpInt = 0;
-	if (!this->ForRead->Read(&letter, CHAR)) {
+	if (!this->ForRead->Read(&letter, sizeof(char))) {
 		if (this->NeedToRead != 0) {
 			return READ_ERROR;
 		}
@@ -97,7 +108,7 @@ int TPrefix::UpdateForRoot() {
 		for (int i = 0; i < this->Next.size(); ++i) {
 			if (this->Next[i].first == letter) {
 				if (this->LastNumber < this->Border) {
-					if (!this->ForRead->Read(&letter, CHAR)) {
+					if (!this->ForRead->Read(&letter, sizeof(char))) {
 						if (this->NeedToRead != 0) {
 							return READ_ERROR;
 						}
@@ -117,10 +128,10 @@ int TPrefix::UpdateForRoot() {
 						std::cout << (char*)&this->Next[i].second->NumberOfWord << (char*)&tmpInt;
 					}
 					else if (!keys[5]) {
-						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, LLINT)) {
+						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
 							return WRITE_ERROR;
 						}
-						if (!this->ForWrite->Write((char*)&tmpInt, LLINT)) {
+						if (!this->ForWrite->Write((char*)&tmpInt, this->Bites)) {
 							return WRITE_ERROR;
 						}
 					}

@@ -1,13 +1,10 @@
 #pragma once
-//#include "Compressor.h"
 #include "TPrefix.h"
 #include "Globals.h"
 #include <cmath>
+#include <map>
 
-enum Borders {
-	MINIMUM_BORDER	= 	16,
-	HIGH_BORDER		=	256204778801521550LLU
-};
+const short int MINIMUM_BORDER = 16;
 
 class TLZW {
 public:
@@ -45,5 +42,4 @@ private:
 
 	/* дерево декомрессии */
 	std::map<unsigned long long int, std::string> DecompressionTree;
-	
 };

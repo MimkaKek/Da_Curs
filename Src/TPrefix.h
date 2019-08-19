@@ -3,6 +3,7 @@
 
 #include "Globals.h"
 #include "BFile.h"
+#include <limits>
 
 // класс для префиксного дерева в LZW
 class TPrefix {
@@ -48,6 +49,8 @@ private:
 	static InBinary* ForRead; 
 
 	static OutBinary* ForWrite;
+
+	static unsigned short int Bites;
 };
 
 #endif

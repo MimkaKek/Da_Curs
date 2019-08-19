@@ -86,7 +86,7 @@ void ShowResult(std::string fileName) {
 		return;
 	}
 	char outPut;
-	while (file->Read(&outPut, CHAR)) {
+	while (file->Read(&outPut, sizeof(char))) {
 		std::cout << outPut;
 	}
 	std::cout << std::endl;
@@ -97,11 +97,11 @@ void ShowResult(std::string fileName) {
 
 bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	char trash;
-	if (!file->Read(&trash, CHAR)) {
+	if (!file->Read(&trash, sizeof(char))) {
 		return false;
 	}
 	unsigned long long int uncompressed, compressed;
-	if (!file->Read((char*)&uncompressed, LLINT)) {
+	if (!file->Read((char*)&uncompressed, sizeof(unsigned long long int))) {
 		return false;
 	}
 	compressed = file->SizeFile();
@@ -231,7 +231,7 @@ void WorkWithFile(std::string fileName) {
 		}
 		char algorithm;
 		bool success;
-		if (!file->Read(&algorithm, CHAR)) {
+		if (!file->Read(&algorithm, sizeof(char))) {
 			std::cout << fileName << ": can't transfer data" << std::endl;
 			file->Close();
 			if (!keys[0] && !keys[5]) {

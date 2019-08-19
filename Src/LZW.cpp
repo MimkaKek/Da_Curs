@@ -14,9 +14,12 @@ TLZW::TLZW(int compressionRatio, InBinary* from, OutBinary* to) {
 				fileSize /= pow(divider, 2);
 				break;
 			case HIGH:
-				fileSize = HIGH_BORDER;
+				fileSize = this->DecompressionTree.max_size();
 				break;
 		}
+	}
+	else {
+		fileSize = CHAR_HAS * 2;
 	}
 	this->CompressionTree = new TPrefix(fileSize, from, to);
 	return;
@@ -29,11 +32,11 @@ bool TLZW::Compress(std::string fileName) {
 		std::cout << method << size;
 	}
 	else if (!keys[5]) {
-		if (!this->ForWrite->Write(&method, CHAR)) {
+		if (!this->ForWrite->Write(&method, sizeof(char))) {
 			std::cout << std::endl << "\t\t" << fileName << ": can't write in file." << std::endl;
 			return false;
 		}
-		if (!this->ForWrite->Write((char*)&size, LLINT)) {
+		if (!this->ForWrite->Write((char*)&size, sizeof(unsigned long long int))) {
 			std::cout << std::endl << "\t\t" << fileName << ": can't write in file." << std::endl;
 			return false;
 		}
@@ -63,20 +66,30 @@ bool TLZW::Compress(std::string fileName) {
 
 
 bool TLZW::Decompress(std::string fileName) {
-	unsigned long long int letter, alreadyRead, wordCounter;
+	unsigned long long int letter;
 	std::string previousWord, presentWord;
-	if (!this->ForRead->Read((char*)&wordCounter, LLINT)) {
+	unsigned short int bites;
+	if (!this->ForRead->Read((char*)&letter, sizeof(unsigned long long int))) {
 		std::cout << fileName << ": can't read file" << std::endl;
 		return false;
 	}
-	const unsigned long long int fileSize = wordCounter;
+	if (letter < std::numeric_limits<unsigned short int>::max()) {
+		bites = sizeof(short int);
+	}
+	else if (letter < std::numeric_limits<unsigned int>::max()) {
+		bites = sizeof(int);
+	}
+	else {
+		bites = sizeof(long long int);
+	}
+	const unsigned long long int fileSize = letter;
 	if (fileSize == 0) {
 		return true;
 	}
 	std::map<unsigned long long int, std::string>::iterator finder;
-	wordCounter = CHAR_HAS;
-	alreadyRead = 0;
-	while (this->ForRead->Read((char*)&letter, LLINT)) {
+	unsigned long long int wordCounter = CHAR_HAS;
+	unsigned long long int alreadyRead = 0;
+	while (this->ForRead->Read((char*)&letter, bites)) {
 		for (int i = 0; i < CHAR_HAS; ++i) {
 			this->DecompressionTree.insert({i + 1, std::string(1, (char) i)});
 		}
@@ -95,7 +108,7 @@ bool TLZW::Decompress(std::string fileName) {
 		if (alreadyRead == fileSize) {
 			return true;
 		}
-		while (this->ForRead->Read((char*)&letter, LLINT)) {
+		while (this->ForRead->Read((char*)&letter, bites)) {
 			if (letter == 0) {
 				break;
 			}

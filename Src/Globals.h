@@ -6,7 +6,6 @@
 #include <vector>
 #include <dirent.h>
 #include <errno.h>
-#include <map>
 #include <ctime>//TEST
 
 /* ключи                                                                    
@@ -39,11 +38,6 @@ enum CompressionRatio {
     NORMAL,
     HIGH,
     DECOMPRESS
-};
-
-enum Sizeof {
-    LLINT = sizeof(unsigned long long int),
-    CHAR = sizeof(char)
 };
 
 enum UpdateResult {
