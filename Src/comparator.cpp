@@ -5,34 +5,35 @@
 //программа будет заниматься сравнением данных *до* и *после* архивации
 //Может быть когда-нибудь где-нибудь зачем-нибудь ещё пригодится
 
-void Compare(InBinary* original, InBinary* afterWork, int number) {
+bool Compare(InBinary* original, InBinary* afterWork, int number) {
 	unsigned long long int origSize, afterSize;
 	char origLetter, afterLetter;
 	const int CHARS = sizeof(char);
 	origSize = original->SizeFile();
 	afterSize = afterWork->SizeFile();
-	/*if (origSize != afterSize) {//временно закоментил для поиска бага в LZW
+	if (origSize != afterSize) {
 		std::cout << number << ": different sizes" << std::endl;
-		return;
-	}*/
+		return false;
+	}
 	for (int i = 0; i < origSize; ++i) {
 		if (!original->Read(&origLetter, CHARS)) {
 			std::cout << number << ": orig bad read" << std::endl;
-			return;
+			return false;
 		}
 		if (!afterWork->Read(&afterLetter, CHARS)) {
 			std::cout << number << ": after bad read" << std::endl;
-			return;
+			return false;
 		}
 		if (origLetter != afterLetter) {
 			std::cout << number << ": bad compare: letter " << i << std::endl;
-			return;
+			return false;
 		}
 	}
-	return;
+	return true;
 }
 
 int main() {
+	bool ok = true;
 	std::vector<std::pair<std::string, std::string>> files = {
 		{"test01", "test02"},
 		{"test11", "test12"},
@@ -52,11 +53,16 @@ int main() {
 			std::cout << "no file " << files[i].second << std::endl;
 			continue;
 		}
-		Compare(original, afterWork, i);
+		if (!Compare(original, afterWork, i)) {
+			ok = false;
+		}
 		original->Close();
 		afterWork->Close();
 	}
 	delete original;
 	delete afterWork;
+	if (!ok) {
+		return 1;
+	}
 	return 0;
 }

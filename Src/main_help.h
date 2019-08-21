@@ -13,12 +13,6 @@
 
 bool KeyManager(std::string gotKeys);
 
-/*	Имя: ShowResult
- * 	Что делает: вывод результата компресии или декомпресии в out (ключ c)
- */
-
-void ShowResult(std::string fileName);
-
 /*	Имя: DifferensOfSizes
  * 	Что делает: вывод для каждого файла размера сжатого, оригинального, 
  * 	коэффициента сжатия(%) и имя ориг файла(ключ l)

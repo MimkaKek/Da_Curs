@@ -9,9 +9,11 @@ TLZW::TLZW(int compressionRatio, InBinary* from, OutBinary* to) {
 		switch (compressionRatio) {
 			case FAST:
 				fileSize /= pow(divider, 3);
+				fileSize += CHAR_HAS;
 				break;
 			case NORMAL:
 				fileSize /= pow(divider, 2);
+				fileSize += CHAR_HAS;
 				break;
 			case HIGH:
 				fileSize = this->DecompressionTree.max_size();
@@ -154,6 +156,7 @@ bool TLZW::Decompress(std::string fileName) {
 		if (letter != 0) {
 			break;
 		}
+		wordCounter = CHAR_HAS;
 	}
 	if (alreadyRead < fileSize) {
 		std::cout << fileName << ": unexpected end of file" << std::endl;

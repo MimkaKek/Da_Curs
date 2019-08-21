@@ -45,10 +45,25 @@ then
 	./main -d test32.gz 
 	./main -d test42.gz 
 	./main -d test52.gz
+	echo "end decom"
 	#проверка совпадения результатов
 	./comparator
+	rc=$?
+	if [ "$rc" -eq 0 ]
+	then
+		echo "YOU HAVE DONE THIS CORRECTLY"
+	else
+		echo "YOU HAVE ERRORS IN ALGORITHM"
+	fi
 elif [ "$action" -eq 0 ]
 then
+	cp "test01" "test02"
+	cp "test11" "test12"
+	cp "test21" "test22"
+	cp "test31" "test32"
+	cp "test41" "test42"
+	cp "test51" "test52"
+	echo "end cp"
 	./main -1 test02
 	./main	  test12
 	./main -9 test22
@@ -63,8 +78,16 @@ then
 	./main -d test32.gz 
 	./main -d test42.gz 
 	./main -d test52.gz
+	echo "end decom"
 	#проверка совпадения результатов
 	./comparator
+	rc=$?
+	if [ "$rc" -eq 0 ]
+	then
+		echo "YOU HAVE DONE THIS CORRECTLY"
+	else
+		echo "YOU HAVE ERRORS IN ALGORITHM"
+	fi
 else
 	rm "test01" "test02" "test11" "test12" "test21" "test22" "test31" "test32" "test41" "test42" "test51" "test52"
 	rm "test02.gz" "test12.gz" "test22.gz" "test32.gz" "test42.gz" "test52.gz"

@@ -74,27 +74,6 @@ bool KeyManager(std::string gotKeys) {
 	return true;
 }
 
-void ShowResult(std::string fileName) {
-	InBinary* file = new InBinary;
-	if (file == nullptr) {
-		std::cout << fileName << ": unexpected memory error" << std::endl;
-		return;
-	}
-	if (!file->Open(&fileName)) {
-		std::cout << fileName << "can't read file" << std::endl;
-		delete file;
-		return;
-	}
-	char outPut;
-	while (file->Read(&outPut, sizeof(char))) {
-		std::cout << outPut;
-	}
-	std::cout << std::endl;
-	file->Close();
-	delete file;
-	return;
-}
-
 bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	char trash;
 	if (!file->Read(&trash, sizeof(char))) {
