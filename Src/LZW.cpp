@@ -132,7 +132,7 @@ bool TLZW::Decompress(std::string fileName) {
 				presentWord = previousWord + finder->second.front();
 				previousWord = finder->second;
 			}
-			else {
+			else if (letter == wordCounter + 1) {
 				presentWord = previousWord + previousWord.front();
 				alreadyRead += presentWord.size();
 				if (keys[0]) {
@@ -148,6 +148,10 @@ bool TLZW::Decompress(std::string fileName) {
 					return true;
 				}
 				previousWord = presentWord;
+			}
+			else {
+				std::cout << fileName << ": invalid compressed data" << std::endl;
+				return false;
 			}
 			this->DecompressionTree.insert({wordCounter + 1, presentWord});
 			++wordCounter;

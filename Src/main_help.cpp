@@ -101,8 +101,8 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	return true;
 }
 
-void WorkWithDirectory(std::string directoryName) {//TODO
-	DIR* directory = opendir(directoryName.c_str());
+void WorkWithDirectory(std::string directoryName) {//TODO может ерно
+	DIR *directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
 		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
 	{
@@ -111,30 +111,29 @@ void WorkWithDirectory(std::string directoryName) {//TODO
 		}
 		return;
 	}
-	struct dirent* directoryFile = readdir(directory);
-	while (directoryFile != NULL) {//TODO какая то херня ломается в дирректории
+	struct dirent *directoryFile;
+	while (directoryFile = readdir(directory)) {
 		if (errno == EBADF) {
 			std::cout << directoryName << ": something wrong" << std::endl;
 			return;
 		}
-		std::string tmp;
+		std::string tmp = std::string(directoryFile->d_name);
+		if (tmp == "." || tmp == "..") {
+			continue;
+		}
 		if (directoryName.back() == '/') {
-			tmp = directoryName + std::string(directoryFile->d_name);
+			tmp = directoryName + tmp;
 		}
 		else {
-			tmp = directoryName + "/" + std::string(directoryFile->d_name);
+			tmp = directoryName + "/" + tmp;
 		}
 		std::cout << std::endl << tmp << std::endl;//TEST
-		if (tmp[tmp.size() - 1] == '.' && tmp[tmp.size() - 2] == '/') {
-			break;
-		}
 		if (IsDirectory(tmp, true)) {
 			WorkWithDirectory(tmp);
 		}
 		else {
 			WorkWithFile(tmp);
 		}
-		directoryFile = readdir(directory);
 	}
 	closedir(directory);
 	if (errno == EBADF) {
@@ -221,36 +220,25 @@ void WorkWithFile(std::string fileName) {
 			delete file;
 			return;
 		}
-		switch (algorithm) {//TODO switch
-			case 'A': {
-				//Arithmetic* method = new Arithmetic(); TODO
-				std::cout << std::endl;//TEST
-				break;
-			}
-			case 'W': {
-				TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
-				if (method == nullptr) {
-					std::cout << fileName << ": unexpected memory error" << std::endl;
-					file->Close();
-					if (!keys[0] && !keys[5]) {
-						decompressedFile->Close();
-						Delete(tmpName);
-					}
-					delete decompressedFile;
-					delete file;
-					return;
+		if (algorithm == 'A') {//TODO YOU
+			/*Arithmetic* method = new Arithmetic();
+			if (method == nullptr) {
+				std::cout << fileName << ": unexpected memory error" << std::endl;
+				file->Close();
+				if (!keys[0] && !keys[5]) {
+					decompressedFile->Close();
+					Delete(tmpName);
 				}
-				success = method->Decompress(fileName);
-				delete method;
-				break;
-			}
-			case '7': {
-				//LZ77* method = new LZ77(); TODO
-				std::cout << std::endl;//TEST
-				break;
-			}
-			default: {
-				std::cout << fileName << ": not compressed data" << std::endl;
+				delete decompressedFile;
+				delete file;
+				return;
+			}*/
+			std::cout << std::endl;//TEST
+		}
+		else if (algorithm == 'W') {
+			TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
+			if (method == nullptr) {
+				std::cout << fileName << ": unexpected memory error" << std::endl;
 				file->Close();
 				if (!keys[0] && !keys[5]) {
 					decompressedFile->Close();
@@ -260,6 +248,36 @@ void WorkWithFile(std::string fileName) {
 				delete file;
 				return;
 			}
+			success = method->Decompress(fileName);
+			delete method;
+		}
+		else if (algorithm == '7') {//TODO YOU
+			/*LZ77* method = new LZ77();
+			if (method == nullptr) {
+				std::cout << fileName << ": unexpected memory error" << std::endl;
+				file->Close();
+				if (!keys[0] && !keys[5]) {
+					decompressedFile->Close();
+					Delete(tmpName);
+				}
+				delete decompressedFile;
+				delete file;
+				return;
+			}
+			success = method->Decompress(fileName);
+			delete method;*/
+			std::cout << std::endl;//TEST
+		}
+		else {
+			std::cout << fileName << ": not compressed data" << std::endl;
+			file->Close();
+			if (!keys[0] && !keys[5]) {
+				decompressedFile->Close();
+				Delete(tmpName);
+			}
+			delete decompressedFile;
+			delete file;
+			return;
 		}
 		file->Close();
 		if (!keys[0] && !keys[5]) {
@@ -359,11 +377,103 @@ void WorkWithFile(std::string fileName) {
 		LZWSize = compressionFile->SizeFile();
 		compressionFile->Close();
 		file->Close();
-		/* Блок с вашими алгоритмами */ //TODO
-		/*							 */
-		
+		//Arithmetic
+		/* TODO YOU
+		if (!file->Open(&fileName)) {
+			delete compressionFile;
+			delete file;
+			Delete(LZWName);
+			std::cout << fileName << ": can't open file" << std::endl;
+			return;
+		}
+		if (!keys[0]) {
+			if (!compressionFile->Open(&LZWName)) {
+				file->Close();
+				delete compressionFile;
+				delete file;
+				std::cout << fileName << ": can't transfer data" << std::endl;
+				return;
+			}
+		}
+		Arithmetic* arith = new Arithmetic;
+		if (arith == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			file->Close();
+			compressionFile->Close();
+			Delete(LZWName);
+			Delete(arithmeticName);
+			delete compressionFile;
+			delete file;
+			return;
+		}
+		if (!arith->Compress(fileName)) {
+			file->Close();
+			if (!keys[0] && !keys[5]) {
+				compressionFile->Close();
+				Delete(LZWName);
+				Delete(arithmeticName);
+			}
+			delete arith;
+			delete compressionFile;
+			delete file;
+			std::cout << "\t\tcompression failed" << std::endl;
+			return;
+		}
+		delete LZW;
+		arithmeticSize = compressionFile->SizeFile();
+		compressionFile->Close();
+		file->Close();
+		//LZ77
+		if (!file->Open(&fileName)) {
+			delete compressionFile;
+			delete file;
+			Delete(LZWName);
+			Delete(arithmeticName);
+			std::cout << fileName << ": can't open file" << std::endl;
+			return;
+		}
+		if (!keys[0]) {
+			if (!compressionFile->Open(&LZ77Name)) {
+				file->Close();
+				delete compressionFile;
+				delete file;
+				std::cout << fileName << ": can't transfer data" << std::endl;
+				return;
+			}
+		}
+		LZ77* lz77 = new LZ77;
+		if (lz77 == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			file->Close();
+			compressionFile->Close();
+			Delete(LZWName);
+			Delete(arithmeticName);
+			Delete(LZ77Name);
+			delete compressionFile;
+			delete file;
+			return;
+		}
+		if (!lz77->Compress(fileName)) {
+			file->Close();
+			if (!keys[0] && !keys[5]) {
+				compressionFile->Close();
+				Delete(LZWName);
+				Delete(arithmeticName);
+				Delete(LZ77Name);
+			}
+			delete lz77;
+			delete compressionFile;
+			delete file;
+			std::cout << "\t\tcompression failed" << std::endl;
+			return;
+		}
+		delete lz77;
+		LZ77Size = compressionFile->SizeFile();
+		compressionFile->Close();
+		file->Close();
+		*/
 		nextName = LZWName;//TEST
-		/*if (LZWSize < LZ77Size) {//удаление временных файлов
+		/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
 			Delete(LZ77Name);
 			if (LZWSize < arithmeticSize) {
 				Delete(arithmeticName);

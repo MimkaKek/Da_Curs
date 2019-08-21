@@ -1,7 +1,6 @@
 #ifndef MAIN_HELP_H
 #define MAIN_HELP_H
 
-
 #include "Globals.h"
 #include "LZW.h"
 #include <cstdio>

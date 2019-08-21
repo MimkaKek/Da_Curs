@@ -18,7 +18,7 @@ LZW.o:
 	g++ -c -g LZW.cpp
 BFile.o:
 	g++ -c -g BFile.cpp
-#Включу ваши алги как они будут готовы
+#TODO Включу ваши алги как они будут готовы
 Arithmetic.o:
 	g++ -c -g Arithmetic.cpp
 LZ77.o:
