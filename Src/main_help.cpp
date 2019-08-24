@@ -83,6 +83,9 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	if (!file->Read((char*)&uncompressed, sizeof(unsigned long long int))) {
 		return false;
 	}
+	if (trash != 'W' && trash != '7' && trash != 'A') {
+		return false;
+	}
 	compressed = file->SizeFile();
 	double ratio = (double) compressed / uncompressed;
 	ratio = 1 - ratio;
@@ -94,14 +97,16 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 	}
 	std::cout << "         compressed        uncompressed  ratio uncompressed_name" << std::endl;
 	printf("%19llu %19llu %5.1lf", compressed, uncompressed, ratio * 100);
-	fileName.pop_back();
-	fileName.pop_back();
-	fileName.pop_back();
+	if (IsArchive(fileName)) {
+		fileName.pop_back();
+		fileName.pop_back();
+		fileName.pop_back();
+	}
 	std::cout << "% " << fileName << std::endl;
 	return true;
 }
 
-void WorkWithDirectory(std::string directoryName) {//TODO может ерно
+void WorkWithDirectory(std::string directoryName) {
 	DIR *directory = opendir(directoryName.c_str());
 	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
 		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
@@ -127,7 +132,6 @@ void WorkWithDirectory(std::string directoryName) {//TODO может ерно
 		else {
 			tmp = directoryName + "/" + tmp;
 		}
-		std::cout << std::endl << tmp << std::endl;//TEST
 		if (IsDirectory(tmp, true)) {
 			WorkWithDirectory(tmp);
 		}
@@ -150,23 +154,26 @@ void WorkWithFile(std::string fileName) {
 		return;
 	}
 	if (!file->Open(&fileName)) {
-		std::cout << fileName << ":\tNo such file" << std::endl;
+		std::cout << fileName << ": can't read file" << std::endl;
 		delete file;
 		return;
 	}
-	if (keys[3]) {//-l (L)
-		if (!IsArchive(fileName)) {
-			std::cout << fileName << " is not an archive" << std::endl;
-		}
-		else {
-			if(!DifferensOfSizes(file, fileName)) {
-				std::cout << fileName << ": can't read file" << std::endl;
-			}
+	if (keys[3]) {//-l
+		if(!DifferensOfSizes(file, fileName)) {
+			std::cout << fileName << ": wrong format" << std::endl;
 		}
 		file->Close();
 		delete file;
 	}
 	else if (keys[1] || keys[5]) {//-d или -t
+		if (keys[1]) {
+			if (!IsArchive(fileName)) {
+				std::cout << fileName << ": unknown suffix -- ignored" << std::endl;
+				file->Close();
+				delete file;
+				return;
+			}
+		}
 		std::string tmpName = fileName + ".tmp";
 		file->Close();
 		nextName = fileName;
@@ -207,7 +214,7 @@ void WorkWithFile(std::string fileName) {
 				return;
 			}
 		}
-		char algorithm;
+		char algorithm = 0;
 		bool success;
 		if (!file->Read(&algorithm, sizeof(char))) {
 			std::cout << fileName << ": can't transfer data" << std::endl;
@@ -286,13 +293,15 @@ void WorkWithFile(std::string fileName) {
 		delete decompressedFile;
 		delete file;
 		if (!success) {
-			std::cout << "\t\tdecompressing failed" << std::endl;
+			if (!keys[5]) {
+				std::cout << "\t\tdecompressing failed" << std::endl;
+			}
 			if (!keys[0] && !keys[5]) {
 				Delete(tmpName);
 			}
 			return;
 		}
-		if (!keys[0] && !keys[2] && !keys[5]) {//-c или -k или -t
+		if (!keys[0] && !keys[2] && !keys[5]) {//нет -c, -k и -t
 			Delete(fileName);
 		}
 		if (!keys[0] && !keys[5]) {
@@ -303,6 +312,8 @@ void WorkWithFile(std::string fileName) {
 		file->Close();
 		if (IsArchive(fileName)) {
 			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
+			file->Close();
+			delete file;
 			return;
 		}
 		nextName = fileName + ".gz";
@@ -363,7 +374,7 @@ void WorkWithFile(std::string fileName) {
 		}
 		if (!LZW->Compress(fileName)) {
 			file->Close();
-			if (!keys[0] && !keys[5]) {
+			if (!keys[0]) {
 				compressionFile->Close();
 				Delete(LZWName);
 			}
@@ -408,7 +419,7 @@ void WorkWithFile(std::string fileName) {
 		}
 		if (!arith->Compress(fileName)) {
 			file->Close();
-			if (!keys[0] && !keys[5]) {
+			if (!keys[0]) {
 				compressionFile->Close();
 				Delete(LZWName);
 				Delete(arithmeticName);
@@ -455,7 +466,7 @@ void WorkWithFile(std::string fileName) {
 		}
 		if (!lz77->Compress(fileName)) {
 			file->Close();
-			if (!keys[0] && !keys[5]) {
+			if (!keys[0]) {
 				compressionFile->Close();
 				Delete(LZWName);
 				Delete(arithmeticName);
@@ -472,6 +483,8 @@ void WorkWithFile(std::string fileName) {
 		compressionFile->Close();
 		file->Close();
 		*/
+		delete file;
+		delete compressionFile;
 		nextName = LZWName;//TEST
 		/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
 			Delete(LZ77Name);
@@ -522,7 +535,9 @@ bool IsDirectory(std::string directoryName, bool help) {
 	}
 	closedir(directory);
 	if (errno == EBADF) {
-		PrintDirectoryErrors(directoryName);
+		if (help) {
+			PrintDirectoryErrors(directoryName);
+		}
 		return false;
 	}
 	return true;
