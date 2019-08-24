@@ -147,7 +147,6 @@ void WorkWithDirectory(std::string directoryName) {
 }
 
 void WorkWithFile(std::string fileName) {
-	std::string nextName;
 	InBinary* file = new InBinary;
 	if (file == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
@@ -162,364 +161,15 @@ void WorkWithFile(std::string fileName) {
 		if(!DifferensOfSizes(file, fileName)) {
 			std::cout << fileName << ": wrong format" << std::endl;
 		}
-		file->Close();
-		delete file;
 	}
 	else if (keys[1] || keys[5]) {//-d или -t
-		if (keys[1]) {
-			if (!IsArchive(fileName)) {
-				std::cout << fileName << ": unknown suffix -- ignored" << std::endl;
-				file->Close();
-				delete file;
-				return;
-			}
-		}
-		std::string tmpName = fileName + ".tmp";
-		file->Close();
-		nextName = fileName;
-		nextName.pop_back();
-		nextName.pop_back();
-		nextName.pop_back();
-		if (!keys[0] && !keys[5]) {
-			if (file->Open(&nextName)) {
-				std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-				char choise;
-				std::cin >> choise;
-				file->Close();
-				if (choise != 'Y' && choise != 'y') {
-					std::cout << "\tnot overwritten" << std::endl;
-					delete file;
-					return;
-				}
-			}
-		}
-		if (!file->Open(&fileName)) {
-			std::cout << fileName << ": can't read file" << std::endl;
-			delete file;
-			return;
-		}
-		OutBinary* decompressedFile = new OutBinary;
-		if (decompressedFile == nullptr) {
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			file->Close();
-			delete file;
-			return;
-		}
-		if (!keys[0] && !keys[5]) {
-			if (!decompressedFile->Open(&tmpName)) {
-				std::cout << fileName << ": can't transfer data" << std::endl;
-				file->Close();
-				delete decompressedFile;
-				delete file;
-				return;
-			}
-		}
-		char algorithm = 0;
-		bool success;
-		if (!file->Read(&algorithm, sizeof(char))) {
-			std::cout << fileName << ": can't transfer data" << std::endl;
-			file->Close();
-			if (!keys[0] && !keys[5]) {
-				decompressedFile->Close();
-				Delete(tmpName);
-			}
-			delete decompressedFile;
-			delete file;
-			return;
-		}
-		if (algorithm == 'A') {//TODO YOU
-			/*Arithmetic* method = new Arithmetic();
-			if (method == nullptr) {
-				std::cout << fileName << ": unexpected memory error" << std::endl;
-				file->Close();
-				if (!keys[0] && !keys[5]) {
-					decompressedFile->Close();
-					Delete(tmpName);
-				}
-				delete decompressedFile;
-				delete file;
-				return;
-			}*/
-			std::cout << std::endl;//TEST
-		}
-		else if (algorithm == 'W') {
-			TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
-			if (method == nullptr) {
-				std::cout << fileName << ": unexpected memory error" << std::endl;
-				file->Close();
-				if (!keys[0] && !keys[5]) {
-					decompressedFile->Close();
-					Delete(tmpName);
-				}
-				delete decompressedFile;
-				delete file;
-				return;
-			}
-			success = method->Decompress(fileName);
-			delete method;
-		}
-		else if (algorithm == '7') {//TODO YOU
-			/*LZ77* method = new LZ77();
-			if (method == nullptr) {
-				std::cout << fileName << ": unexpected memory error" << std::endl;
-				file->Close();
-				if (!keys[0] && !keys[5]) {
-					decompressedFile->Close();
-					Delete(tmpName);
-				}
-				delete decompressedFile;
-				delete file;
-				return;
-			}
-			success = method->Decompress(fileName);
-			delete method;*/
-			std::cout << std::endl;//TEST
-		}
-		else {
-			std::cout << fileName << ": not compressed data" << std::endl;
-			file->Close();
-			if (!keys[0] && !keys[5]) {
-				decompressedFile->Close();
-				Delete(tmpName);
-			}
-			delete decompressedFile;
-			delete file;
-			return;
-		}
-		file->Close();
-		if (!keys[0] && !keys[5]) {
-			decompressedFile->Close();
-		}
-		delete decompressedFile;
-		delete file;
-		if (!success) {
-			if (!keys[5]) {
-				std::cout << "\t\tdecompressing failed" << std::endl;
-			}
-			if (!keys[0] && !keys[5]) {
-				Delete(tmpName);
-			}
-			return;
-		}
-		if (!keys[0] && !keys[2] && !keys[5]) {//нет -c, -k и -t
-			Delete(fileName);
-		}
-		if (!keys[0] && !keys[5]) {
-			Rename(tmpName, nextName);
-		}
+		MainDecompress(file, fileName);
 	}
 	else {
-		file->Close();
-		if (IsArchive(fileName)) {
-			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
-			file->Close();
-			delete file;
-			return;
-		}
-		nextName = fileName + ".gz";
-		if (!keys[0]) {
-			if (file->Open(&nextName)) {
-				std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-				char choise;
-				std::cin >> choise;
-				file->Close();
-				if (choise != 'Y' && choise != 'y') {
-					std::cout << "\tnot overwritten" << std::endl;
-					delete file;
-					return;
-				}
-			}
-		}
-		if (!file->Open(&fileName)) {
-			std::cout << fileName << ": can't read file" << std::endl;
-			delete file;
-			return;
-		}
-		int compressRatio = NORMAL;
-		if (keys[6]) {
-			compressRatio = FAST;
-		}
-		else if (keys[7]) {
-			compressRatio = HIGH;
-		}
-		OutBinary* compressionFile = new OutBinary;
-		if (compressionFile == nullptr) {
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			file->Close();
-			delete file;
-		}
-		std::string LZWName			= fileName + ".LZW";
-		std::string LZ77Name		= fileName + ".LZ7";
-		std::string arithmeticName	= fileName + ".ARI";
-		unsigned long long int LZWSize, LZ77Size, arithmeticSize;
-		/* Блок с моим LZW */
-		if (!keys[0]) {
-			if (!compressionFile->Open(&LZWName)) {
-				file->Close();
-				delete compressionFile;
-				delete file;
-				std::cout << fileName << ": can't transfer data" << std::endl;
-				return;
-			}
-		}
-		TLZW* LZW = new TLZW(compressRatio, file, compressionFile);
-		if (LZW == nullptr) {
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			file->Close();
-			compressionFile->Close();
-			Delete(LZWName);
-			delete compressionFile;
-			delete file;
-			return;
-		}
-		if (!LZW->Compress(fileName)) {
-			file->Close();
-			if (!keys[0]) {
-				compressionFile->Close();
-				Delete(LZWName);
-			}
-			delete LZW;
-			delete compressionFile;
-			delete file;
-			std::cout << "\t\tcompression failed" << std::endl;
-			return;
-		}
-		delete LZW;
-		LZWSize = compressionFile->SizeFile();
-		compressionFile->Close();
-		file->Close();
-		//Arithmetic
-		/* TODO YOU
-		if (!file->Open(&fileName)) {
-			delete compressionFile;
-			delete file;
-			Delete(LZWName);
-			std::cout << fileName << ": can't open file" << std::endl;
-			return;
-		}
-		if (!keys[0]) {
-			if (!compressionFile->Open(&LZWName)) {
-				file->Close();
-				delete compressionFile;
-				delete file;
-				std::cout << fileName << ": can't transfer data" << std::endl;
-				return;
-			}
-		}
-		Arithmetic* arith = new Arithmetic;
-		if (arith == nullptr) {
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			file->Close();
-			compressionFile->Close();
-			Delete(LZWName);
-			Delete(arithmeticName);
-			delete compressionFile;
-			delete file;
-			return;
-		}
-		if (!arith->Compress(fileName)) {
-			file->Close();
-			if (!keys[0]) {
-				compressionFile->Close();
-				Delete(LZWName);
-				Delete(arithmeticName);
-			}
-			delete arith;
-			delete compressionFile;
-			delete file;
-			std::cout << "\t\tcompression failed" << std::endl;
-			return;
-		}
-		delete LZW;
-		arithmeticSize = compressionFile->SizeFile();
-		compressionFile->Close();
-		file->Close();
-		//LZ77
-		if (!file->Open(&fileName)) {
-			delete compressionFile;
-			delete file;
-			Delete(LZWName);
-			Delete(arithmeticName);
-			std::cout << fileName << ": can't open file" << std::endl;
-			return;
-		}
-		if (!keys[0]) {
-			if (!compressionFile->Open(&LZ77Name)) {
-				file->Close();
-				delete compressionFile;
-				delete file;
-				std::cout << fileName << ": can't transfer data" << std::endl;
-				return;
-			}
-		}
-		LZ77* lz77 = new LZ77;
-		if (lz77 == nullptr) {
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			file->Close();
-			compressionFile->Close();
-			Delete(LZWName);
-			Delete(arithmeticName);
-			Delete(LZ77Name);
-			delete compressionFile;
-			delete file;
-			return;
-		}
-		if (!lz77->Compress(fileName)) {
-			file->Close();
-			if (!keys[0]) {
-				compressionFile->Close();
-				Delete(LZWName);
-				Delete(arithmeticName);
-				Delete(LZ77Name);
-			}
-			delete lz77;
-			delete compressionFile;
-			delete file;
-			std::cout << "\t\tcompression failed" << std::endl;
-			return;
-		}
-		delete lz77;
-		LZ77Size = compressionFile->SizeFile();
-		compressionFile->Close();
-		file->Close();
-		*/
-		delete file;
-		delete compressionFile;
-		nextName = LZWName;//TEST
-		/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
-			Delete(LZ77Name);
-			if (LZWSize < arithmeticSize) {
-				Delete(arithmeticName);
-				nextName = LZWName;
-			}
-			else {
-				Delete(LZWName);
-				nextName = arithmeticName;
-			}
-		}
-		else {
-			Delete(LZWName);
-			if (LZ77Size < arithmeticSize) {
-				Delete(arithmeticName);
-				nextName = LZ77Name;
-			}
-			else {
-				Delete(LZ77Name);
-				nextName = arithmeticName;
-			}
-		}*/ //TODO
-		std::string oldName = nextName;
-		nextName.pop_back();
-		nextName.pop_back();
-		nextName.pop_back();
-		nextName += "gz";
-		if (!keys[0]) {
-			Rename(oldName, nextName);
-			if (!keys[2]) {//-k
-				Delete(fileName);
-			}
-		}
+		MainCompress(file, fileName);
 	}
+	file->Close();
+	delete file;
 	return;
 }
 
@@ -580,4 +230,338 @@ void Delete(std::string fileName) {
 	std::string command = "rm " + fileName;
 	system(command.c_str());
 	return;
+}
+
+void MainDecompress(InBinary* file, std::string fileName) {
+	if (keys[1]) {
+		if (!IsArchive(fileName)) {
+			std::cout << fileName << ": unknown suffix -- ignored" << std::endl;
+			return;
+		}
+	}
+	std::string tmpName = fileName + ".tmp";
+	file->Close();
+	std::string nextName = fileName;
+	nextName.pop_back();
+	nextName.pop_back();
+	nextName.pop_back();
+	if (!keys[0] && !keys[5]) {
+		if (file->Open(&nextName)) {
+			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char choise;
+			std::cin >> choise;
+			file->Close();
+			if (choise != 'Y' && choise != 'y') {
+				std::cout << "\tnot overwritten" << std::endl;
+				return;
+			}
+		}
+	}
+	if (!file->Open(&fileName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return;
+	}
+	OutBinary* decompressedFile = nullptr;
+	if (!keys[0] && !keys[5]) {
+		decompressedFile = new OutBinary;
+		if (decompressedFile == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			return;
+		}
+		if (!decompressedFile->Open(&tmpName)) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			delete decompressedFile;
+			return;
+		}
+	}
+	char algorithm = 0;
+	bool success;
+	if (!file->Read(&algorithm, sizeof(char))) {
+		std::cout << fileName << ": can't transfer data" << std::endl;
+		if (!keys[0] && !keys[5]) {
+			decompressedFile->Close();
+			Delete(tmpName);
+			delete decompressedFile;
+		}
+		return;
+	}
+	if (algorithm == 'A') {//TODO YOU
+		/*Arithmetic* method = new Arithmetic();
+		if (method == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			if (!keys[0] && !keys[5]) {
+				decompressedFile->Close();
+				Delete(tmpName);
+				delete decompressedFile;
+			}
+			return;
+		}*/
+		std::cout << std::endl;//TEST
+	}
+	else if (algorithm == 'W') {
+		TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
+		if (method == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			if (!keys[0] && !keys[5]) {
+				decompressedFile->Close();
+				Delete(tmpName);
+				delete decompressedFile;
+			}
+			return;
+		}
+		success = method->Decompress(fileName);
+		delete method;
+	}
+	else if (algorithm == '7') {//TODO YOU
+		/*LZ77* method = new LZ77();
+		if (method == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			if (!keys[0] && !keys[5]) {
+				decompressedFile->Close();
+				Delete(tmpName);
+				delete decompressedFile;
+			}
+			return;
+		}
+		success = method->Decompress(fileName);
+		delete method;*/
+		std::cout << std::endl;//TEST
+	}
+	else {
+		std::cout << fileName << ": not compressed data" << std::endl;
+		if (!keys[0] && !keys[5]) {
+			decompressedFile->Close();
+			Delete(tmpName);
+			delete decompressedFile;
+		}
+		return;
+	}
+	if (!keys[0] && !keys[5]) {
+		decompressedFile->Close();
+		delete decompressedFile;
+	}
+	if (!success) {
+		if (!keys[5]) {
+			std::cout << "\t\tdecompressing failed" << std::endl;
+		}
+		if (!keys[0] && !keys[5]) {
+			Delete(tmpName);
+		}
+		return;
+	}
+	if (!keys[0] && !keys[2] && !keys[5]) {//нет -c, -k и -t
+		Delete(fileName);
+	}
+	if (!keys[0] && !keys[5]) {
+		Rename(tmpName, nextName);
+	}
+	return;
+}
+
+void MainCompress(InBinary* file, std::string fileName) {
+	std::string nextName = fileName + ".gz";
+	file->Close();
+	if (IsArchive(fileName)) {
+		std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
+		return;
+	}
+	if (!keys[0]) {
+		if (file->Open(&nextName)) {
+			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char choise;
+			std::cin >> choise;
+			file->Close();
+			if (choise != 'Y' && choise != 'y') {
+				std::cout << "\tnot overwritten" << std::endl;
+				return;
+			}
+		}
+	}
+	int compressRatio = NORMAL;
+	if (keys[6]) {
+		compressRatio = FAST;
+	}
+	else if (keys[7]) {
+		compressRatio = HIGH;
+	}
+	OutBinary* compressionFile = nullptr;
+	if (!keys[0]) {
+		compressionFile = new OutBinary;
+		if (compressionFile == nullptr) {
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			return;
+		}
+	}
+	unsigned long long int LZWSize, LZ77Size, arithmeticSize;
+	/* Блок с моим LZW */
+	LZWSize = LZWCompress(file, fileName, compressionFile, compressRatio);
+	file->Close();
+	if (LZWSize == 0) {
+		if (!keys[0]) {
+			delete compressionFile;
+			Delete(fileName + ".LZW");
+		}
+		return;
+	}
+	/* LZ77 */
+	/*TODO YOU
+	LZ77Size = LZ77Compress(file, fileName, compressionFile);
+	file->Close();
+	if (LZ77Size == 0) {
+		if (!keys[0]) {
+			delete compressionFile;
+			Delete(fileName + ".LZW");
+			Delete(fileName + ".LZ7");
+		}
+		return;
+	}*/
+	/* арифметика */
+	/* TODO YOU
+	arithmeticSize = ArithmeticCompress(file, fileName, compressionFile);
+	if (arithmeticSize == 0) {
+		if (!keys[0]) {
+			Delete(fileName + ".LZW");
+			Delete(fileName + ".LZ7");
+			Delete(fileName + ".ARI");
+		}
+		return;
+	}*/
+	if (!keys[0]) {
+		delete compressionFile;
+		KeepSmall(LZWSize, LZ77Size, arithmeticSize, fileName);
+	}
+	return;
+}
+
+unsigned long long int LZWCompress(InBinary* file, std::string fileName,
+								   OutBinary* compressionFile, int compressRatio) {
+	std::string LZWName = fileName + ".LZW";
+	if (!file->Open(&fileName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	if (!keys[0]) {
+		if (!compressionFile->Open(&LZWName)) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			return 0;
+		}
+	}
+	TLZW* method = new TLZW(compressRatio, file, compressionFile);
+	if (method == nullptr) {
+		std::cout << fileName << ": unexpected memory error" << std::endl;
+		return 0;
+	}
+	if (!method->Compress(fileName)) {
+		delete method;
+		std::cout << "\t\tcompression failed" << std::endl;
+		return 0;
+	}
+	delete method;
+	compressionFile->Close();
+	file->Close();
+	if (!file->Open(&LZWName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	return file->SizeFile();
+}
+/*
+unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBinary* compressionFile) {
+	std::string LZ77Name = fileName + ".LZ7";
+	if (!file->Open(&fileName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	if (!keys[0]) {
+		if (!compressionFile->Open(&LZ77Name)) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			return 0;
+		}
+	}
+	LZ77* method = new LZ77;
+	if (method == nullptr) {
+		std::cout << fileName << ": unexpected memory error" << std::endl;
+		return 0;
+	}
+	if (!method->Compress()) {
+		delete method;
+		std::cout << "\t\tcompression failed" << std::endl;
+		return 0;
+	}
+	delete method;
+	compressionFile->Close();
+	file->Close();
+	if (!file->Open(&LZWName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	return file->SizeFile();
+}*/
+/*
+unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, OutBinary* compressionFile) {
+	std::string arithmeticName	= fileName + ".ARI";
+	if (!file->Open(&fileName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	if (!keys[0]) {
+		if (!compressionFile->Open(&arithmeticName)) {
+			std::cout << fileName << ": can't transfer data" << std::endl;
+			return 0;
+		}
+	}
+	Arithmetic* method = new Arithmetic;
+	if (method == nullptr) {
+		std::cout << fileName << ": unexpected memory error" << std::endl;
+		return 0;
+	}
+	if (!method->Compress()) {
+		delete method;
+		std::cout << "\t\tcompression failed" << std::endl;
+		return 0;
+	}
+	delete method;
+	compressionFile->Close();
+	file->Close();
+	if (!file->Open(&LZWName)) {
+		std::cout << fileName << ": can't read file" << std::endl;
+		return 0;
+	}
+	return file->SizeFile();
+}*/
+
+void KeepSmall(unsigned long long int LZWSize, unsigned long long int LZ77Size,
+			   unsigned long long int arithmeticSize, std::string fileName) {
+	std::string nextName = fileName + ".LZW";//TEST
+	/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
+		Delete(LZ77Name);
+		if (LZWSize < arithmeticSize) {
+			Delete(arithmeticName);
+			nextName += ".LZW";
+		}
+		else {
+			Delete(LZWName);
+			nextName += ".ARI";
+		}
+	}
+	else {
+		Delete(LZWName);
+		if (LZ77Size < arithmeticSize) {
+			Delete(arithmeticName);
+			nextName += ".LZ7";
+		}
+		else {
+			Delete(LZ77Name);
+			nextName += ".ARI";
+		}
+	} *///TODO
+	std::string oldName = nextName;
+	nextName.pop_back();
+	nextName.pop_back();
+	nextName.pop_back();
+	nextName += "gz";
+	Rename(oldName, nextName);
+	if (!keys[2]) {//-k
+		Delete(fileName);
+	}
 }

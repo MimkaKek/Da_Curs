@@ -62,4 +62,42 @@ void Rename(std::string oldName, std::string nextName);
 
 void Delete(std::string fileName);
 
+/*
+ *
+ */
+
+void MainDecompress(InBinary* file, std::string fileName);
+
+/*
+ *
+ */
+
+void MainCompress(InBinary* file, std::string fileName);
+
+/*
+ *
+ */
+
+unsigned long long int LZWCompress(InBinary* file, std::string fileName,
+								   OutBinary* compressionFile, int compressRatio);
+
+/*
+ *
+ */
+
+unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBinary* compressionFile);
+
+/*
+ *
+ */
+
+unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, OutBinary* compressionFile);
+
+/*
+ *
+ */
+
+void KeepSmall(unsigned long long int LZWSize, unsigned long long int LZ77Size,
+			   unsigned long long int arithmeticSize, std::string fileName);
+
 #endif
