@@ -62,39 +62,39 @@ void Rename(std::string oldName, std::string nextName);
 
 void Delete(std::string fileName);
 
-/*
- *
+/*	Имя: MainDecompress
+ *	Что делает: отвечает за подготовку декомпрессинга
  */
 
 void MainDecompress(InBinary* file, std::string fileName);
 
-/*
- *
+/*	Имя: MainCompress
+ *	Что делает: отвечает за подготовку компрессинга
  */
 
 void MainCompress(InBinary* file, std::string fileName);
 
-/*
- *
+/*	Имя: LZWCompress
+ *	Что делает: подготавливает LZW компрессинг
  */
 
 unsigned long long int LZWCompress(InBinary* file, std::string fileName,
 								   OutBinary* compressionFile, int compressRatio);
 
-/*
- *
+/*	Имя: LZ77Compress
+ *	Что делает: подготавливает LZ77 компрессинг
  */
 
 unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBinary* compressionFile);
 
-/*
- *
+/*	Имя: ArithmeticCompress
+ *	Что делает: подготавливает арифметический компрессинг
  */
 
 unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, OutBinary* compressionFile);
 
-/*
- *
+/*	Имя: KeepSmall
+ *	Что делает: сохраняет архив самого малого размера
  */
 
 void KeepSmall(unsigned long long int LZWSize, unsigned long long int LZ77Size,
