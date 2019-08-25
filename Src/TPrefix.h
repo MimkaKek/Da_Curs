@@ -9,7 +9,7 @@
 class TPrefix {
 public:
 	/* Конструктор корня */
-	TPrefix(unsigned long long int, InBinary*, OutBinary*);
+	TPrefix(unsigned long long int, TInBinary*, TOutBinary*);
 
 	/* Конструктор для прочих узлов */
 	TPrefix();
@@ -46,9 +46,9 @@ private:
 	/* максимальная граница кол-ва слов перед созданием нового дерева */
 	static unsigned long long int Border;
 	
-	static InBinary* ForRead; 
+	static TInBinary* ForRead; 
 
-	static OutBinary* ForWrite;
+	static TOutBinary* ForWrite;
 
 	static unsigned short int Bites;
 };

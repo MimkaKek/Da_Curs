@@ -74,16 +74,16 @@ bool KeyManager(std::string gotKeys) {
 	return true;
 }
 
-bool DifferensOfSizes(InBinary* file, std::string fileName) {
-	char trash;
+bool DifferensOfSizes(TInBinary* file, std::string fileName) {
+	char trash = 0;
 	if (!file->Read(&trash, sizeof(char))) {
+		return false;
+	}
+	if (trash != 'W' && trash != '7' && trash != 'A') {//TODO YOU
 		return false;
 	}
 	unsigned long long int uncompressed, compressed;
 	if (!file->Read((char*)&uncompressed, sizeof(unsigned long long int))) {
-		return false;
-	}
-	if (trash != 'W' && trash != '7' && trash != 'A') {
 		return false;
 	}
 	compressed = file->SizeFile();
@@ -108,12 +108,8 @@ bool DifferensOfSizes(InBinary* file, std::string fileName) {
 
 void WorkWithDirectory(std::string directoryName) {
 	DIR *directory = opendir(directoryName.c_str());
-	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
-		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
-	{
-		if (errno != ENOTDIR) {
-			PrintDirectoryErrors(directoryName);
-		}
+	if (errno == EACCES || errno == EBADF || errno == EMFILE || errno == ENOMEM || errno == ENOENT) {
+		PrintDirectoryErrors(directoryName);
 		return;
 	}
 	struct dirent *directoryFile;
@@ -147,7 +143,7 @@ void WorkWithDirectory(std::string directoryName) {
 }
 
 void WorkWithFile(std::string fileName) {
-	InBinary* file = new InBinary;
+	TInBinary* file = new TInBinary;
 	if (file == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
 		return;
@@ -232,8 +228,8 @@ void Delete(std::string fileName) {
 	return;
 }
 
-void MainDecompress(InBinary* file, std::string fileName) {
-	if (keys[1]) {
+void MainDecompress(TInBinary* file, std::string fileName) {
+	if (keys[1] && !keys[0]) {
 		if (!IsArchive(fileName)) {
 			std::cout << fileName << ": unknown suffix -- ignored" << std::endl;
 			return;
@@ -261,9 +257,9 @@ void MainDecompress(InBinary* file, std::string fileName) {
 		std::cout << fileName << ": can't read file" << std::endl;
 		return;
 	}
-	OutBinary* decompressedFile = nullptr;
+	TOutBinary* decompressedFile = nullptr;
 	if (!keys[0] && !keys[5]) {
-		decompressedFile = new OutBinary;
+		decompressedFile = new TOutBinary;
 		if (decompressedFile == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			return;
@@ -286,7 +282,7 @@ void MainDecompress(InBinary* file, std::string fileName) {
 		return;
 	}
 	if (algorithm == 'A') {//TODO YOU
-		/*Arithmetic* method = new Arithmetic();
+		/*TArithmetic* method = new TArithmetic();
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -313,7 +309,7 @@ void MainDecompress(InBinary* file, std::string fileName) {
 		delete method;
 	}
 	else if (algorithm == '7') {//TODO YOU
-		/*LZ77* method = new LZ77();
+		/*TLZ77* method = new TLZ77();
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -358,12 +354,14 @@ void MainDecompress(InBinary* file, std::string fileName) {
 	return;
 }
 
-void MainCompress(InBinary* file, std::string fileName) {
+void MainCompress(TInBinary* file, std::string fileName) {
 	std::string nextName = fileName + ".gz";
 	file->Close();
-	if (IsArchive(fileName)) {
-		std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
-		return;
+	if (!keys[0]) {
+		if (IsArchive(fileName)) {
+			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
+			return;
+		}
 	}
 	if (!keys[0]) {
 		if (file->Open(&nextName)) {
@@ -384,9 +382,9 @@ void MainCompress(InBinary* file, std::string fileName) {
 	else if (keys[7]) {
 		compressRatio = HIGH;
 	}
-	OutBinary* compressionFile = nullptr;
+	TOutBinary* compressionFile = nullptr;
 	if (!keys[0]) {
-		compressionFile = new OutBinary;
+		compressionFile = new TOutBinary;
 		if (compressionFile == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			return;
@@ -433,8 +431,8 @@ void MainCompress(InBinary* file, std::string fileName) {
 	return;
 }
 
-unsigned long long int LZWCompress(InBinary* file, std::string fileName,
-								   OutBinary* compressionFile, int compressRatio) {
+unsigned long long int LZWCompress(TInBinary* file, std::string fileName,
+								   TOutBinary* compressionFile, int compressRatio) {
 	std::string LZWName = fileName + ".LZW";
 	if (!file->Open(&fileName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -458,6 +456,9 @@ unsigned long long int LZWCompress(InBinary* file, std::string fileName,
 	}
 	delete method;
 	compressionFile->Close();
+	if (keys[0]) {
+		return 1;
+	}
 	file->Close();
 	if (!file->Open(&LZWName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -466,7 +467,7 @@ unsigned long long int LZWCompress(InBinary* file, std::string fileName,
 	return file->SizeFile();
 }
 /*
-unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBinary* compressionFile) {
+unsigned long long int LZ77Compress(TInBinary* file, std::string fileName, TOutBinary* compressionFile) {
 	std::string LZ77Name = fileName + ".LZ7";
 	if (!file->Open(&fileName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -478,7 +479,7 @@ unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBin
 			return 0;
 		}
 	}
-	LZ77* method = new LZ77;
+	TLZ77* method = new TLZ77;
 	if (method == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
 		return 0;
@@ -490,6 +491,9 @@ unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBin
 	}
 	delete method;
 	compressionFile->Close();
+	if (keys[0]) {
+		return 1;
+	}
 	file->Close();
 	if (!file->Open(&LZWName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -498,7 +502,7 @@ unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBin
 	return file->SizeFile();
 }*/
 /*
-unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, OutBinary* compressionFile) {
+unsigned long long int ArithmeticCompress(TInBinary* file, std::string fileName, TOutBinary* compressionFile) {
 	std::string arithmeticName	= fileName + ".ARI";
 	if (!file->Open(&fileName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -510,7 +514,7 @@ unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, 
 			return 0;
 		}
 	}
-	Arithmetic* method = new Arithmetic;
+	TArithmetic* method = new TArithmetic;
 	if (method == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
 		return 0;
@@ -522,6 +526,9 @@ unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, 
 	}
 	delete method;
 	compressionFile->Close();
+	if (keys[0]) {
+		return 1;
+	}
 	file->Close();
 	if (!file->Open(&LZWName)) {
 		std::cout << fileName << ": can't read file" << std::endl;

@@ -3,28 +3,27 @@
 std::vector<bool> keys;
 
 int main(int argc, char *argv[]) {
-	std::vector<std::string> fileNames;
+	std::map<std::string, int> fileNames;
+	std::map<std::string, int>::iterator finder;
 	keys = {false, false, false, false, false, false, false, false};
 //			c	   d	  k		 l		r	   t	  1		 9
 	for (int i = 1; i < argc; ++i) {
 		std::string keyFile;
 		std::stringstream tmp(argv[i]);
 		tmp >> keyFile;
-		if (keyFile[0] == '-') {//ага ключ(и)
+		if (keyFile[0] == '-') {//ключ(и)
 			if (!KeyManager(keyFile)) {
 				return -1;
 			}
 		}
-		else {// ага файлы и папки
+		else {// файлы и папки
 			bool got = false;
-			for (int j = 0; j < fileNames.size(); ++j) {
-				if (fileNames[j] == keyFile) {//для избежания работы над одним и тем же файлом несколько раз
-					got = true;
-					break;
-				}
+			finder = fileNames.find(keyFile);
+			if (finder != fileNames.end()) {//для избежания работы над одним и тем же файлом несколько раз
+				got = true;
 			}
 			if (!got) {
-				fileNames.push_back(keyFile);
+				fileNames.insert({keyFile, i});
 			}
 		}
 	}
@@ -32,20 +31,21 @@ int main(int argc, char *argv[]) {
 		std::cout << "Compressed data not written to a terminal." << std::endl;
 		return 0;
 	}
-	for (int i = 0; i < fileNames.size(); i++) {//проверка на файлы и папки и дальнейшая работа с ними
-		bool directory = IsDirectory(fileNames[i], false);
+	//проверка на файлы и папки и дальнейшая работа с ними
+	for (finder = fileNames.begin(); finder != fileNames.end(); ++finder) {
+		bool directory = IsDirectory(finder->first, false);
 		if (!keys[4] && directory) {
-			std::cout << fileNames[i] << " is a directory -- ignored" << std::endl;
+			std::cout << finder->first << " is a directory -- ignored" << std::endl;
 		}
 		else if (directory) {
-			WorkWithDirectory(fileNames[i]);
+			WorkWithDirectory(finder->first);
 		}
 		else {
 			if (errno == ENOTDIR) {
-				WorkWithFile(fileNames[i]);
+				WorkWithFile(finder->first);
 			}
 			else {
-				PrintDirectoryErrors(fileNames[i]);
+				PrintDirectoryErrors(finder->first);
 			}
 		}
 	}

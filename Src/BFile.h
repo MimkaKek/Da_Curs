@@ -7,12 +7,12 @@
 
 /* Запись в файл.
  */
-class OutBinary {
+class TOutBinary {
     public:
         
         /* Что делает: задаёт начальные значения. Файл не будет открыт.
          */
-        OutBinary();
+        TOutBinary();
         
         /* Что делает: открывает файл. 
          * В случае успеха - true. Иначе - false.
@@ -41,7 +41,7 @@ class OutBinary {
         /* Что делает: записывает файл нужный бит. 
          * В случае успеха - true. Иначе - false.
          */
-        friend bool operator << (OutBinary& file, size_t const &bit);
+        friend bool operator << (TOutBinary& file, size_t const &bit);
     private:
         
         std::ofstream    out;
@@ -55,12 +55,12 @@ class OutBinary {
 
 /* Считывание из файла.
  */
-class InBinary {
+class TInBinary {
     public:
         
         /* Что делает: задаёт начальные значения. Файл не будет открыт.
          */
-        InBinary();
+        TInBinary();
         
         /* Что делает: открывает файл. 
          * В случае успеха - true. 
@@ -93,7 +93,7 @@ class InBinary {
          * В случае успеха - true. 
          * Иначе - false.
          */
-        friend bool operator >> (InBinary& iFile, char &bit);
+        friend bool operator >> (TInBinary& iFile, char &bit);
     private:
         
         std::ifstream    in;

@@ -17,7 +17,7 @@ bool KeyManager(std::string gotKeys);
  * 	коэффициента сжатия(%) и имя ориг файла(ключ l)
  */
 
-bool DifferensOfSizes(InBinary* file, std::string fileName);
+bool DifferensOfSizes(TInBinary* file, std::string fileName);
 
 /*	Имя: WorkWithDirectory
  * 	Что делает: работает (смотри WorkWithFile) с директорией (ключ r) 
@@ -66,32 +66,32 @@ void Delete(std::string fileName);
  *	Что делает: отвечает за подготовку декомпрессинга
  */
 
-void MainDecompress(InBinary* file, std::string fileName);
+void MainDecompress(TInBinary* file, std::string fileName);
 
 /*	Имя: MainCompress
  *	Что делает: отвечает за подготовку компрессинга
  */
 
-void MainCompress(InBinary* file, std::string fileName);
+void MainCompress(TInBinary* file, std::string fileName);
 
 /*	Имя: LZWCompress
  *	Что делает: подготавливает LZW компрессинг
  */
 
-unsigned long long int LZWCompress(InBinary* file, std::string fileName,
-								   OutBinary* compressionFile, int compressRatio);
+unsigned long long int LZWCompress(TInBinary* file, std::string fileName,
+								   TOutBinary* compressionFile, int compressRatio);
 
 /*	Имя: LZ77Compress
  *	Что делает: подготавливает LZ77 компрессинг
  */
 
-unsigned long long int LZ77Compress(InBinary* file, std::string fileName, OutBinary* compressionFile);
+unsigned long long int LZ77Compress(TInBinary* file, std::string fileName, TOutBinary* compressionFile);
 
 /*	Имя: ArithmeticCompress
  *	Что делает: подготавливает арифметический компрессинг
  */
 
-unsigned long long int ArithmeticCompress(InBinary* file, std::string fileName, OutBinary* compressionFile);
+unsigned long long int ArithmeticCompress(TInBinary* file, std::string fileName, TOutBinary* compressionFile);
 
 /*	Имя: KeepSmall
  *	Что делает: сохраняет архив самого малого размера

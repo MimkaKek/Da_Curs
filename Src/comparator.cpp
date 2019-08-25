@@ -5,7 +5,7 @@
 //программа будет заниматься сравнением данных *до* и *после* архивации
 //Может быть когда-нибудь где-нибудь зачем-нибудь ещё пригодится
 
-bool Compare(InBinary* original, InBinary* afterWork, int number) {
+bool Compare(TInBinary* original, TInBinary* afterWork, int number) {
 	unsigned long long int origSize, afterSize;
 	char origLetter, afterLetter;
 	const int CHARS = sizeof(char);
@@ -42,8 +42,8 @@ int main() {
 		{"test41", "test42"},
 		{"test51", "test52"}
 	};
-	InBinary* original	= 	new InBinary;
-	InBinary* afterWork	=	new InBinary;
+	TInBinary* original	= 	new TInBinary;
+	TInBinary* afterWork	=	new TInBinary;
 	for (int i = 0; i < files.size(); ++i) {
 		if (!original->Open(&files[i].first)) {
 			std::cout << "no file " << files[i].first << std::endl;

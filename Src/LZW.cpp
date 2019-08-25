@@ -1,6 +1,6 @@
 #include "LZW.h"
 
-TLZW::TLZW(int compressionRatio, InBinary* from, OutBinary* to) {
+TLZW::TLZW(int compressionRatio, TInBinary* from, TOutBinary* to) {
 	this->ForRead = from;
 	this->ForWrite = to;
 	unsigned long long int fileSize = this->ForRead->SizeFile();

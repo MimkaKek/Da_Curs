@@ -1,14 +1,14 @@
 #include "TPrefix.h"
 
 unsigned long long int TPrefix::Border;
-InBinary* TPrefix::ForRead;
-OutBinary* TPrefix::ForWrite;
+TInBinary* TPrefix::ForRead;
+TOutBinary* TPrefix::ForWrite;
 char TPrefix::LastLetter;
 unsigned long long int TPrefix::LastNumber;
 unsigned long long int TPrefix::NeedToRead;
 unsigned short int TPrefix::Bites;
 
-TPrefix::TPrefix(unsigned long long int highBorder, InBinary* from, OutBinary* to) {
+TPrefix::TPrefix(unsigned long long int highBorder, TInBinary* from, TOutBinary* to) {
 	this->Border = highBorder;
 	if (highBorder == 0) {
 		return;

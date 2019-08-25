@@ -1,11 +1,11 @@
 #include "BFile.h"
 
-OutBinary::OutBinary() {
+TOutBinary::TOutBinary() {
     head = 1 << 7;
     block = 0;
 }
 
-bool OutBinary::Open(std::string* name) {
+bool TOutBinary::Open(std::string* name) {
     if(out.is_open()) {
         return false;
     }
@@ -23,7 +23,7 @@ bool OutBinary::Open(std::string* name) {
     }
 }
 
-bool OutBinary::Close() {
+bool TOutBinary::Close() {
     if(out.is_open()) {
         if(!(head & (1 << 7))) {
             out << block;
@@ -39,7 +39,7 @@ bool OutBinary::Close() {
     }
 }
 
-bool OutBinary::Write(const char* obj, size_t size) {
+bool TOutBinary::Write(const char* obj, size_t size) {
     if(out.is_open()) {
         if(!(head & (1 << 7))) {
             out << block;
@@ -52,7 +52,7 @@ bool OutBinary::Write(const char* obj, size_t size) {
     }
 }
 
-bool OutBinary::WriteBin(size_t bit) {
+bool TOutBinary::WriteBin(size_t bit) {
     
     if(out.is_open()) {
         if(bit) {
@@ -71,12 +71,12 @@ bool OutBinary::WriteBin(size_t bit) {
     }
 }
 
-unsigned long long OutBinary::SizeFile() {
+unsigned long long TOutBinary::SizeFile() {
     std::ifstream in(name, std::ifstream::ate | std::ifstream::binary);
     return in.tellg();
 }
 
-bool operator << (OutBinary& file, size_t const &bit) {
+bool operator << (TOutBinary& file, size_t const &bit) {
     
     if(file.out.is_open()) {
         if(bit) {
@@ -96,12 +96,12 @@ bool operator << (OutBinary& file, size_t const &bit) {
 }
 
 
-InBinary::InBinary() {
+TInBinary::TInBinary() {
     head = 0;
     block = 0;
 }
 
-bool InBinary::Open(std::string* name) {
+bool TInBinary::Open(std::string* name) {
     if(in.is_open()) {
         return false;
     }
@@ -119,7 +119,7 @@ bool InBinary::Open(std::string* name) {
     }
 }
 
-bool InBinary::Close() {
+bool TInBinary::Close() {
     in.close();
     if(in.fail()) {
         return false;
@@ -127,7 +127,7 @@ bool InBinary::Close() {
     return true;
 }
 
-bool InBinary::Read(char* obj, size_t size) {
+bool TInBinary::Read(char* obj, size_t size) {
     if(!in.eof()) {
         in.read(obj, size);
         return true;
@@ -137,7 +137,7 @@ bool InBinary::Read(char* obj, size_t size) {
     }
 }
 
-bool InBinary::ReadBin(char* bit) {
+bool TInBinary::ReadBin(char* bit) {
     if(!head) {
         if(in >> block) {
             head = 1 << 7;
@@ -151,12 +151,12 @@ bool InBinary::ReadBin(char* bit) {
     return true;
 }
 
-unsigned long long InBinary::SizeFile() {
+unsigned long long TInBinary::SizeFile() {
     std::ifstream in(name, std::ifstream::ate | std::ifstream::binary);
     return in.tellg();
 }
 
-bool operator >> (InBinary& iFile, char& bit) {
+bool operator >> (TInBinary& iFile, char& bit) {
     if(!iFile.head) {
         if(iFile.in >> iFile.block) {
             iFile.head = 1 << 7;

@@ -2,7 +2,6 @@
 #include "TPrefix.h"
 #include "Globals.h"
 #include <cmath>
-#include <map>
 
 const short int MINIMUM_BORDER = 16;
 
@@ -13,7 +12,7 @@ public:
 	 * передаваемое число определяет степень сжатия или говорит о декомпрессии
 	 * */
 	
-	TLZW(int, InBinary*, OutBinary*);
+	TLZW(int, TInBinary*, TOutBinary*);
 
 	/*	Имя: Compress
 	 *	Что делает: Принимает решение о степени сжатия
@@ -32,10 +31,10 @@ public:
 private:
 	
 	/* файл из которого осуществляется считывание */
-	InBinary* ForRead;
+	TInBinary* ForRead;
 	
 	/* основной файл для записи */
-	OutBinary* ForWrite;
+	TOutBinary* ForWrite;
 	
 	/* Дерево компрессии */
 	TPrefix* CompressionTree;
