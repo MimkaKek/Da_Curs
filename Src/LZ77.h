@@ -1,3 +1,4 @@
+/* LZ77.h */
 #pragma once
 #include "Compressor.h"
 class LZ77: public Compressor

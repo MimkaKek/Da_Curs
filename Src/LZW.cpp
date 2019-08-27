@@ -1,3 +1,4 @@
+/* LZW.cpp */
 #include "LZW.h"
 
 TLZW::TLZW(int compressionRatio, TInBinary* from, TOutBinary* to) {

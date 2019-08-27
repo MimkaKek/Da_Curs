@@ -1,5 +1,5 @@
-#include "main_help.h"
 /* main_help.cpp */
+#include "main_help.h"
 
 bool KeyManager(std::string gotKeys) {
 	for (int j = 1; j < gotKeys.size(); ++j) {

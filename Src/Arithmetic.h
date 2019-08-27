@@ -1,3 +1,4 @@
+/* Arithmetic.h */
 #pragma once
 #include "Compressor.h"
 #include <string>

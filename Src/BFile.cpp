@@ -1,3 +1,4 @@
+/* BFile.cpp */
 #include "BFile.h"
 
 TOutBinary::TOutBinary() {
@@ -95,7 +96,6 @@ bool operator << (TOutBinary& file, size_t const &bit) {
     }
 }
 
-
 TInBinary::TInBinary() {
     head = 0;
     block = 0;
@@ -169,6 +169,3 @@ bool operator >> (TInBinary& iFile, char& bit) {
     iFile.head >>= 1;
     return true;
 }
-
-
-/* BFile.cpp */

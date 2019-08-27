@@ -1,3 +1,4 @@
+/* BFile.h */
 #ifndef BFILE_H
 #define BFILE_H
 
@@ -103,4 +104,4 @@ class TInBinary {
         unsigned char    block;
 };
 
-#endif /* BFILE_H */
+#endif
