@@ -159,6 +159,7 @@ bool TLZW::Decompress(std::string fileName) {
 		}
 		this->DecompressionTree.clear();
 		if (letter != 0) {
+			letter = 1;
 			break;
 		}
 		wordCounter = CHAR_HAS;
