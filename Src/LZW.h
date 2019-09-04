@@ -4,6 +4,8 @@
 #include "Globals.h"
 #include <cmath>
 
+unsigned long long int CalculateSize(unsigned long long int, int);
+
 const short int MINIMUM_BORDER = 16;
 
 class TLZW {
