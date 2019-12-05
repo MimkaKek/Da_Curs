@@ -41,7 +41,7 @@ class ACC {
         
     private:
         
-        
+        bool                chError;
         
         // Таблицы перекодировки
         unsigned char       indexToChar [NO_OF_SYMBOLS];
