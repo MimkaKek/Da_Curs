@@ -253,8 +253,10 @@ void ACC::Compress (const char *infile, const  char *outfile) {
     int ch, symbol;
     char tmp = 'A'; 
     
-    in = fopen ( infile, "r+b");
-    out = fopen ( outfile, "w+b");
+    in = fopen (infile, "r+b");
+    if(!keys[0]) {
+        out = fopen (outfile, "w+b");
+    }
     if (in == NULL || out == NULL) {
         return;
     }
@@ -293,8 +295,10 @@ void ACC::Decompress (const char *infile, const char *outfile) {
     int ch, symbol;
     char typeC = 0;
     unsigned long long oldSize = 0;
-    in = fopen ( infile, "r+b");
-    out = fopen ( outfile, "w+b");
+    in = fopen (infile, "r+b");
+    if(!keys[0] && !keys[5]) {
+        out = fopen (outfile, "w+b");
+    }
     if (in == NULL || out == NULL) {
         return;
     }
@@ -310,7 +314,11 @@ void ACC::Decompress (const char *infile, const char *outfile) {
             break;
         }
         ch = indexToChar [symbol];
-        putc ( ch, out);
+        
+        if(!keys[0] && !keys[5]) {
+            putc(ch, out);
+        }
+        
         UpdateModel (symbol);
     }
     fclose (in);
