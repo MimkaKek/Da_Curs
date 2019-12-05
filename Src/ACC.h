@@ -30,10 +30,10 @@ class ACC {
     public:
 
         // Собственно адаптивное арифметическое кодирование
-        void Compress (const char*, const char*);
+        bool Compress (const char*, const char*);
 
         // Собственно адаптивное арифметическое декодирование
-        void Decompress (const char*, const char*);
+        bool Decompress (const char*, const char*);
 
         // Инициализация адаптивной модели
         ACC();
