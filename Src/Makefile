@@ -1,3 +1,4 @@
+#Makefile
 all: main_help.o main.o TPrefix.o LZW.o BFile.o gen comparator
 	g++ main_help.o main.o TPrefix.o LZW.o BFile.o -o main
 	rm *.o

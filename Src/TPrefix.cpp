@@ -1,3 +1,4 @@
+/* TPrefix.cpp */
 #include "TPrefix.h"
 
 unsigned long long int TPrefix::Border;
@@ -104,40 +105,37 @@ int TPrefix::UpdateForRoot() {
 		return GOT_EOF;
 	}
 	--this->NeedToRead;
+	char startLetter;
 	while (true) {
-		for (int i = 0; i < this->Next.size(); ++i) {
-			if (this->Next[i].first == letter) {
-				if (this->LastNumber < this->Border) {
-					if (!this->ForRead->Read(&letter, sizeof(char))) {
-						if (this->NeedToRead != 0) {
-							return READ_ERROR;
-						}
-						return GOT_EOF;
-					}
-					--this->NeedToRead;
-					tmpInt = this->Next[i].second->Update(letter);
-					if (tmpInt != OK) {
-						return tmpInt;
-					}
-					letter = this->LastLetter;
-					break;
+		startLetter = letter;
+		if (this->LastNumber < this->Border) {
+			if (!this->ForRead->Read(&letter, sizeof(char))) {
+				if (this->NeedToRead != 0) {
+					return READ_ERROR;
 				}
-				else {
-					tmpInt = 0;
-					if (keys[0]) {
-						std::cout << (char*)&this->Next[i].second->NumberOfWord << (char*)&tmpInt;
-					}
-					else if (!keys[5]) {
-						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
-							return WRITE_ERROR;
-						}
-						if (!this->ForWrite->Write((char*)&tmpInt, this->Bites)) {
-							return WRITE_ERROR;
-						}
-					}
-					return FULL;
+				return GOT_EOF;
+			}
+			--this->NeedToRead;
+			tmpInt = this->Next[startLetter].second->Update(letter);
+			if (tmpInt != OK) {
+				return tmpInt;
+			}
+			letter = this->LastLetter;
+		}
+		else {
+			tmpInt = 0;
+			if (keys[0]) {
+				std::cout << (char*)&this->Next[letter].second->NumberOfWord << (char*)&tmpInt;
+			}
+			else if (!keys[5]) {
+				if (!this->ForWrite->Write((char*)&this->Next[letter].second->NumberOfWord, this->Bites)) {
+					return WRITE_ERROR;
+				}
+				if (!this->ForWrite->Write((char*)&tmpInt, this->Bites)) {
+					return WRITE_ERROR;
 				}
 			}
+			return FULL;
 		}
 	}
 }
