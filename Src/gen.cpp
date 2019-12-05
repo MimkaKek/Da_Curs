@@ -27,6 +27,6 @@ int main(int argc, char *argv[]) {
 		ran = mersenne() % 3;
 		std::cout << (ran == 0 ? 'q' : (ran == 1 ? 'w' : 'e'));
 	}
-	std::cout << std::endl;
+	//std::cout << std::endl;
 	return 0;
 }

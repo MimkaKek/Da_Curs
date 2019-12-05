@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
+#include "Globals.h"
 
 // Количество битов в регистре
 const long          BITS_IN_REGISTER = 16;

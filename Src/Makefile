@@ -1,6 +1,6 @@
 #Makefile
-all: main_help.o main.o TPrefix.o LZW.o BFile.o gen comparator
-	g++ main_help.o main.o TPrefix.o LZW.o BFile.o -o main
+all: main_help.o main.o TPrefix.o LZW.o BFile.o gen comparator ACC.o
+	g++ main_help.o main.o TPrefix.o LZW.o BFile.o ACC.o -o main
 	rm *.o
 	echo DONE
 gen:
@@ -20,8 +20,8 @@ LZW.o:
 BFile.o:
 	g++ -c -g BFile.cpp
 #TODO Включу ваши алги как они будут готовы
-Arithmetic.o:
-	g++ -c -g Arithmetic.cpp
+ACC.o:
+	g++ -c -g ACC.cpp
 LZ77.o:
 	g++ -c -g LZ77.cpp
 #clear

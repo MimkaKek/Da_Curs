@@ -327,7 +327,7 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         
         ch = indexToChar [symbol];
         
-        if(!key[5]) {
+        if(!keys[5]) {
             if(keys[0]) {
                 std::cout << ch;
             }

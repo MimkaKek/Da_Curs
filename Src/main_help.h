@@ -4,6 +4,7 @@
 
 #include "Globals.h"
 #include "LZW.h"
+#include "ACC.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -33,7 +34,7 @@ unsigned long long int LZWCompress(TInBinary*, std::string, TOutBinary*, int);
 
 unsigned long long int LZ77Compress(TInBinary* file, std::string, TOutBinary*);
 
-unsigned long long int ArithmeticCompress(TInBinary*, std::string, TOutBinary*);
+unsigned long long int ArithmeticCompress(std::string, TInBinary*);
 
 void KeepSmall(unsigned long long int, unsigned long long int, unsigned long long int, std::string);
 

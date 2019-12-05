@@ -281,8 +281,8 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		}
 		return;
 	}
-	if (algorithm == 'A') {//TODO YOU
-		/*TArithmetic* method = new TArithmetic();
+	if (algorithm == 'A') {
+		ACC* method = new ACC;
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -291,8 +291,9 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 				delete decompressedFile;
 			}
 			return;
-		}*/
-		std::cout << std::endl;//TEST
+		}
+		success = method->Decompress(fileName.c_str(), tmpName.c_str());
+		delete method;
 	}
 	else if (algorithm == 'W') {
 		TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
@@ -413,17 +414,19 @@ void MainCompress(TInBinary* file, std::string fileName) {
 		}
 		return;
 	}*/
+
+	
 	/* арифметика */
-	/* TODO YOU
-	arithmeticSize = ArithmeticCompress(file, fileName, compressionFile);
+	arithmeticSize = ArithmeticCompress(fileName, file);
 	if (arithmeticSize == 0) {
 		if (!keys[0]) {
+			delete compressionFile;
 			Delete(fileName + ".LZW");
 			Delete(fileName + ".LZ7");
 			Delete(fileName + ".ARI");
 		}
 		return;
-	}*/
+	}
 	if (!keys[0]) {
 		delete compressionFile;
 		KeepSmall(LZWSize, LZ77Size, arithmeticSize, fileName);
@@ -455,7 +458,9 @@ unsigned long long int LZWCompress(TInBinary* file, std::string fileName,
 		return 0;
 	}
 	delete method;
-	compressionFile->Close();
+	if (!keys[0]) {
+		compressionFile->Close();
+	}
 	if (keys[0]) {
 		return 1;
 	}
@@ -501,45 +506,41 @@ unsigned long long int LZ77Compress(TInBinary* file, std::string fileName, TOutB
 	}
 	return file->SizeFile();
 }*/
-/*
-unsigned long long int ArithmeticCompress(TInBinary* file, std::string fileName, TOutBinary* compressionFile) {
+
+unsigned long long int ArithmeticCompress(std::string fileName, TInBinary* file) {
 	std::string arithmeticName	= fileName + ".ARI";
-	if (!file->Open(&fileName)) {
-		std::cout << fileName << ": can't read file" << std::endl;
-		return 0;
-	}
-	if (!keys[0]) {
-		if (!compressionFile->Open(&arithmeticName)) {
-			std::cout << fileName << ": can't transfer data" << std::endl;
-			return 0;
-		}
-	}
-	TArithmetic* method = new TArithmetic;
+	ACC* method = new ACC;
 	if (method == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
 		return 0;
 	}
-	if (!method->Compress()) {
+	if (!method->Compress(fileName.c_str(), arithmeticName.c_str())) {
 		delete method;
 		std::cout << "\t\tcompression failed" << std::endl;
 		return 0;
 	}
 	delete method;
-	compressionFile->Close();
 	if (keys[0]) {
 		return 1;
 	}
-	file->Close();
-	if (!file->Open(&LZWName)) {
+	if (!file->Open(&arithmeticName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
 		return 0;
 	}
 	return file->SizeFile();
-}*/
+}
 
 void KeepSmall(unsigned long long int LZWSize, unsigned long long int LZ77Size,
 			   unsigned long long int arithmeticSize, std::string fileName) {
-	std::string nextName = fileName + ".LZW";//TEST
+	std::string nextName;
+	if (LZWSize > arithmeticSize) {//TEST
+		nextName = fileName + ".ARI";
+		Delete(fileName + ".LZW");
+	}
+	else {
+		nextName = fileName + ".LZW";
+		Delete(fileName + ".ARI");
+	}
 	/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
 		Delete(LZ77Name);
 		if (LZWSize < arithmeticSize) {
