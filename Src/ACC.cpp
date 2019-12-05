@@ -327,9 +327,15 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         
         ch = indexToChar [symbol];
         
-        if(!keys[0] && !keys[5]) {
-            putc(ch, out);
+        if(!key[5]) {
+            if(keys[0]) {
+                std::cout << ch;
+            }
+            else {        
+                putc(ch, out);
+            }
         }
+        
         
         UpdateModel (symbol);
     }
