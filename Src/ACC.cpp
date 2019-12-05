@@ -106,7 +106,12 @@ void ACC::OutputBit (int bit) {
     --bitsToGo;
 
     if (bitsToGo == 0) {
-        putc (buffer, out);
+        if(keys[0]) {
+            std::cout << buffer;
+        }
+        else {
+            putc(buffer, out);
+        }
         bitsToGo = 8;
     }
 }
@@ -114,7 +119,12 @@ void ACC::OutputBit (int bit) {
 //------------------------------------------------------------
 // Очистка буфера побитового вывода
 void ACC::DoneOutputingBits () {
-    putc(buffer >> bitsToGo, out);
+    if(keys[0]) {
+        std::cout << (buffer >> bitsToGo);
+    }
+    else {
+        putc(buffer >> bitsToGo, out);
+    }
 }
 
 //------------------------------------------------------------
@@ -202,7 +212,7 @@ int ACC::DecodeSymbol () {
 
     long range;
     int cum, symbol;
-
+ 
     // определение текущего масштаба частот
     range = (long) (high - low) + 1;
     // масштабирование значения в регистре кода
@@ -241,23 +251,23 @@ int ACC::DecodeSymbol () {
 // Собственно адаптивное арифметическое кодирование
 void ACC::Compress (const char *infile, const  char *outfile) {
     int ch, symbol;
+    char tmp = 'A'; 
     
     in = fopen ( infile, "r+b");
     out = fopen ( outfile, "w+b");
     if (in == NULL || out == NULL) {
         return;
     }
-
-    ch = 'A';
-    putc(ch, out);
+    
+    fwrite(&tmp, sizeof(char), 1, out);
     
     unsigned long long savePos, sizeOfFile;
     savePos = ftell(in);
     fseek(in, 0, SEEK_END);
     sizeOfFile = ftell(in);
     fseek(in, savePos, SEEK_SET);
-
     fwrite(&sizeOfFile, sizeof(long long), 1, out);
+
     StartOutputingBits ();
     StartEncoding ();
     for (;;) {
@@ -281,13 +291,17 @@ void ACC::Compress (const char *infile, const  char *outfile) {
 void ACC::Decompress (const char *infile, const char *outfile) {
     
     int ch, symbol;
-    
+    char typeC = 0;
+    unsigned long long oldSize = 0;
     in = fopen ( infile, "r+b");
     out = fopen ( outfile, "w+b");
     if (in == NULL || out == NULL) {
         return;
     }
-
+    
+    fread(&typeC, sizeof(char), 1, in);
+    fread(&oldSize, sizeof(long long), 1, in);
+    
     StartInputingBits ();
     StartDecoding ();
     for (;;) {
