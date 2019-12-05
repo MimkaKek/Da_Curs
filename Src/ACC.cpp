@@ -72,8 +72,8 @@ int ACC::InputBit () {
         if (buffer == EOF) {
             ++garbageBits;
             if (garbageBits > BITS_IN_REGISTER - 2) {
-                printf ("Ошибка в сжатом файле\n");
-                exit (-1);
+                printf ("ERROR: Incorrect compress file!\n");
+                exit (1);
             }
         }
         bitsToGo = 8;
