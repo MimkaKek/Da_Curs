@@ -263,7 +263,7 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
         out = fopen (outfile, "w+b");
     }
     if (in == NULL || out == NULL) {
-        return;
+        return false;
     }
     
     fwrite(&tmp, sizeof(char), 1, out);
@@ -306,7 +306,7 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         out = fopen (outfile, "w+b");
     }
     if (in == NULL || out == NULL) {
-        return;
+        return false;
     }
     
     fread(&typeC, sizeof(char), 1, in);
