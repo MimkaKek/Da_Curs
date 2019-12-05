@@ -14,6 +14,7 @@ ACC::ACC () {
         cumFreq [i] = NO_OF_SYMBOLS - i;
     }
     
+    chError = 0;
     freq [0] = 0;
 }
 
@@ -73,7 +74,8 @@ int ACC::InputBit () {
             ++garbageBits;
             if (garbageBits > BITS_IN_REGISTER - 2) {
                 printf ("ERROR: Incorrect compress file!\n");
-                exit (1);
+                chError = true;
+                return 0;
             }
         }
         bitsToGo = 8;
@@ -243,13 +245,16 @@ int ACC::DecodeSymbol () {
         low   = 2 * low;
         high  = 2 * high + 1;
         value = 2 * value + InputBit ();
+        if(chError) {
+            return 0;
+        }
     }
     return symbol;
 }
 
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое кодирование
-void ACC::Compress (const char *infile, const  char *outfile) {
+bool ACC::Compress (const char *infile, const  char *outfile) {
     int ch, symbol;
     char tmp = 'A'; 
     
@@ -286,11 +291,12 @@ void ACC::Compress (const char *infile, const  char *outfile) {
     DoneOutputingBits ();
     fclose (in);
     fclose (out);
+    return true;
 }
 
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое декодирование
-void ACC::Decompress (const char *infile, const char *outfile) {
+bool ACC::Decompress (const char *infile, const char *outfile) {
     
     int ch, symbol;
     char typeC = 0;
@@ -310,9 +316,15 @@ void ACC::Decompress (const char *infile, const char *outfile) {
     StartDecoding ();
     for (;;) {
         symbol = DecodeSymbol ();
+        
+        if(chError) {
+            return false;
+        }
+        
         if (symbol == EOF_SYMBOL) {
             break;
         }
+        
         ch = indexToChar [symbol];
         
         if(!keys[0] && !keys[5]) {
@@ -323,4 +335,5 @@ void ACC::Decompress (const char *infile, const char *outfile) {
     }
     fclose (in);
     fclose (out);
+    return true;
 }
