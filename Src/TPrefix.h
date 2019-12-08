@@ -6,9 +6,20 @@
 #include "BFile.h"
 #include <limits>
 
+const short int CHAR_HAS = 256;
+
+enum UpdateResult {
+    GOT_EOF,
+    OK,
+    FULL,
+    MEMORY_ERROR,
+    WRITE_ERROR,
+    READ_ERROR
+};
+
 class TPrefix {
 public:
-	TPrefix(unsigned long long int, TInBinary*, TOutBinary*);
+	TPrefix(TInBinary*, TOutBinary*);
 
 	TPrefix();
 

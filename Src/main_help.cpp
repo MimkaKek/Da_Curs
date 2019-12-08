@@ -16,10 +16,6 @@ bool KeyManager(std::string gotKeys) {
 				if (!keys[3] || !keys[5]) {
 					keys[1] = true;
 				}
-				if (keys[1]) {
-					keys[6] = false;
-					keys[7] = false;
-				}
 				break;
 			case 'k':
 				if (!keys[0] || !keys[3] || !keys[5]) {
@@ -32,8 +28,6 @@ bool KeyManager(std::string gotKeys) {
 				keys[1] = false;
 				keys[2] = false;
 				keys[5] = false;
-				keys[6] = false;
-				keys[7] = false;
 				break;
 			case 'r':
 				keys[4] = true;
@@ -46,24 +40,6 @@ bool KeyManager(std::string gotKeys) {
 					keys[0] = false;
 					keys[1] = false;
 					keys[2] = false;
-					keys[6] = false;
-					keys[7] = false;
-				}
-				break;
-			case '1':
-				if (!keys[1] && !keys[3] && !keys[5]) {
-					keys[6] = true;
-				}
-				if (keys[6]) {
-					keys[7] = false;
-				}
-				break;
-			case '9':
-				if (!keys[1] && !keys[3] && !keys[5]) {
-					keys[7] = true;
-				}
-				if (keys[7]) {
-					keys[6] = false;
 				}
 				break;
 			default:
@@ -296,7 +272,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		delete method;
 	}
 	else if (algorithm == 'W') {
-		TLZW* method = new TLZW(DECOMPRESS, file, decompressedFile);
+		TLZW* method = new TLZW(file, decompressedFile);
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -376,13 +352,6 @@ void MainCompress(TInBinary* file, std::string fileName) {
 			}
 		}
 	}
-	int compressRatio = NORMAL;
-	if (keys[6]) {
-		compressRatio = FAST;
-	}
-	else if (keys[7]) {
-		compressRatio = HIGH;
-	}
 	TOutBinary* compressionFile = nullptr;
 	if (!keys[0]) {
 		compressionFile = new TOutBinary;
@@ -393,7 +362,7 @@ void MainCompress(TInBinary* file, std::string fileName) {
 	}
 	unsigned long long int LZWSize, LZ77Size, arithmeticSize;
 	/* Блок с моим LZW */
-	LZWSize = LZWCompress(file, fileName, compressionFile, compressRatio);
+	LZWSize = LZWCompress(file, fileName, compressionFile);
 	file->Close();
 	if (LZWSize == 0) {
 		if (!keys[0]) {
@@ -434,8 +403,7 @@ void MainCompress(TInBinary* file, std::string fileName) {
 	return;
 }
 
-unsigned long long int LZWCompress(TInBinary* file, std::string fileName,
-								   TOutBinary* compressionFile, int compressRatio) {
+unsigned long long int LZWCompress(TInBinary* file, std::string fileName, TOutBinary* compressionFile) {
 	std::string LZWName = fileName + ".LZW";
 	if (!file->Open(&fileName)) {
 		std::cout << fileName << ": can't read file" << std::endl;
@@ -447,7 +415,7 @@ unsigned long long int LZWCompress(TInBinary* file, std::string fileName,
 			return 0;
 		}
 	}
-	TLZW* method = new TLZW(compressRatio, file, compressionFile);
+	TLZW* method = new TLZW(file, compressionFile);
 	if (method == nullptr) {
 		std::cout << fileName << ": unexpected memory error" << std::endl;
 		return 0;

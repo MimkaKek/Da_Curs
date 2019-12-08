@@ -9,7 +9,12 @@ unsigned long long int TPrefix::LastNumber;
 unsigned long long int TPrefix::NeedToRead;
 unsigned short int TPrefix::Bites;
 
-TPrefix::TPrefix(unsigned long long int highBorder, TInBinary* from, TOutBinary* to) {
+TPrefix::TPrefix(TInBinary* from, TOutBinary* to) {
+	if (keys[1]) {
+		return;
+	}
+	std::map<unsigned long long int, std::string> tree;
+	unsigned long long int highBorder = tree.max_size();
 	this->Border = highBorder;
 	if (highBorder == 0) {
 		return;

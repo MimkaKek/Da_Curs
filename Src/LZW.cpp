@@ -1,40 +1,10 @@
 /* LZW.cpp */
 #include "LZW.h"
 
-unsigned long long int CalculateSize(unsigned long long int fileSize, int compressionRatio) {
-	if (fileSize > MINIMUM_BORDER) {
-		std::map<unsigned long long int, std::string> tree;
-		unsigned long long int max = tree.max_size();
-		unsigned long long int divider = std::log10(fileSize) + 1;
-		if (fileSize > max) {
-			fileSize = max;
-		}
-		switch (compressionRatio) {
-			case FAST:
-				fileSize /= pow(divider, 3);
-				fileSize += CHAR_HAS;
-				break;
-			case NORMAL:
-				fileSize /= pow(divider, 2);
-				fileSize += CHAR_HAS;
-				break;
-			case HIGH:
-				fileSize = max;
-				break;
-		}
-	}
-	else {
-		fileSize = CHAR_HAS * 2;
-	}
-	return fileSize;
-}
-
-TLZW::TLZW(int compressionRatio, TInBinary* from, TOutBinary* to) {
+TLZW::TLZW(TInBinary* from, TOutBinary* to) {
 	this->ForRead = from;
 	this->ForWrite = to;
-	unsigned long long int fileSize = this->ForRead->SizeFile();
-	fileSize = CalculateSize(fileSize, compressionRatio);
-	this->CompressionTree = new TPrefix(fileSize, from, to);
+	this->CompressionTree = new TPrefix(from, to);
 	return;
 }
 

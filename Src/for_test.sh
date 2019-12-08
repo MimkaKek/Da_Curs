@@ -31,12 +31,12 @@ then
 	cp "test51" "test52"
 	echo "end cp"
 	#архивация
-	./main -1 test02
+	./main    test02
 	./main	  test12
-	./main -9 test22
-	./main -1 test32
+	./main    test22
+	./main    test32
 	./main 	  test42
-	./main -9 test52
+	./main    test52
 	echo "end compr"
 	#разархивация
 	./main -d test02.gz 
@@ -64,12 +64,12 @@ then
 	cp "test41" "test42"
 	cp "test51" "test52"
 	echo "end cp"
-	./main -1 test02
+	./main    test02
 	./main	  test12
-	./main -9 test22
-	./main -1 test32
+	./main    test22
+	./main    test32
 	./main 	  test42
-	./main -9 test52
+	./main    test52
 	echo "end compr"
 	#разархивация
 	./main -d test02.gz 

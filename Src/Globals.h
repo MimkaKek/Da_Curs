@@ -33,46 +33,4 @@
 
 extern std::vector<bool> keys;
 
-const int CHAR_HAS = 256;
-
-enum CompressionRatio {
-    FAST,
-    NORMAL,
-    HIGH,
-    DECOMPRESS
-};
-
-enum UpdateResult {
-    GOT_EOF,
-    OK,
-    FULL,
-    MEMORY_ERROR,
-    WRITE_ERROR,
-    READ_ERROR
-};
-
-/* Тестовые флаги для арифметического сжатия:
- *
- * Формат - X_ABC:
- *
- * --------------------------------------
- * | ПОЗ | БУКВА |     ПОДРОБНОСТИ      |
- * -------------------------------------- 
- * |  X  |   S   |  ПОКАЗАТЬ            |
- * |  A  |   G   |  ГЕНЕРАЦИЮ           |
- * |  A  |   L   |  ЗАГРУЗКУ            |
- * |  B  |   P   |  ВЕРОЯТНОСТЕЙ        |
- * |  B  |   B   |  ГРАНИЦ              |
- * |  B  |   I   |  ДОП. ИНФОРМАЦИЯ     |
- * |  C  |   T   |  ТАБЛИЦУ             |
- * --------------------------------------
- */
-/*
-char                                S_GPT = 0;
-char                                S_GBT = 0;
-char                                S_GI  = 0;
-char                                S_LPT = 0;
-char                                S_LBT = 0;
-char                                S_LI  = 0;*/
-
 #endif
