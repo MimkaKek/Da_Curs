@@ -262,7 +262,7 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     if(!keys[0]) {
         out = fopen (outfile, "w+b");
     }
-    if (in == NULL || out == NULL) {
+    if (in == NULL || (out == NULL && !keys[0])) {
         return false;
     }
     
