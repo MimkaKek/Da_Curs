@@ -4,24 +4,23 @@ CFLAGS  =-pedantic -Wall -Werror -Wno-sign-compare -Wno-long-long -lm -c
 SRC     =ACC.cpp BFile.cpp LZW.cpp TPrefix.cpp main.cpp main_help.cpp
 OBJS    =$(SRC:.cpp=.o)
 
-.PHONY: all clean clean_all
+.PHONY: all clean clean_tests clean_all
 
-all: $(TARGET) gen comparator 
-	rm *.o
-	echo DONE
+all: $(TARGET) gen comparator
+	@echo DONE
 
 $(TARGET): $(OBJS)
 	$(CC) $(DEBUG) $^ -o $@
-gen:
-	g++ gen.cpp -o gen
+gen: gen.o
+	$(CC) $(DEBUG) $^ -o $@
 comparator: comparator.o BFile.o
-	g++ comparator.o BFile.o -o comparator
+	$(CC) $(DEBUG) $^ -o $@
 	
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(DEBUG) $<
 
 clean:
-	rm *.o $(TARGET)
+	rm *.o $(TARGET) gen comparator
 clean_tests:
 	rm test*
 clean_all:
