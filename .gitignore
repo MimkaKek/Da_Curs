@@ -36,3 +36,5 @@ test*
 main
 gen
 comparator
+# Игнорировать файлы после сборки
+*.o
