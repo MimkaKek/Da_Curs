@@ -6,7 +6,7 @@ std::vector<bool> keys;
 int main(int argc, char *argv[]) {
 	std::map<std::string, int> fileNames;
 	std::map<std::string, int>::iterator finder;
-	keys = {false, false, false, false, false, false, false, false};
+	keys = {false, false, false, false, false, false, false, false, false};
 //			c	   d	  k		 l		r	   t	  1		 9
 	for (int i = 1; i < argc; ++i) {
 		std::string keyFile;
@@ -52,6 +52,8 @@ int main(int argc, char *argv[]) {
 	}
 	//TEST
 	int ti = clock();
-	std::cout << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;
+	if (keys[8]) {
+		std::cout << std::endl << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;
+	}
 	return 0;
 }

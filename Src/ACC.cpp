@@ -264,12 +264,16 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     if(!keys[0]) {
         out = fopen (outfile, "w+b");
     }
+
     if (in == nullptr || (out == nullptr && !keys[0])) {
         return false;
     }
 
     if(!keys[0]) {
         fwrite(&tmp, sizeof(char), 1, out);
+    }
+    else {
+        std::cout << tmp;
     }
     
     unsigned long long savePos, sizeOfFile;
@@ -280,6 +284,10 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     if(!keys[0]) {
         fwrite(&sizeOfFile, sizeof(long long), 1, out);
     }
+    else {
+        std::cout << sizeOfFile;
+    }
+
     StartOutputingBits ();
     StartEncoding ();
     for (;;) {
