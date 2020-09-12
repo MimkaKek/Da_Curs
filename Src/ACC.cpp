@@ -305,7 +305,8 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
 // Собственно адаптивное арифметическое декодирование
 bool ACC::Decompress (const char *infile, const char *outfile) {
     
-    int ch, symbol;
+    int symbol;
+    unsigned char ch;
     char typeC = 0;
     unsigned long long oldSize = 0;
     in = fopen (infile, "r+b");
@@ -346,7 +347,10 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         UpdateModel (symbol);
     }
     fclose (in);
-    if(!keys[0]) {
+    if(keys[0]) {
+        std::cout << std::endl;
+    }
+    else {
         fclose (out);
     }
     return true;
