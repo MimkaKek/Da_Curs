@@ -13,7 +13,9 @@ ACC::ACC () {
         freq [i] = 1;
         cumFreq [i] = NO_OF_SYMBOLS - i;
     }
-    
+
+    in = nullptr;
+    out = nullptr;
     chError = 0;
     freq [0] = 0;
 }
@@ -262,19 +264,22 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     if(!keys[0]) {
         out = fopen (outfile, "w+b");
     }
-    if (in == NULL || out == NULL) {
+    if (in == nullptr || (out == nullptr && !keys[0])) {
         return false;
     }
-    
-    fwrite(&tmp, sizeof(char), 1, out);
+
+    if(!keys[0]) {
+        fwrite(&tmp, sizeof(char), 1, out);
+    }
     
     unsigned long long savePos, sizeOfFile;
     savePos = ftell(in);
     fseek(in, 0, SEEK_END);
     sizeOfFile = ftell(in);
     fseek(in, savePos, SEEK_SET);
-    fwrite(&sizeOfFile, sizeof(long long), 1, out);
-
+    if(!keys[0]) {
+        fwrite(&sizeOfFile, sizeof(long long), 1, out);
+    }
     StartOutputingBits ();
     StartEncoding ();
     for (;;) {
@@ -290,7 +295,9 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     DoneEncoding ();
     DoneOutputingBits ();
     fclose (in);
-    fclose (out);
+    if(!keys[0]) {
+        fclose (out);
+    }
     return true;
 }
 
@@ -302,10 +309,10 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
     char typeC = 0;
     unsigned long long oldSize = 0;
     in = fopen (infile, "r+b");
-    if(!keys[0] && !keys[5]) {
+    if(!keys[0]) {
         out = fopen (outfile, "w+b");
     }
-    if (in == NULL || out == NULL) {
+    if (in == nullptr || (out == nullptr && !keys[0])) {
         return false;
     }
     
@@ -336,10 +343,11 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
             }
         }
         
-        
         UpdateModel (symbol);
     }
     fclose (in);
-    fclose (out);
+    if(!keys[0]) {
+        fclose (out);
+    }
     return true;
 }

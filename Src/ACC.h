@@ -1,6 +1,7 @@
 #ifndef ACC_H
 #define ACC_H
 
+#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
