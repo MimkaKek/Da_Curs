@@ -4,6 +4,9 @@
 bool KeyManager(std::string gotKeys) {
 	for (int j = 1; j < gotKeys.size(); ++j) {
 		switch (gotKeys[j]) {
+			case 'a':
+				keys[8] = true;
+				break;
 			case 'c':
 				if (!keys[3] || !keys[5]) {
 					keys[0] = true;
@@ -15,6 +18,10 @@ bool KeyManager(std::string gotKeys) {
 			case 'd':
 				if (!keys[3] || !keys[5]) {
 					keys[1] = true;
+				}
+				if (keys[1]) {
+					keys[6] = false;
+					keys[7] = false;
 				}
 				break;
 			case 'k':
@@ -28,6 +35,8 @@ bool KeyManager(std::string gotKeys) {
 				keys[1] = false;
 				keys[2] = false;
 				keys[5] = false;
+				keys[6] = false;
+				keys[7] = false;
 				break;
 			case 'r':
 				keys[4] = true;
@@ -40,6 +49,24 @@ bool KeyManager(std::string gotKeys) {
 					keys[0] = false;
 					keys[1] = false;
 					keys[2] = false;
+					keys[6] = false;
+					keys[7] = false;
+				}
+				break;
+			case '1':
+				if (!keys[1] && !keys[3] && !keys[5]) {
+					keys[6] = true;
+				}
+				if (keys[6]) {
+					keys[7] = false;
+				}
+				break;
+			case '9':
+				if (!keys[1] && !keys[3] && !keys[5]) {
+					keys[7] = true;
+				}
+				if (keys[7]) {
+					keys[6] = false;
 				}
 				break;
 			default:
@@ -168,17 +195,20 @@ bool IsDirectory(std::string directoryName, bool help) {
 void PrintDirectoryErrors(std::string directoryName) {
 	switch (errno) {
 		case EACCES:
-			std::cout << "No permission for directory " << directoryName << "\t Try it next time" << std::endl;
+			std::cout << "No permission for directory " << directoryName
+					  << "\t Try it next time" << std::endl;
 			break;
 		case EBADF:
-			std::cout << "Not a valid descriptor for directory " << directoryName << "\t Try it next time" << std::endl;
+			std::cout << "Not a valid descriptor for directory " << directoryName
+					  << "\t Try it next time" << std::endl;
 			break;
 		case EMFILE:
 			std::cout << "Too many files opened in system. Can't open directory" << directoryName
 					  << "\t Try it next time" << std::endl;
 			break;
 		case ENOMEM:
-			std::cout << "Not enought memory for opening directory " << directoryName << "\t Try it next time" << std::endl;
+			std::cout << "Not enought memory for opening directory " << directoryName
+					  << "\t Try it next time" << std::endl;
 			break;
 		case ENOENT:
 			std::cout << "No file or directory with name " << directoryName << std::endl;
@@ -331,7 +361,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 	return;
 }
 
-void MainCompress(TInBinary* file, std::string fileName) {
+void MainCompress(TInBinary* file, std::string fileName) {//TODO -c + .gz всё ломает
 	std::string nextName = fileName + ".gz";
 	file->Close();
 	if (!keys[0]) {
@@ -361,44 +391,72 @@ void MainCompress(TInBinary* file, std::string fileName) {
 		}
 	}
 	unsigned long long int LZWSize, LZ77Size, arithmeticSize;
-	/* Блок с моим LZW */
-	LZWSize = LZWCompress(file, fileName, compressionFile);
-	file->Close();
-	if (LZWSize == 0) {
-		if (!keys[0]) {
-			delete compressionFile;
-			Delete(fileName + ".LZW");
+	bool keep = false;
+	if (!keys[6] && !keys[7]) {//ключи 1 и 9 не указаны
+		/* Блок с моим LZW */
+		keep = true;
+		LZWSize = LZWCompress(file, fileName, compressionFile);
+		file->Close();
+		if (LZWSize == 0) {
+			if (!keys[0]) {
+				delete compressionFile;
+				Delete(fileName + ".LZW");
+			}
+			return;
 		}
-		return;
+		/* LZ77 */
+		/*TODO YOU
+		LZ77Size = LZ77Compress(file, fileName, compressionFile);
+		file->Close();
+		if (LZ77Size == 0) {
+			if (!keys[0]) {
+				delete compressionFile;
+				Delete(fileName + ".LZW");
+				Delete(fileName + ".LZ7");
+			}
+			return;
+		}*/
+		
+		
+		/* арифметика */
+		arithmeticSize = ArithmeticCompress(fileName, file);
+		if (arithmeticSize == 0) {
+			if (!keys[0]) {
+				delete compressionFile;
+				Delete(fileName + ".LZW");
+				Delete(fileName + ".LZ7");
+				Delete(fileName + ".ARI");
+			}
+			return;
+		}
+		
 	}
-	/* LZ77 */
-	/*TODO YOU
-	LZ77Size = LZ77Compress(file, fileName, compressionFile);
-	file->Close();
-	if (LZ77Size == 0) {
-		if (!keys[0]) {
-			delete compressionFile;
-			Delete(fileName + ".LZW");
-			Delete(fileName + ".LZ7");
+	else if (keys[6]) {/* LZW / LZ77 т.к. 1*/
+		arithmeticSize = 0;
+		LZWSize = LZWCompress(file, fileName, compressionFile);
+		file->Close();
+		if (LZWSize == 0) {
+			if (!keys[0]) {
+				delete compressionFile;
+				Delete(fileName + ".LZW");
+			}
+			return;
 		}
-		return;
-	}*/
-
-	
-	/* арифметика */
-	arithmeticSize = ArithmeticCompress(fileName, file);
-	if (arithmeticSize == 0) {
-		if (!keys[0]) {
-			delete compressionFile;
-			Delete(fileName + ".LZW");
-			Delete(fileName + ".LZ7");
-			Delete(fileName + ".ARI");
+	}
+	else {// Arif т.к. 9
+		LZWSize = 0;
+		arithmeticSize = ArithmeticCompress(fileName, file);
+		if (arithmeticSize == 0) {
+			if (!keys[0]) {
+				delete compressionFile;
+				Delete(fileName + ".ARI");
+			}
+			return;
 		}
-		return;
 	}
 	if (!keys[0]) {
 		delete compressionFile;
-		KeepSmall(LZWSize, LZ77Size, arithmeticSize, fileName);
+		KeepSmall(LZWSize, LZ77Size, arithmeticSize, fileName, keep);
 	}
 	return;
 }
@@ -499,45 +557,29 @@ unsigned long long int ArithmeticCompress(std::string fileName, TInBinary* file)
 }
 
 void KeepSmall(unsigned long long int LZWSize, unsigned long long int LZ77Size,
-			   unsigned long long int arithmeticSize, std::string fileName) {
+			   unsigned long long int arithmeticSize, std::string fileName, bool noKeys) {
 	std::string nextName;
-	if (LZWSize > arithmeticSize) {//TEST
-		nextName = fileName + ".ARI";
-		Delete(fileName + ".LZW");
-	}
-	else {
-		nextName = fileName + ".LZW";
-		Delete(fileName + ".ARI");
-	}
-	/*if (LZWSize < LZ77Size) {//удаление временных файлов YOU
-		Delete(LZ77Name);
-		if (LZWSize < arithmeticSize) {
-			Delete(arithmeticName);
-			nextName += ".LZW";
+	if (noKeys) {
+		if (LZWSize > arithmeticSize) {//TEST
+			nextName = fileName + ".ARI";
+			Delete(fileName + ".LZW");
 		}
 		else {
-			Delete(LZWName);
-			nextName += ".ARI";
+			nextName = fileName + ".LZW";
+			Delete(fileName + ".ARI");
 		}
+		Rename(nextName, fileName + ".gz");
 	}
 	else {
-		Delete(LZWName);
-		if (LZ77Size < arithmeticSize) {
-			Delete(arithmeticName);
-			nextName += ".LZ7";
+		if (LZWSize == 0) {
+			Rename(fileName + ".ARI", fileName + ".gz");
 		}
 		else {
-			Delete(LZ77Name);
-			nextName += ".ARI";
+			Rename(fileName + ".LZW", fileName + ".gz");
 		}
-	} *///TODO
-	std::string oldName = nextName;
-	nextName.pop_back();
-	nextName.pop_back();
-	nextName.pop_back();
-	nextName += "gz";
-	Rename(oldName, nextName);
+	}
 	if (!keys[2]) {//-k
 		Delete(fileName);
 	}
+	return;
 }
