@@ -1,31 +1,28 @@
-#Makefile
-all: main_help.o main.o TPrefix.o LZW.o BFile.o gen comparator ACC.o
-	g++ main_help.o main.o TPrefix.o LZW.o BFile.o ACC.o -o main
+TARGET  =main
+CC      =g++
+CFLAGS  =-pedantic -Wall -Werror -Wno-sign-compare -Wno-long-long -lm -c
+SRC     =ACC.cpp BFile.cpp LZW.cpp TPrefix.cpp main.cpp main_help.cpp
+OBJS    =$(SRC:.cpp=.o)
+
+.PHONY: all clean clean_all
+
+all: $(TARGET) gen comparator 
 	rm *.o
 	echo DONE
+
+$(TARGET): $(OBJS)
+	$(CC) $(DEBUG) $^ -o $@
 gen:
 	g++ gen.cpp -o gen
 comparator: comparator.o BFile.o
 	g++ comparator.o BFile.o -o comparator
-comparator.o:
-	g++ -c -g comparator.cpp
-main.o:
-	g++ -c -g main.cpp
-main_help.o:
-	g++ -c -g main_help.cpp
-TPrefix.o:
-	g++ -c -g TPrefix.cpp
-LZW.o:
-	g++ -c -g LZW.cpp
-BFile.o:
-	g++ -c -g BFile.cpp
-ACC.o:
-	g++ -c -g ACC.cpp
-#TODO Включу ваши алги как они будут готовы
-LZ77.o:
-	g++ -c -g LZ77.cpp
-#clear
-c:
-	rm *.o main
-ca:
-	rm *.o main gen comparator
+	
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(DEBUG) $<
+
+clean:
+	rm *.o $(TARGET)
+clean_tests:
+	rm test*
+clean_all:
+	rm *.o test* $(TARGET) gen comparator
