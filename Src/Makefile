@@ -20,8 +20,8 @@ comparator: comparator.o BFile.o
 	$(CC) $(CFLAGS) $(DEBUG) $<
 
 clean:
-	rm *.o $(TARGET) gen comparator
+	rm -f *.o $(TARGET) gen comparator
 clean_tests:
-	rm -r tests
+	rm -rf tests
 clean_all:
-	rm -r *.o tests $(TARGET) gen comparator
+	rm -rf *.o tests $(TARGET) gen comparator
