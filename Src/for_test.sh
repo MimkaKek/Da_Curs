@@ -13,8 +13,8 @@ read action
 
 if [ "$action" -gt  0 ]
 then
-	rm "test01" "test02" "test11" "test12" "test21" "test22" "test31" "test32" "test41" "test42" "test51" "test52" "test61" "test62" "test71" "test72" "test81" "test82" "test91" "test92"
-	rm "test02.gz" "test12.gz" "test22.gz" "test32.gz" "test42.gz" "test52.gz" "test62.gz" "test72.gz" "test82.gz" "test92.gz" "test01.gz" "test11.gz" "test21.gz" "test31.gz" "test41.gz" "test51.gz" "test61.gz" "test71.gz" "test81.gz" "test91.gz"
+	rm -f "test01" "test02" "test11" "test12" "test21" "test22" "test31" "test32" "test41" "test42" "test51" "test52" "test61" "test62" "test71" "test72" "test81" "test82" "test91" "test92"
+	rm -f "test02.gz" "test12.gz" "test22.gz" "test32.gz" "test42.gz" "test52.gz" "test62.gz" "test72.gz" "test82.gz" "test92.gz" "test01.gz" "test11.gz" "test21.gz" "test31.gz" "test41.gz" "test51.gz" "test61.gz" "test71.gz" "test81.gz" "test91.gz"
 	#генерация тестовых файлов
 	./gen "$action"	>> "test01"
 	./gen "$action" >> "test11"
@@ -134,6 +134,6 @@ then
 		echo "YOU HAVE ERRORS IN ALGORITHM"
 	fi
 else
-	rm "test01" "test02" "test11" "test12" "test21" "test22" "test31" "test32" "test41" "test42" "test51" "test52" "test61" "test62" "test71" "test72" "test81" "test82" "test91" "test92"
-	rm "test02.gz" "test12.gz" "test22.gz" "test32.gz" "test42.gz" "test52.gz" "test62.gz" "test72.gz" "test82.gz" "test92.gz" "test01.gz" "test11.gz" "test21.gz" "test31.gz" "test41.gz" "test51.gz" "test61.gz" "test71.gz" "test81.gz" "test91.gz"
+	rm -f "test01" "test02" "test11" "test12" "test21" "test22" "test31" "test32" "test41" "test42" "test51" "test52" "test61" "test62" "test71" "test72" "test81" "test82" "test91" "test92"
+	rm -f "test02.gz" "test12.gz" "test22.gz" "test32.gz" "test42.gz" "test52.gz" "test62.gz" "test72.gz" "test82.gz" "test92.gz" "test01.gz" "test11.gz" "test21.gz" "test31.gz" "test41.gz" "test51.gz" "test61.gz" "test71.gz" "test81.gz" "test91.gz"
 fi

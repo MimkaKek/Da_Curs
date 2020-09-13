@@ -35,16 +35,16 @@ bool Compare(TInBinary* original, TInBinary* afterWork, int number) {
 int main() {
 	bool ok = true;
 	std::vector<std::pair<std::string, std::string>> files = {
-		{"test01", "test02"},
-		{"test11", "test12"},
-		{"test21", "test22"},
-		{"test31", "test32"},
-		{"test41", "test42"},
-		{"test51", "test52"},
-		{"test61", "test62"},
-		{"test71", "test72"},
-		{"test81", "test82"},
-		{"test91", "test92"}
+		{"tests/test01", "tests/test02"},
+		{"tests/test11", "tests/test12"},
+		{"tests/test21", "tests/test22"},
+		{"tests/test31", "tests/test32"},
+		{"tests/test41", "tests/test42"},
+		{"tests/test51", "tests/test52"},
+		{"tests/test61", "tests/test62"},
+		{"tests/test71", "tests/test72"},
+		{"tests/test81", "tests/test82"},
+		{"tests/test91", "tests/test92"}
 	};
 	TInBinary* original	= 	new TInBinary;
 	TInBinary* afterWork	=	new TInBinary;
