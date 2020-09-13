@@ -111,7 +111,7 @@ bool DifferensOfSizes(TInBinary* file, std::string fileName) {
 
 void WorkWithDirectory(std::string directoryName) {
 	DIR *directory = opendir(directoryName.c_str());
-	if (errno == EACCES || errno == EBADF || errno == EMFILE || errno == ENOMEM || errno == ENOENT) {
+	if (directory == NULL) {
 		PrintDirectoryErrors(directoryName);
 		return;
 	}
@@ -174,9 +174,7 @@ void WorkWithFile(std::string fileName) {
 
 bool IsDirectory(std::string directoryName, bool help) {
 	DIR* directory = opendir(directoryName.c_str());
-	if (errno == ENOTDIR || errno == EACCES || errno == EBADF ||
-		errno == EMFILE || errno == ENOMEM || errno == ENOENT)
-	{
+	if (directory == NULL) {
 		if (help && errno != ENOTDIR) {
 			PrintDirectoryErrors(directoryName);
 		}
@@ -352,23 +350,25 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		}
 		return;
 	}
-	if (!keys[0] && !keys[2] && !keys[5]) {//нет -c, -k и -t
+	if (keys[5]) {
+		Delete(tmpName);
+		return;
+	}
+	if (!keys[0] && !keys[2]) {//нет -c, -k и -t
 		Delete(fileName);
 	}
-	if (!keys[0] && !keys[5]) {
+	if (!keys[0]) {
 		Rename(tmpName, nextName);
 	}
 	return;
 }
 
-void MainCompress(TInBinary* file, std::string fileName) {//TODO -c + .gz всё ломает
+void MainCompress(TInBinary* file, std::string fileName) {//TODO
 	std::string nextName = fileName + ".gz";
 	file->Close();
-	if (!keys[0]) {
-		if (IsArchive(fileName)) {
-			std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
-			return;
-		}
+	if (IsArchive(fileName)) {
+		std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
+		return;
 	}
 	if (!keys[0]) {
 		if (file->Open(&nextName)) {

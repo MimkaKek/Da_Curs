@@ -2,7 +2,6 @@
 #pragma once
 #include "TPrefix.h"
 #include "Globals.h"
-#include <cmath>
 
 class TLZW {
 public:

@@ -19,6 +19,7 @@ enum UpdateResult {
 
 class TPrefix {
 public:
+
 	TPrefix(TInBinary*, TOutBinary*);
 
 	TPrefix();

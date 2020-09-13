@@ -1,8 +1,9 @@
 TARGET  =main
 CC      =g++
-CFLAGS  =-pedantic -Wall -Werror -Wno-sign-compare -Wno-long-long -lm -c
+CFLAGS  =-pedantic -Wall  -Wno-sign-compare -Wno-long-long -lm -c -g
 SRC     =ACC.cpp BFile.cpp LZW.cpp TPrefix.cpp main.cpp main_help.cpp
 OBJS    =$(SRC:.cpp=.o)
+#-Werror
 
 .PHONY: all clean clean_all
 

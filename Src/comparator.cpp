@@ -40,7 +40,11 @@ int main() {
 		{"test21", "test22"},
 		{"test31", "test32"},
 		{"test41", "test42"},
-		{"test51", "test52"}
+		{"test51", "test52"},
+		{"test61", "test62"},
+		{"test71", "test72"},
+		{"test81", "test82"},
+		{"test91", "test92"}
 	};
 	TInBinary* original	= 	new TInBinary;
 	TInBinary* afterWork	=	new TInBinary;

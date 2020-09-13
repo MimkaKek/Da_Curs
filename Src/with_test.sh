@@ -27,41 +27,29 @@ then
 	./gen "$action" >> "test81"
 	./gen "$action" >> "test91"
 	echo "end gen"
-	#создание доп копий тестовых файлов
-	cp "test01" "test02"
-	cp "test11" "test12"
-	cp "test21" "test22"
-	cp "test31" "test32"
-	cp "test41" "test42"
-	cp "test51" "test52"
-	cp "test61" "test62"
-	cp "test71" "test72"
-	cp "test81" "test82"
-	cp "test91" "test92"
-	echo "end cp"
-	#архивация
-	./main  -1  test02
-	./main		test12
-	./main  -9 	test22
-	./main  -1  test32
-	./main 	  	test42
-	./main  -9 	test52
-	./main  -1  test62
-	./main    	test72
-	./main  -9 	test82
-	./main  -1 	test92
+	##архивация и создание доп копий тестовых файлов
+	./main  -1k 	test01
+	./main	-k		test11
+	./main  -9k 	test21
+	./main  -1k  	test31
+	./main 	-k  	test41
+	./main  -9k 	test51
+	./main  -1k  	test61
+	./main  -k  	test71
+	./main  -9k 	test81
+	./main  -1k 	test91
 	echo "end compr"
 	#разархивация
-	./main -d test02.gz 
-	./main -d test12.gz 
-	./main -d test22.gz 
-	./main -d test32.gz 
-	./main -d test42.gz 
-	./main -d test52.gz
-	./main -d test62.gz
-	./main -d test72.gz
-	./main -d test82.gz
-	./main -d test92.gz
+	./main -dc test01.gz >> test02
+	./main -dc test11.gz >> test12
+	./main -dc test21.gz >> test22
+	./main -dc test31.gz >> test32
+	./main -dc test41.gz >> test42
+	./main -dc test51.gz >> test52
+	./main -dc test61.gz >> test62
+	./main -dc test71.gz >> test72
+	./main -dc test81.gz >> test82
+	./main -dc test91.gz >> test92
 	echo "end decom"
 	#проверка совпадения результатов
 	./comparator
