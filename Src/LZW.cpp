@@ -47,7 +47,6 @@ bool TLZW::Compress(std::string fileName) {
 	return true;
 }
 
-
 bool TLZW::Decompress(std::string fileName) {
 	unsigned long long int letter;
 	std::string previousWord, presentWord;
