@@ -355,10 +355,7 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         UpdateModel (symbol);
     }
     fclose (in);
-    if(keys[0]) {
-        std::cout << std::endl;
-    }
-    else {
+    if(!keys[0]) {
         fclose (out);
     }
     return true;
