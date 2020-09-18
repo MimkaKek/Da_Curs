@@ -22,7 +22,7 @@ TPrefix::TPrefix(TInBinary* from, TOutBinary* to) {
 	this->ForRead = from;
 	this->ForWrite = to;
 	highBorder = this->ForRead->SizeFile();
-	this->NeedToRead = highBorder + 1;
+	this->NeedToRead = highBorder;
 	if (highBorder < std::numeric_limits<unsigned short int>::max()) {
 		this->Bites = sizeof(unsigned short int);
 	}
@@ -50,20 +50,9 @@ int TPrefix::Update(char letter) {
 	for (int i = 0; i < this->Next.size(); ++i) {
 		if (letter == this->Next[i].first) {
 			needNew = false;
-			if (this->LastNumber < this->Border) {
+			if (this->NeedToRead > 0) {
 				if (!this->ForRead->Read(&letter, sizeof(char))) {
-					if (this->NeedToRead != 0) {
-						return READ_ERROR;
-					}
-					if (keys[0]) {
-						std::cout << (char*)&this->Next[i].second->NumberOfWord;
-					}
-					else if (!keys[5]) {
-						if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
-							return WRITE_ERROR;
-						}
-					}
-					return GOT_EOF;
+					return READ_ERROR;
 				}
 				--this->NeedToRead;
 				return this->Next[i].second->Update(letter);
@@ -72,12 +61,12 @@ int TPrefix::Update(char letter) {
 				if (keys[0]) {
 					std::cout << (char*)&this->Next[i].second->NumberOfWord;
 				}
-				else if (!keys[5]) {
+				if (!keys[5]) {
 					if (!this->ForWrite->Write((char*)&this->Next[i].second->NumberOfWord, this->Bites)) {
 						return WRITE_ERROR;
 					}
 				}
-				return FULL;
+				return GOT_EOF;
 			}
 		}
 	}
@@ -101,7 +90,7 @@ int TPrefix::Update(char letter) {
 
 int TPrefix::UpdateForRoot() {
 	this->LastNumber = CHAR_HAS + 1;
-	char letter;
+	char letter, startLetter;
 	unsigned long long int tmpInt = 0;
 	if (!this->ForRead->Read(&letter, sizeof(char))) {
 		if (this->NeedToRead != 0) {
@@ -110,37 +99,45 @@ int TPrefix::UpdateForRoot() {
 		return GOT_EOF;
 	}
 	--this->NeedToRead;
-	char startLetter;
 	while (true) {
-		startLetter = letter;
-		if (this->LastNumber < this->Border) {
-			if (!this->ForRead->Read(&letter, sizeof(char))) {
-				if (this->NeedToRead != 0) {
+		if (this->NeedToRead > 0) {
+			startLetter = letter;
+			if (this->LastNumber < this->Border) {
+				if (!this->ForRead->Read(&letter, sizeof(char))) {
 					return READ_ERROR;
 				}
-				return GOT_EOF;
+				--this->NeedToRead;
+				tmpInt = this->Next[startLetter].second->Update(letter);
+				if (tmpInt != OK) {
+					return tmpInt;
+				}
+				letter = this->LastLetter;
 			}
-			--this->NeedToRead;
-			tmpInt = this->Next[startLetter].second->Update(letter);
-			if (tmpInt != OK) {
-				return tmpInt;
+			else {// для супербольших файлов
+				tmpInt = 0;
+				if (keys[0]) {
+					std::cout << (char*)&this->Next[letter].second->NumberOfWord << (char*)&tmpInt;
+				}
+				else if (!keys[5]) {
+					if (!this->ForWrite->Write((char*)&this->Next[letter].second->NumberOfWord, this->Bites)) {
+						return WRITE_ERROR;
+					}
+					if (!this->ForWrite->Write((char*)&tmpInt, this->Bites)) {
+						return WRITE_ERROR;
+					}
+				}
 			}
-			letter = this->LastLetter;
 		}
 		else {
-			tmpInt = 0;
 			if (keys[0]) {
-				std::cout << (char*)&this->Next[letter].second->NumberOfWord << (char*)&tmpInt;
+				std::cout << (char*)&this->Next[letter].second->NumberOfWord;
 			}
 			else if (!keys[5]) {
 				if (!this->ForWrite->Write((char*)&this->Next[letter].second->NumberOfWord, this->Bites)) {
 					return WRITE_ERROR;
 				}
-				if (!this->ForWrite->Write((char*)&tmpInt, this->Bites)) {
-					return WRITE_ERROR;
-				}
 			}
-			return FULL;
+			return GOT_EOF;
 		}
 	}
 }

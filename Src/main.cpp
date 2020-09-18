@@ -50,7 +50,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	//TEST
 	int ti = clock();
 	if (keys[8]) {
 		std::cout << std::endl << ((double)ti) / CLOCKS_PER_SEC << " секунд" << std::endl;

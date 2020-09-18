@@ -8,7 +8,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <map>
-#include <ctime>//TEST
+#include <ctime>
 
 /* ключи                                                                    
  * -c вывод архива в out

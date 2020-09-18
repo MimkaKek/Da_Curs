@@ -124,6 +124,7 @@ void WorkWithDirectory(std::string directoryName) {
 		}
 		std::string tmp = std::string(directoryFile->d_name);
 		if (tmp == "." || tmp == "..") {
+			directoryFile = readdir(directory);
 			continue;
 		}
 		if (directoryName.back() == '/') {

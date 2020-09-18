@@ -27,7 +27,7 @@ then
 	./gen "$action" >> "tests/test81"
 	./gen "$action" >> "tests/test91"
 	echo "end gen"
-	##архивация и создание доп копий тестовых файлов
+	#архивация и создание доп копий тестовых файлов
 	./main  -1k 	tests/test01
 	./main	-k		tests/test11
 	./main  -9k 	tests/test21
@@ -100,16 +100,7 @@ then
 		./main -dc tests/test82.gz >> tests/test82
 		./main -dc tests/test92.gz >> tests/test92
 	else
-		./main -d tests/test02.gz 
-		./main -d tests/test12.gz 
-		./main -d tests/test22.gz 
-		./main -d tests/test32.gz 
-		./main -d tests/test42.gz 
-		./main -d tests/test52.gz
-		./main -d tests/test62.gz
-		./main -d tests/test72.gz
-		./main -d tests/test82.gz
-		./main -d tests/test92.gz
+		./main -dr tests/ 
 	fi
 	echo "end decom"
 	#проверка совпадения результатов
