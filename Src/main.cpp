@@ -19,6 +19,11 @@ int main(int argc, char *argv[]) {
 		}
 		else {// файлы и папки
 			bool got = false;
+			if (keyFile.size() > 2) {
+				if (keyFile[0] == '.' && keyFile[1] == '/') {
+					keyFile.erase(0, 2);
+				}
+			}
 			finder = fileNames.find(keyFile);
 			if (finder != fileNames.end()) {//для избежания работы над одним и тем же файлом несколько раз
 				got = true;
@@ -40,6 +45,9 @@ int main(int argc, char *argv[]) {
 		}
 		else if (directory) {
 			WorkWithDirectory(finder->first);
+		}
+		else if (finder->first == "main") {
+			continue;
 		}
 		else {
 			if (errno == ENOTDIR) {

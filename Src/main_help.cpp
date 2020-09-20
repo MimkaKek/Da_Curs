@@ -115,6 +115,15 @@ void WorkWithDirectory(std::string directoryName) {
 		PrintDirectoryErrors(directoryName);
 		return;
 	}
+	short int countOfDirs = 0;
+	for (int i = 0; i < directoryName.size(); ++i) {
+		if (directoryName[i] == '/') {
+			++countOfDirs;
+		}
+		if (countOfDirs > 1) {
+			break;
+		}
+	}
 	struct dirent *directoryFile;
 	directoryFile = readdir(directory);
 	while (directoryFile) {
@@ -123,7 +132,9 @@ void WorkWithDirectory(std::string directoryName) {
 			return;
 		}
 		std::string tmp = std::string(directoryFile->d_name);
-		if (tmp == "." || tmp == "..") {
+		if (tmp == "." || tmp == ".." || (tmp == "main" && countOfDirs == 1
+			&& (directoryName[0] == directoryName[1]) && directoryName[1] == '.'))
+		{
 			directoryFile = readdir(directory);
 			continue;
 		}
@@ -132,6 +143,10 @@ void WorkWithDirectory(std::string directoryName) {
 		}
 		else {
 			tmp = directoryName + "/" + tmp;
+		}
+		if (tmp == "./main") {
+			directoryFile = readdir(directory);
+			continue;
 		}
 		if (IsDirectory(tmp, true)) {
 			WorkWithDirectory(tmp);
@@ -224,13 +239,13 @@ bool IsArchive(std::string fileName) {
 }
 
 void Rename(std::string oldName, std::string nextName) {
-    std::string command = "mv " + oldName + " " + nextName;
+    std::string command = "mv ./" + oldName + " ./" + nextName;
     system(command.c_str());
     return;
 }
 
 void Delete(std::string fileName) {
-    std::string command = "rm " + fileName;
+    std::string command = "rm ./" + fileName;
     system(command.c_str());
     return;
 }
