@@ -1,5 +1,5 @@
 /* main_help.cpp */
-#include "main_help.h"
+#include "main_help.h"//TODO W -> L
 
 bool KeyManager(std::string gotKeys) {
     for (int j = 1; j < gotKeys.size(); ++j) {
@@ -82,7 +82,7 @@ bool DifferensOfSizes(TInBinary* file, std::string fileName) {
     if (!file->Read(&trash, sizeof(char))) {
         return false;
     }
-    if (trash != 'W' && trash != '7' && trash != 'A') {//TODO YOU
+    if (trash != 'L' && trash != 'A') {
         return false;
     }
     unsigned long long int uncompressed, compressed;
@@ -317,7 +317,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		success = method->Decompress(fileName.c_str(), tmpName.c_str());
 		delete method;
 	}
-	else if (algorithm == 'W') {
+	else if (algorithm == 'L') {
 		TLZW* method = new TLZW(file, decompressedFile);
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;

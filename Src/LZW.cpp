@@ -9,7 +9,7 @@ TLZW::TLZW(TInBinary* from, TOutBinary* to) {
 }
 
 bool TLZW::Compress(std::string fileName) {
-	char method = 'W';
+	char method = 'L';
 	unsigned long long int size = this->ForRead->SizeFile();
 	if (keys[0]) {
 		std::cout << method << size;
