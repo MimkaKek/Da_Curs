@@ -12,10 +12,54 @@
 \DeclareGraphicsExtensions{.png,.jpg}
 
 \begin{document}
+\begin{titlepage}
+	\begin{center}
+		\bfseries
+		
+		{\Large Московский авиационный институт\\ (национальный исследовательский университет)
+			
+		}
+		
+		\vspace{48pt}
+		
+		{\large Факультет информационных технологий и прикладной математики
+		}
+		
+		\vspace{36pt}
+		
+		
+		{\large Кафедра вычислительной математики и~программирования
+			
+		}
+		
+		
+		\vspace{48pt}
+		
+		Курсовая работа по курсу <<Дискрeтный анализ>>: Методы сжатия данных
+	\end{center}
+	
+	\vspace{72pt}
+	
+	\begin{flushright}
+		\begin{tabular}{rl}
+			Студент: & О.\,Р. Лисовский  \\
+			Преподаватель: & Н.\,А. Зацепин \\
+			Группа: & М8О-408Б \\
+			Дата: & \\
+			Оценка: & \\
+			Подпись: & \\
+		\end{tabular}
+	\end{flushright}
+	
+	\vfill
+	
+	\begin{center}
+		\bfseries
+		Москва, \the\year
+	\end{center}
+\end{titlepage}
 
-\section*{Курсовой проект: Архиватор (Arithmetic + LZ77)}
-\noindent
-Выполнил студент группы 08-408Б МАИ \textit{Лисовский Олег Романович}.
+\pagebreak
 
 \subsection*{Условие}
 
@@ -74,7 +118,7 @@
 
 \subsection*{Описание файлов программы}
 
-Код программы разбит на %TODO 
+Код программы разбит на 11 %TODO перетасовать и объединить
  файлов:
 
 \begin{enumerate}
@@ -87,8 +131,6 @@
 	\item LZ77.cpp - Содержит реализацию всех методов класса TLZ77.
 	\item main\_help.h - Содержит в себе перечисление и описание всех функций необходимых для препроцессинга перед началом работы алгоритмов компрессии и декомпрессии.
 	\item main\_help.cpp - Содержит реализацию всех функций, необходимых для препроцессинга, описанных в файле main\_help.h.
-	\item TPrefix.h - Содержит перечисление методов и описание класса TPrefix, необходимого для работы LZW компрессии.
-	\item TPrefix.cpp - Содержит реализацию всех методов класса TPrefix.
 	\item main.cpp - Содержит в себе алгоритм чтения файлов и ключей.
 	\item Makefile - Файл для сборки программы.
 \end{enumerate}
@@ -219,7 +261,7 @@ private:
 
 \subsubsection*{Прочие функции}
 \noindent
-\begin{enumerate}
+\begin{enumerate} %TODO перетасовать
 	\item bool KeyManager(std::string) - Обрабатывает полученные ключи. В случае получения неизвестного ключа возвращает false, иначе true.
 	\item bool DifferensOfSizes(TInBinary*, std::string) - вывод для каждого файла размера сжатого, оригинального, коэффициента сжатия(\%) и имя оригинального файла(ключ l). В случае повреждения. архива возвращает false, иначе true.
 	\item void WorkWithDirectory(std::string) - работает с директорией (ключ r).
@@ -245,4 +287,12 @@ private:
 
 \subsection*{Выводы}%TODO
 
+\subsection*{Список литературы}
+\begin{enumerate}
+	\item Алгоритм LZ77 [Электронный ресурс]: mf.grsu.by URL:\\ http://mf.grsu.by/UchProc/livak/po/comprsite/theory\_lz77.html (дата обращения\\ 10.08.2020)
+	\item Алгоритмы LZW, LZ77 и LZ78 [Электронный ресурс]: habr.com URL:\\ https://habr.com/ru/post/132683/ (дата обращения 23.08.2020)
+	\item Арифметическое кодирование [Электронный ресурс]: mf.grsu.by URL:\\ http://mf.grsu.by/UchProc/livak/po/comprsite/theory\_arithmetic.html (дата обращения 30.08.2020)
+	\item Идея арифметического кодирования [Электронный ресурс]: algolist.ru URL:\\ http://algolist.ru/compress/standard/arithm.php (дата обращения 02.09.2020)
+	\item Arithmetic coding - integer implementation [Электронный ресурс]: stringology.org URL: http://www.stringology.org/DataCompression/ak-int/index\_en.html (дата обращения 26.09.2020)
+\end{enumerate}
 \end{document}
