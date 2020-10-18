@@ -4,7 +4,7 @@
 
 #include "Globals.h"
 #include "LZ77.h"
-#include "ACC.h"
+#include "Arithmetic.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -12,7 +12,7 @@ bool KeyManager(std::string);
 
 bool DifferensOfSizes(TInBinary*, std::string);
  
-void WorkWithDirectory(std::string);
+void WorkWithDirectory(std::string, std::map<std::string, int>*);
 
 void WorkWithFile(std::string);
 

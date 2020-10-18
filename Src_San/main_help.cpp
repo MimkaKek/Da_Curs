@@ -109,7 +109,7 @@ bool DifferensOfSizes(TInBinary* file, std::string fileName) {
     return true;
 }
 
-void WorkWithDirectory(std::string directoryName) {
+void WorkWithDirectory(std::string directoryName, std::map<std::string, int>* directoryNames) {//TODO
 	DIR *directory = opendir(directoryName.c_str());
 	if (directory == NULL) {
 		PrintDirectoryErrors(directoryName);
@@ -126,6 +126,7 @@ void WorkWithDirectory(std::string directoryName) {
 	}
 	struct dirent *directoryFile;
 	directoryFile = readdir(directory);
+	std::map<std::string, int>::iterator finder;
 	while (directoryFile) {
 		if (errno == EBADF) {
 			std::cout << directoryName << ": something wrong" << std::endl;
@@ -149,10 +150,17 @@ void WorkWithDirectory(std::string directoryName) {
 			continue;
 		}
 		if (IsDirectory(tmp, true)) {
-			WorkWithDirectory(tmp);
+			WorkWithDirectory(tmp, directoryNames);
 		}
 		else {
-			WorkWithFile(tmp);
+			bool got = false;
+			finder = directoryNames->find(tmp);
+			if (finder != directoryNames->end()) {//для избежания работы над одним и тем же файлом несколько раз
+				got = true;
+			}
+			if (!got) {
+				directoryNames->insert({tmp, directoryNames->size + 1});
+			}
 		}
 		directoryFile = readdir(directory);
 	}
@@ -304,7 +312,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		return;
 	}
 	if (algorithm == 'A') {
-		ACC* method = new ACC;
+		Arithmetic* method = new Arithmetic;
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -484,7 +492,7 @@ unsigned long long int LZ77Compress(TInBinary* file, std::string fileName, TOutB
 
 unsigned long long int ArithmeticCompress(std::string fileName, TInBinary* file) {
     std::string arithmeticName  = fileName + ".ARI";
-    ACC* method = new ACC;
+    Arithmetic* method = new Arithmetic;
     if (method == nullptr) {
         std::cout << fileName << ": unexpected memory error" << std::endl;
         return 0;
