@@ -1,6 +1,6 @@
 /* LZW.h */
 #pragma once
-#include "TPrefix.h"
+#include "Prefix.h"
 #include "Globals.h"
 
 class TLZW {

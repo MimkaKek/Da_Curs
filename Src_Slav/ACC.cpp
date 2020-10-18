@@ -1,6 +1,6 @@
 #include "ACC.h"
 
-ACC::ACC () {
+TACC::TACC () {
 
     int i;
     
@@ -21,7 +21,7 @@ ACC::ACC () {
 }
 
 //------------------------------------------------------------
-void ACC::UpdateModel (int symbol) {
+void TACC::UpdateModel (int symbol) {
 
     int i;
     int chI, chSymbol;
@@ -59,14 +59,14 @@ void ACC::UpdateModel (int symbol) {
 
 //------------------------------------------------------------
 // Инициализация побитового ввода
-void ACC::StartInputingBits () {
+void TACC::StartInputingBits () {
     bitsToGo = 0;
     garbageBits = 0;
 }
 
 //------------------------------------------------------------
 // Ввод очередного бита сжатой информации
-int ACC::InputBit () {
+int TACC::InputBit () {
 
     int t;
 
@@ -92,14 +92,14 @@ int ACC::InputBit () {
 
 //------------------------------------------------------------
 // Инициализация побитового вывода
-void ACC::StartOutputingBits () {
+void TACC::StartOutputingBits () {
     buffer = 0;
     bitsToGo = 8;
 }
 
 //------------------------------------------------------------
 // Вывод очередного бита сжатой информации
-void ACC::OutputBit (int bit) {
+void TACC::OutputBit (int bit) {
 
     buffer >>= 1;
 
@@ -122,7 +122,7 @@ void ACC::OutputBit (int bit) {
 
 //------------------------------------------------------------
 // Очистка буфера побитового вывода
-void ACC::DoneOutputingBits () {
+void TACC::DoneOutputingBits () {
     if(keys[0]) {
         std::cout << (buffer >> bitsToGo);
     }
@@ -133,7 +133,7 @@ void ACC::DoneOutputingBits () {
 
 //------------------------------------------------------------
 // Вывод указанного бита и отложенных ранее
-void ACC::OutputBitPlusFollow (int bit) {
+void TACC::OutputBitPlusFollow (int bit) {
     OutputBit (bit);
     while (bitsToFollow > 0) {
         OutputBit (!bit);
@@ -143,7 +143,7 @@ void ACC::OutputBitPlusFollow (int bit) {
 
 //------------------------------------------------------------
 // Инициализация регистров границ и кода перед началом сжатия
-void ACC::StartEncoding () {
+void TACC::StartEncoding () {
     low            = 0l;
     high           = TOP_VALUE;
     bitsToFollow   = 0l;
@@ -151,7 +151,7 @@ void ACC::StartEncoding () {
 
 //------------------------------------------------------------
 // Очистка побитового вывода
-void ACC::DoneEncoding () {
+void TACC::DoneEncoding () {
 
     ++bitsToFollow;
     if (low < FIRST_QTR) {
@@ -166,7 +166,7 @@ void ACC::DoneEncoding () {
 /* Инициализация регистров перед декодированием.
    Загрузка начала сжатого сообщения
 */
-void ACC::StartDecoding () {
+void TACC::StartDecoding () {
 
     value = 0l;
     for ( int i = 0; i < BITS_IN_REGISTER; ++i) {
@@ -178,7 +178,7 @@ void ACC::StartDecoding () {
 
 //------------------------------------------------------------
 // Кодирование очередного символа
-void ACC::EncodeSymbol (int symbol) {
+void TACC::EncodeSymbol (int symbol) {
 
     long range;
     
@@ -212,7 +212,7 @@ void ACC::EncodeSymbol (int symbol) {
 
 //------------------------------------------------------------
 // Декодирование очередного символа
-int ACC::DecodeSymbol () {
+int TACC::DecodeSymbol () {
 
     long range;
     int cum, symbol;
@@ -256,7 +256,7 @@ int ACC::DecodeSymbol () {
 
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое кодирование
-bool ACC::Compress (const char *infile, const  char *outfile) {
+bool TACC::Compress (const char *infile, const  char *outfile) {
     int ch, symbol;
     char tmp = 'A'; 
     
@@ -311,7 +311,7 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
 
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое декодирование
-bool ACC::Decompress (const char *infile, const char *outfile) {
+bool TACC::Decompress (const char *infile, const char *outfile) {
     
     int symbol;
     unsigned char ch;

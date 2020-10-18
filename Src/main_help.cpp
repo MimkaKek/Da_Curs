@@ -1,4 +1,4 @@
-/* main_help.cpp */
+/* main_help.cpp *///TODO ключ t
 #include "main_help.h"//TODO W -> L
 
 bool KeyManager(std::string gotKeys) {
@@ -372,7 +372,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		Delete(tmpName);
 		return;
 	}
-	if (!keys[0] && !keys[2]) {//нет -c, -k и -t
+	if (!keys[0] && !keys[2]) {//нет -c, -k и -t//TODO
 		Delete(fileName);
 	}
 	if (!keys[0]) {

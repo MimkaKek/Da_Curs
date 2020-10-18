@@ -28,7 +28,7 @@ const long          NO_OF_SYMBOLS = NO_OF_CHARS + 1;
 // Порог частоты для масштабирования
 const long          MAX_FREQUENCY = 16383;
 
-class ACC {
+class TACC {
     public:
 
         // Собственно адаптивное арифметическое кодирование
@@ -38,7 +38,7 @@ class ACC {
         bool Decompress (const char*, const char*);
 
         // Инициализация адаптивной модели
-        ACC();
+        TACC();
         
         
     private:

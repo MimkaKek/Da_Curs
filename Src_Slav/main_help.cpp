@@ -304,7 +304,7 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		return;
 	}
 	if (algorithm == 'A') {
-		ACC* method = new ACC;
+		TACC* method = new TACC;
 		if (method == nullptr) {
 			std::cout << fileName << ": unexpected memory error" << std::endl;
 			if (!keys[0] && !keys[5]) {
@@ -486,7 +486,7 @@ unsigned long long int LZWCompress(TInBinary* file, std::string fileName, TOutBi
 
 unsigned long long int ArithmeticCompress(std::string fileName, TInBinary* file) {
     std::string arithmeticName  = fileName + ".ARI";
-    ACC* method = new ACC;
+    TACC* method = new TACC;
     if (method == nullptr) {
         std::cout << fileName << ": unexpected memory error" << std::endl;
         return 0;

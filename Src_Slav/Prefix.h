@@ -1,6 +1,6 @@
 /* TPrefix.h */
-#ifndef TPREFIX_H
-#define TPREFIX_H
+#ifndef PREFIX_H
+#define PREFIX_H
 
 #include "Globals.h"
 #include "BFile.h"
