@@ -24,7 +24,7 @@ public:
 
 	TPrefix();
 
-	int Update(char);
+	int Update(unsigned char);
 
 	int UpdateForRoot();
 
@@ -34,11 +34,11 @@ public:
 
 private:
 
-	std::vector<std::pair<char, TPrefix*>> Next;
+	std::vector<std::pair<unsigned char, TPrefix*>> Next;
 
 	unsigned long long int NumberOfWord;
 
-	static char LastLetter;
+	static unsigned char LastLetter;
 
 	static unsigned long long int NeedToRead;
 

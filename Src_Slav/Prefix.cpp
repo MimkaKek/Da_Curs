@@ -4,7 +4,7 @@
 unsigned long long int TPrefix::Border;
 TInBinary* TPrefix::ForRead;
 TOutBinary* TPrefix::ForWrite;
-char TPrefix::LastLetter;
+unsigned char TPrefix::LastLetter;
 unsigned long long int TPrefix::LastNumber;
 unsigned long long int TPrefix::NeedToRead;
 unsigned short int TPrefix::Bites;
@@ -36,7 +36,7 @@ TPrefix::TPrefix(TInBinary* from, TOutBinary* to) {
 	this->LastLetter = 0;
 	this->LastNumber = 1;
 	for (int i = 0; i < CHAR_HAS; ++i) {
-		this->Next.push_back({(char) i, new TPrefix()});
+		this->Next.push_back({(unsigned char) i, new TPrefix()});
 	}
 }
 
@@ -45,13 +45,13 @@ TPrefix::TPrefix() {
 	++this->LastNumber;
 }
 
-int TPrefix::Update(char letter) {
+int TPrefix::Update(unsigned char letter) {
 	bool needNew = true;
 	for (int i = 0; i < this->Next.size(); ++i) {
 		if (letter == this->Next[i].first) {
 			needNew = false;
 			if (this->NeedToRead > 0) {
-				if (!this->ForRead->Read(&letter, sizeof(char))) {
+				if (!this->ForRead->Read((char*)&letter, sizeof(unsigned char))) {
 					return READ_ERROR;
 				}
 				--this->NeedToRead;
@@ -90,9 +90,9 @@ int TPrefix::Update(char letter) {
 
 int TPrefix::UpdateForRoot() {
 	this->LastNumber = CHAR_HAS + 1;
-	char letter, startLetter;
+	unsigned char letter, startLetter;
 	unsigned long long int tmpInt = 0;
-	if (!this->ForRead->Read(&letter, sizeof(char))) {
+	if (!this->ForRead->Read((char*)&letter, sizeof(unsigned char))) {
 		if (this->NeedToRead != 0) {
 			return READ_ERROR;
 		}
@@ -103,7 +103,7 @@ int TPrefix::UpdateForRoot() {
 		if (this->NeedToRead > 0) {
 			startLetter = letter;
 			if (this->LastNumber < this->Border) {
-				if (!this->ForRead->Read(&letter, sizeof(char))) {
+				if (!this->ForRead->Read((char*)&letter, sizeof(unsigned char))) {
 					return READ_ERROR;
 				}
 				--this->NeedToRead;
