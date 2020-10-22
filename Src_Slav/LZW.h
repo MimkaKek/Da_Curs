@@ -1,4 +1,3 @@
-/* LZW.h */
 #pragma once
 #include "Prefix.h"
 #include "Globals.h"

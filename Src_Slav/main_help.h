@@ -1,4 +1,3 @@
-/* main_help.h */
 #ifndef MAIN_HELP_H
 #define MAIN_HELP_H
 

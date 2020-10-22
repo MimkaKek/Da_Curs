@@ -1,4 +1,3 @@
-/* main_help.cpp */
 #include "main_help.h"
 
 bool KeyManager(std::string gotKeys) {
@@ -174,12 +173,12 @@ void WorkWithFile(std::string fileName) {
         delete file;
         return;
     }
-    if (keys[3]) {//-l
+    if (keys[3]) {
         if(!DifferensOfSizes(file, fileName)) {
             std::cout << fileName << ": wrong format" << std::endl;
         }
     }
-    else if (keys[1] || keys[5]) {//-d или -t
+    else if (keys[1] || keys[5]) {
         MainDecompress(file, fileName);
     }
     else {
@@ -354,10 +353,12 @@ void MainDecompress(TInBinary* file, std::string fileName) {
 		return;
 	}
 	if (keys[5]) {
-		Delete(tmpName);
+		if (algorithm != 'L') {
+			Delete(tmpName);
+		}
 		return;
 	}
-	if (!keys[0] && !keys[2]) {//нет -c, -k и -t
+	if (!keys[0] && !keys[2]) {
 		Delete(fileName);
 	}
 	if (!keys[0]) {
@@ -394,8 +395,7 @@ void MainCompress(TInBinary* file, std::string fileName) {
 		}
 	}
 	unsigned long long int LZWSize, arithmeticSize;
-	if (!keys[6] && !keys[7]) {//ключи 1 и 9 не указаны
-		/* Блок с моим LZW */
+	if (!keys[6] && !keys[7]) {
 		LZWSize = LZWCompress(file, fileName, compressionFile);
 		file->Close();
 		if (LZWSize == 0) {
@@ -405,7 +405,6 @@ void MainCompress(TInBinary* file, std::string fileName) {
 			}
 			return;
 		}
-		/* арифметика */
 		arithmeticSize = ArithmeticCompress(fileName, file);
 		if (arithmeticSize == 0) {
 			if (!keys[0]) {
@@ -417,7 +416,7 @@ void MainCompress(TInBinary* file, std::string fileName) {
 		}
 		
 	}
-	else if (keys[6]) {/* LZW т.к. 1*/
+	else if (keys[6]) {
 		arithmeticSize = 0;
 		LZWSize = LZWCompress(file, fileName, compressionFile);
 		file->Close();
@@ -429,7 +428,7 @@ void MainCompress(TInBinary* file, std::string fileName) {
 			return;
 		}
 	}
-	else {// Arif т.к. 9
+	else {
 		LZWSize = 0;
 		arithmeticSize = ArithmeticCompress(fileName, file);
 		if (arithmeticSize == 0) {
@@ -528,7 +527,7 @@ void KeepSmall(unsigned long long int LZWSize, unsigned long long int arithmetic
             Rename(fileName + ".LZW", fileName + ".gz");
         }
     }
-    if (!keys[2]) {//-k
+    if (!keys[2]) {
         Delete(fileName);
     }
     return;

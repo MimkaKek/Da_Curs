@@ -1,4 +1,3 @@
-/* TPrefix.cpp */
 #include "Prefix.h"
 
 unsigned long long int TPrefix::Border;
@@ -113,7 +112,7 @@ int TPrefix::UpdateForRoot() {
 				}
 				letter = this->LastLetter;
 			}
-			else {// для супербольших файлов
+			else {
 				tmpInt = 0;
 				if (keys[0]) {
 					std::cout << (char*)&this->Next[letter].second->NumberOfWord << (char*)&tmpInt;

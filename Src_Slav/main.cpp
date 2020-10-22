@@ -1,4 +1,3 @@
-/* maip.cpp */
 #include "main_help.h"
 
 std::vector<bool> keys;
@@ -8,17 +7,16 @@ int main(int argc, char *argv[]) {
 	std::map<std::string, int> fileNames;
 	std::map<std::string, int>::iterator finder;
 	keys = {false, false, false, false, false, false, false, false, false};
-//			c	   d	  k		 l		r	   t	  1		 9		a
 	for (int i = 1; i < argc; ++i) {
 		std::string keyFile;
 		std::stringstream tmp(argv[i]);
 		tmp >> keyFile;
-		if (keyFile[0] == '-') {//ключ(и)
+		if (keyFile[0] == '-') {
 			if (!KeyManager(keyFile)) {
 				return -1;
 			}
 		}
-		else {// файлы и папки
+		else {
 			bool got = false;
 			if (keyFile.size() > 2) {
 				if (keyFile[0] == '.' && keyFile[1] == '/') {
@@ -26,7 +24,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			finder = fileNames.find(keyFile);
-			if (finder != fileNames.end()) {//для избежания работы над одним и тем же файлом несколько раз
+			if (finder != fileNames.end()) {
 				got = true;
 			}
 			if (!got) {
@@ -38,7 +36,6 @@ int main(int argc, char *argv[]) {
 		std::cout << "Compressed data not written to a terminal." << std::endl;
 		return 0;
 	}
-	//проверка на файлы и папки и дальнейшая работа с ними
 	for (finder = fileNames.begin(); finder != fileNames.end(); ++finder) {
 		bool directory = IsDirectory(finder->first, false);
 		if (!keys[4] && directory) {
@@ -59,7 +56,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	clock_t t1 = clock();//TODO
+	clock_t t1 = clock();
 	if (keys[8]) {
 		std::cout << std::endl << ((double) t1 - t0) / CLOCKS_PER_SEC << " секунд" << std::endl;
 	}

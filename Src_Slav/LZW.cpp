@@ -1,4 +1,3 @@
-/* LZW.cpp */
 #include "LZW.h"
 
 TLZW::TLZW(TInBinary* from, TOutBinary* to) {

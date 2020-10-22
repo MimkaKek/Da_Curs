@@ -8,32 +8,26 @@
 #include <cstdio>
 #include <cstdlib>
 
-bool KeyManager(std::string);
+void Compress(TInBinary*, std::string);
+void Decompress(TInBinary*, std::string);
 
-bool DifferensOfSizes(TInBinary*, std::string);
- 
-void WorkWithDirectory(std::string, std::map<std::string, int>*);
+bool ActivateKeys(std::string);
 
-void WorkWithFile(std::string);
+bool ArchiveInfo(TInBinary*, std::string);
 
-bool IsDirectory(std::string, bool);
+unsigned long long int CompressA(std::string, TInBinary*);
+unsigned long long int CompressL(TInBinary* file, std::string, TOutBinary*);
 
-void PrintDirectoryErrors(std::string);
+bool ArchiveCheck(std::string);
+bool DirectoryCheck(std::string, bool);
+void ChangeFile(std::string);
+void GetFiles(std::string, std::map<std::string, int>*);
 
-bool IsArchive(std::string);
+void SaveBest(unsigned long long int, unsigned long long int, std::string);
 
-void Rename(std::string, std::string);
+void ShowErrors(std::string);
 
-void Delete(std::string);
-
-void MainDecompress(TInBinary*, std::string);
-
-void MainCompress(TInBinary*, std::string);
-
-unsigned long long int LZ77Compress(TInBinary* file, std::string, TOutBinary*);
-
-unsigned long long int ArithmeticCompress(std::string, TInBinary*);
-
-void KeepSmall(unsigned long long int, unsigned long long int, std::string);
+void Mv(std::string, std::string);
+void Rm(std::string);
 
 #endif

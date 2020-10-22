@@ -1,4 +1,3 @@
-/* TPrefix.h */
 #ifndef PREFIX_H
 #define PREFIX_H
 
