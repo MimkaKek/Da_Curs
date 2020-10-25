@@ -1,5 +1,5 @@
 /* main_help.cpp */
-#include "main_help.h"
+#include "preprocessing.h"
 
 void Compress(std::string fileName)
 {//NEED_CHECK

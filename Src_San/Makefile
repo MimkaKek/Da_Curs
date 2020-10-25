@@ -1,5 +1,5 @@
-all: Arithmetic.o BFile.o LZ77.o main.o main_help.o gen comparator
-	g++ Arithmetic.o BFile.o LZ77.o main.o main_help.o -g -o main
+all: Arithmetic.o BFile.o LZ77.o main.o preprocessing.o gen comparator
+	g++ Arithmetic.o BFile.o LZ77.o main.o preprocessing.o -g -o main
 	rm *.o
 	echo DONE
 
@@ -21,8 +21,8 @@ LZ77.o:
 main.o:
 	g++ -c -g main.cpp
 
-main_help.o:
-	g++ -c -g main_help.cpp
+preprocessing.o:
+	g++ -c -g preprocessing.cpp
 
 clean:
 	rm -rf tests gen comparator
