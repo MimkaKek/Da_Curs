@@ -8,22 +8,21 @@
 #include <cstdio>
 #include <cstdlib>
 
-void Compress(TInBinary*, std::string);
-void Decompress(TInBinary*, std::string);
+void Compress(std::string);
+void Decompress(std::string);
 
 bool ActivateKeys(std::string);
 
-bool ArchiveInfo(TInBinary*, std::string);
+void ArchiveInfo(std::string);
 
-unsigned long long int CompressA(std::string, TInBinary*);
-unsigned long long int CompressL(TInBinary* file, std::string, TOutBinary*);
+unsigned long long int CompressA(std::string);
+unsigned long long int CompressL(std::string);
 
 bool ArchiveCheck(std::string);
 bool DirectoryCheck(std::string, bool);
-void ChangeFile(std::string);
 void GetFiles(std::string, std::map<std::string, int>*);
 
-void SaveBest(unsigned long long int, unsigned long long int, std::string);
+void SaveBest(std::string, unsigned long long int, unsigned long long int);
 
 void ShowErrors(std::string);
 

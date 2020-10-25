@@ -2,13 +2,13 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <vector>
+#include <map>
+#include <dirent.h>
+#include <ctime>
+#include <errno.h>
 #include <iostream>
 #include <sstream>
-#include <vector>
-#include <dirent.h>
-#include <errno.h>
-#include <map>
-#include <ctime>
 
 /* ключи                                                                    
  * -c вывод архива в out

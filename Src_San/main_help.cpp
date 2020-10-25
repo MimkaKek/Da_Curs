@@ -1,120 +1,94 @@
 /* main_help.cpp */
-#include "main_help.h"//TODO W -> L
+#include "main_help.h"
 
-void Compress(TInBinary* file, std::string fileName)
-{//TODO
-	std::string nextName = fileName + ".gz";
-	file->Close();
+void Compress(std::string fileName)
+{//NEED_CHECK
+	std::string compressFile = fileName + ".gz";
 
 	if (ArchiveCheck(fileName))
 	{
 		std::cout << fileName << " already has .gz suffix -- unchanged" << std::endl;
 		return;
 	}
-
+	
+	FILE *file;
+	
 	if (!keys[0])
-		if (file->Open(&nextName))
+		if(file = fopen(compressFile.c_str(), 'r'))
 		{
-			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-			char choise;
-			std::cin >> choise;
-			file->Close();
+			std::cout << compressFile << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char save;
+			std::cin >> save;
+			fclose(file);
 
-			if (choise != 'Y' && choise != 'y')
+			if (save != 'Y' && save != 'y')
 			{
 				std::cout << "\tnot overwritten" << std::endl;
 				return;
 			}
 		}
 
-	TOutBinary* compressionFile = nullptr;
-
-	if (!keys[0])
-	{
-		compressionFile = new TOutBinary;
-
-		if (compressionFile == nullptr)
-		{
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			return;
-		}
-	}
-
-	unsigned long long int LZ77Size, arithmeticSize;
+	unsigned long long int sizeLZ, sizeAr;
 
 	if (!keys[6] && !keys[7])
 	{//ключи 1 и 9 не указаны
 		/* LZ77 */
-		LZ77Size = CompressL(file, fileName, compressionFile);//TODO YOU
-		file->Close();
+		sizeLZ = CompressL(fileName);//TODO YOU
 
-		if (LZ77Size == 0)
+		if (sizeLZ == 0)
 		{
 			if (!keys[0])
-			{
-				delete compressionFile;
 				Rm(fileName + ".LZ7");
-			}
 
 			return;
 		}
 		/* арифметика */
-		arithmeticSize = CompressA(fileName, file);
+		sizeAr = CompressA(fileName);
 
-		if (arithmeticSize == 0)
+		if (sizeAr == 0)
 		{
 			if (!keys[0])
 			{
-				delete compressionFile;
 				Rm(fileName + ".LZ7");
 				Rm(fileName + ".ARI");
 			}
+			
 			return;
 		}
 		
 	}
 	else if (keys[6])
 	{/* LZ77 т.к. 1*/
-		arithmeticSize = 0;
-		LZ77Size = CompressL(file, fileName, compressionFile);//TODO
-		file->Close();
+		sizeAr = 0;
+		sizeLZ = CompressL(fileName);//TODO
 
-		if (LZ77Size == 0)
+		if (sizeLZ == 0)
 		{
 			if (!keys[0])
-			{
-				delete compressionFile;
 				Rm(fileName + ".LZ7");
-			}
+
 			return;
 		}
 	}
 	else
 	{// Arif т.к. 9
-		LZ77Size = 0;
-		arithmeticSize = CompressA(fileName, file);
+		sizeLZ = 0;
+		sizeAr = CompressA(fileName);
 
-		if (arithmeticSize == 0)
+		if (sizeAr == 0)
 		{
 			if (!keys[0])
-			{
-				delete compressionFile;
 				Rm(fileName + ".ARI");
-			}
+
 			return;
 		}
 	}
 
 	if (!keys[0])
-	{
-		delete compressionFile;
-		SaveBest(LZ77Size, arithmeticSize, fileName);
-	}
-
-	return;
+		SaveBest(fileName, sizeLZ, sizeAr);
 }
-void Decompress(TInBinary* file, std::string fileName)
-{
+void Decompress(std::string fileName)
+{//NEED_CHECK
 	if (keys[1] && !keys[0])
 		if (!ArchiveCheck(fileName))
 		{
@@ -122,166 +96,105 @@ void Decompress(TInBinary* file, std::string fileName)
 			return;
 		}
 
-	std::string tmpName = fileName + ".tmp";
+	std::string tmp = fileName + ".tmp";
+	std::string decompresFile = fileName;
 
-	file->Close();
+	decompresFile.pop_back();
+	decompresFile.pop_back();
+	decompresFile.pop_back();
 
-	std::string nextName = fileName;
-
-	nextName.pop_back();
-	nextName.pop_back();
-	nextName.pop_back();
+	FILE* file = NULL;
 
 	if (!keys[0] && !keys[5])
-		if (file->Open(&nextName))
+		if (file = fopen(decompresFile.c_str(), 'r'))
 		{
-			std::cout << nextName << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
-			char choise;
+			std::cout << decompresFile << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
+			char save;
+			std::cin >> save;
+			fclose(file);
 
-			std::cin >> choise;
-			file->Close();
-
-			if (choise != 'Y' && choise != 'y')
+			if (save != 'Y' && save != 'y')
 			{
 				std::cout << "\tnot overwritten" << std::endl;
 				return;
 			}
 		}
 
-	if (!file->Open(&fileName))
+	char algo = 0;
+	bool complete;
+
+	if (!file = fopen(fileName.c_str(), 'r'))
 	{
-		std::cout << fileName << ": can't read file" << std::endl;
+		std::cout << "Can\'t open file " << fileName << std::endl;
 		return;
 	}
 
-	TOutBinary* decompressedFile = nullptr;
-
-	if (!keys[0] && !keys[5])
-	{
-		decompressedFile = new TOutBinary;
-
-		if (decompressedFile == nullptr)
-		{
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-			return;
-		}
-
-		if (!decompressedFile->Open(&tmpName))
-		{
-			std::cout << fileName << ": can't transfer data" << std::endl;
-			delete decompressedFile;
-			return;
-		}
-	}
-	char algorithm = 0;
-	bool success;
-
-	if (!file->Read(&algorithm, sizeof(char)))
+	if (!fread(&algo, sizeof(char), 1, file))
 	{
 		std::cout << fileName << ": can't transfer data" << std::endl;
-
-		if (!keys[0] && !keys[5])
-		{
-			decompressedFile->Close();
-			Rm(tmpName);
-			delete decompressedFile;
-		}
-
 		return;
 	}
-
-	if (algorithm == 'A')
+	
+	if (!fclose(file))
 	{
-		Arithmetic* method = new Arithmetic;
-
-		if (method == nullptr)
-		{
-			std::cout << fileName << ": unexpected memory error" << std::endl;
-
-			if (!keys[0] && !keys[5])
-			{
-				decompressedFile->Close();
-				Rm(tmpName);
-				delete decompressedFile;
-			}
-
-			return;
-		}
-
-		success = method->Decompress(fileName.c_str(), tmpName.c_str());
-		delete method;
+		std::cout << "Can\'t close file " << fileName << std::endl;
+		return;
 	}
-	else if (algorithm == 'L')
+	
+	if (algo == 'A')
 	{
-		LZ77* method = new LZ77;//TODO YOU
+		Arithmetic* algorithm = new Arithmetic;
 
-		if (method == nullptr)
+		if (algorithm == nullptr)
 		{
 			std::cout << fileName << ": unexpected memory error" << std::endl;
-
-			if (!keys[0] && !keys[5])
-			{
-				decompressedFile->Close();
-				Rm(tmpName);
-				delete decompressedFile;
-			}
-
 			return;
 		}
 
-		success = method->Decompress(fileName);
-		delete method;
+		complete = algorithm->Decompress(fileName.c_str(), tmp.c_str());
+		delete algorithm;
+	}
+	else if (algo == 'L')
+	{
+		LZ77* algorithm = new LZ77;//TODO YOU
+
+		if (algorithm == nullptr)
+		{
+			std::cout << fileName << ": unexpected memory error" << std::endl;
+			return;
+		}
+
+		complete = algorithm->Decompress(fileName, tmp);
+		delete algorithm;
 	}
 	else
 	{
 		std::cout << fileName << ": not compressed data" << std::endl;
-
-		if (!keys[0] && !keys[5])
-		{
-			decompressedFile->Close();
-			Rm(tmpName);
-			delete decompressedFile;
-		}
-
 		return;
 	}
 
-	if (!keys[0] && !keys[5])
-	{
-		decompressedFile->Close();
-		delete decompressedFile;
-	}
-
-	if (!success)
+	if (!complete)
 	{
 		if (!keys[5])
 			std::cout << "\t\tdecompressing failed" << std::endl;
 
 		if (!keys[0] && !keys[5])
-			Rm(tmpName);
+			Rm(tmp);
 
 		return;
 	}
 
-	if (keys[5])
-	{
-		Rm(tmpName);
-		return;
-	}
-
-	if (!keys[0] && !keys[2]) //нет -c, -k и -t
+	if (!keys[0] && !keys[2] && !keys[5]) //нет -c, -k и -t
 		Rm(fileName);
 
-	if (!keys[0])
-		Mv(tmpName, nextName);
-
-	return;
+	if (!keys[0] && !keys[5])
+		Mv(tmp, nextName);
 }
-bool ActivateKeys(std::string gotKeys)
+bool ActivateKeys(std::string argvKeys)
 {
-    for (int j = 1; j < gotKeys.size(); ++j)
+    for (int j = 1; j < argvKeys.size(); ++j)
     {
-        switch (gotKeys[j])
+        switch (argvKeys[j])
         {
             case 'a':
                 keys[8] = true;
@@ -342,39 +255,67 @@ bool ActivateKeys(std::string gotKeys)
                     keys[6] = false;
                 break;
             default:
-                std::cout << "invalid option -- '" << gotKeys[j] << "'" << std::endl;
+                std::cout << "invalid option -- '" << argvKeys[j] << "'" << std::endl;
                 return false;
         }
     }
     return true;
 }
-bool ArchiveInfo(TInBinary* file, std::string fileName)
+void ArchiveInfo(std::string fileName)
 {
-    char trash = 0;
+    char algo = 0;
+	FILE *file;
+	if(!file = fopen(fileName.c_str(), 'r'))
+	{
+		std::cout << "Can't open file " << fileName << std::endl;
+		return;
+	}
     
-    if (!file->Read(&trash, sizeof(char)))
-        return false;
-    
-    if (trash != 'L' && trash != 'A')
-        return false;
+    if (!fread(&algo, sizeof(char), 1, file))
+	{
+		std::cout << "Can't read file " << fileName << std::endl;
+		return;
+	}
+	
+    if (algo != 'L' && algo != 'A')
+	{
+		std::cout << fileName << ": wrong format" << std::endl;
+		return;
+	}
 
-    unsigned long long int uncompressed, compressed;
+    unsigned long long int big, cut;
 
-    if (!file->Read((char*)&uncompressed, sizeof(unsigned long long int)))
-        return false;
+    if (!fread(&big, sizeof(unsigned long long int), 1, file))
+	{
+		std::cout << "Can't read file " << fileName << std::endl;
+		return;
+	}
 
-    compressed = file->SizeFile();
-    double ratio = (double) compressed / uncompressed;
+	if (fseek(file, 0L, SEEK_END))
+	{
+		std::cout << "Can't read file " << fileName << std::endl;
+		return;
+	}
+	
+    cut = ftell(file);
+
+	if (!fclose(file))
+	{
+		std::cout << "Can\'t close file " << fileName << std::endl;
+		return;
+	}
+	
+    double ratio = (double) cut / big;
     ratio = 1 - ratio;
 
-    if (uncompressed == 0)
+    if (big == 0)
         ratio = 0.0;
     else if (ratio < -1)
         ratio = -1;
 
     std::cout << "         compressed        uncompressed  ratio uncompressed_name" << std::endl;
 
-    printf("%19llu %19llu %5.1lf", compressed, uncompressed, ratio * 100);
+    printf("%19llu %19llu %5.1lf", cut, big, ratio * 100);
 
     if (ArchiveCheck(fileName))
     {
@@ -384,92 +325,106 @@ bool ArchiveInfo(TInBinary* file, std::string fileName)
     }
 
     std::cout << "% " << fileName << std::endl;
-
-    return true;
 }
-unsigned long long int CompressA(std::string fileName, TInBinary* file)
+unsigned long long int CompressA(std::string fileName)
 {
-    std::string arithmeticName  = fileName + ".ARI";
-    Arithmetic* method = new Arithmetic;
+    std::string tmp  = fileName + ".ARI";
+    Arithmetic* algorithm = new Arithmetic;
 
-    if (method == nullptr)
+    if (algorithm == nullptr)
     {
         std::cout << fileName << ": unexpected memory error" << std::endl;
         return 0;
     }
 
-    if (!method->Compress(fileName.c_str(), arithmeticName.c_str()))
+    if (!algorithm->Compress(fileName.c_str(), tmp.c_str()))
     {
-        delete method;
+        delete algorithm;
         std::cout << "\t\tcompression failed" << std::endl;
         return 0;
     }
 
-    delete method;
+    delete algorithm;
 
     if (keys[0])
         return 1;
 
-    if (!file->Open(&arithmeticName))
-    {
-        std::cout << fileName << ": can't read file" << std::endl;
+	FILE *file;
+	
+	if (!file = fopen(tmp.c_str(), 'r'))
+	{
+		std::cout << fileName << ": can't read file" << std::endl;
         return 0;
-    }
+	}
 
-    return file->SizeFile();
+	if (fseek(file, 0L, SEEK_END))
+	{
+		std::cout << "Can't read file " << fileName << std::endl;
+		return 0;
+	}
+	
+    unsigned long long int size = ftell(file);
+
+	if (!fclose(file))
+	{
+		std::cout << "Can\'t close file " << fileName << std::endl;
+		return 0;
+	}
+
+    return size;
 }
-unsigned long long int CompressL(TInBinary* file, std::string fileName, TOutBinary* compressionFile)
-{//TODO
-    std::string LZ77Name = fileName + ".LZ7";
+unsigned long long int CompressL(std::string fileName)
+{
+    std::string tmp = fileName + ".LZ7";
 
-    if (!file->Open(&fileName))
-    {
-        std::cout << fileName << ": can't read file" << std::endl;
-        return 0;
-    }
+    LZ77* algorithm = new LZ77;
 
-    if (!keys[0])
-        if (!compressionFile->Open(&LZ77Name))
-        {
-            std::cout << fileName << ": can't transfer data" << std::endl;
-            return 0;
-        }
-
-    TLZ77* method = new TLZ77;
-
-    if (method == nullptr)
+    if (algorithm == nullptr)
     {
         std::cout << fileName << ": unexpected memory error" << std::endl;
         return 0;
     }
 
-    if (!method->Compress())
+    if (!algorithm->Compress(fileName, tmp))
     {
-        delete method;
+        delete algorithm;
         std::cout << "\t\tcompression failed" << std::endl;
         return 0;
     }
 
-    delete method;
-    compressionFile->Close();
+    delete algorithm;
 
     if (keys[0])
         return 1;
 
-    file->Close();
-
-    if (!file->Open(&LZWName))
-    {
-        std::cout << fileName << ": can't read file" << std::endl;
+    FILE *file;
+	
+	if (!file = fopen(tmp.c_str(), 'r'))
+	{
+		std::cout << fileName << ": can't read file" << std::endl;
         return 0;
-    }
+	}
 
-    return file->SizeFile();
+	if (fseek(file, 0L, SEEK_END))
+	{
+		std::cout << "Can't read file " << fileName << std::endl;
+		return 0;
+	}
+	
+    unsigned long long int size = ftell(file);
+
+	if (!fclose(file))
+	{
+		std::cout << "Can\'t close file " << fileName << std::endl;
+		return 0;
+	}
+
+    return size;
 }
 bool ArchiveCheck(std::string fileName)
 {
-    int size = fileName.length() - 1;
-    return (fileName[size - 2] == '.' && fileName[size - 1] == 'g' && fileName[size] == 'z');
+    int length = fileName.length() - 1;
+    return (fileName[length - 2] == '.' && fileName[length - 1] == 'g' && fileName[length] == 'z');
 }
 bool DirectoryCheck(std::string directoryName, bool help)
 {
@@ -492,39 +447,8 @@ bool DirectoryCheck(std::string directoryName, bool help)
 
 	return true;
 }
-void ChangeFile(std::string fileName)
+void GetFiles(std::string directoryName, std::map<std::string, int>* filesInDirectories)
 {
-    TInBinary* file = new TInBinary;
-
-    if (file == nullptr)
-    {
-        std::cout << fileName << ": unexpected memory error" << std::endl;
-        return;
-    }
-
-    if (!file->Open(&fileName))
-    {
-        std::cout << fileName << ": can't read file" << std::endl;
-        delete file;
-        return;
-    }
-
-    if (keys[3])
-    {//-l
-        if(!ArchiveInfo(file, fileName))
-            std::cout << fileName << ": wrong format" << std::endl;
-    }
-    else if (keys[1] || keys[5]) //-d или -t
-        Decompress(file, fileName);
-    else
-        Compress(file, fileName);
-
-    file->Close();
-    delete file;
-    return;
-}
-void GetFiles(std::string directoryName, std::map<std::string, int>* directoryNames)
-{//TODO
 	DIR *directory = opendir(directoryName.c_str());
 
 	if (directory == NULL)
@@ -533,14 +457,14 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* directoryNa
 		return;
 	}
 
-	short int countOfDirs = 0;
+	short int depth = 0;
 
 	for (int i = 0; i < directoryName.size(); ++i)
 	{
 		if (directoryName[i] == '/')
-			++countOfDirs;
+			++depth;
 
-		if (countOfDirs > 1)
+		if (depth > 1)
 			break;
 	}
 
@@ -557,8 +481,8 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* directoryNa
 
 		std::string tmp = std::string(directoryFile->d_name);
 
-		if (tmp == "." || tmp == ".." || (tmp == "main" && countOfDirs == 1
-			&& (directoryName[0] == directoryName[1]) && directoryName[1] == '.'))
+		if (tmp == "." || tmp == ".." || (tmp == "main" && depth == 1 && directoryName[1] == '.'
+			&& (directoryName[0] == directoryName[1])))
 		{
 			directoryFile = readdir(directory);
 			continue;
@@ -576,17 +500,17 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* directoryNa
 		}
 
 		if (DirectoryCheck(tmp, true))
-			GetFiles(tmp, directoryNames);
+			GetFiles(tmp, filesInDirectories);
 		else
 		{
 			bool got = false;
-			finder = directoryNames->find(tmp);
+			finder = filesInDirectories->find(tmp);
 
-			if (finder != directoryNames->end())//для избежания работы над одним и тем же файлом несколько раз
+			if (finder != filesInDirectories->end())//для избежания работы над одним и тем же файлом несколько раз
 				got = true;
 
 			if (!got)
-				directoryNames->insert({tmp, directoryNames->size + 1});
+				filesInDirectories->insert({tmp, filesInDirectories->size + 1});
 		}
 
 		directoryFile = readdir(directory);
@@ -596,38 +520,34 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* directoryNa
 
 	if (errno == EBADF)
 		ShowErrors(directoryName);
-
-	return;
 }
-void SaveBest(unsigned long long int LZ77Size, unsigned long long int arithmeticSize, std::string fileName)
+void SaveBest(std::string fileName, unsigned long long int sizeLZ, unsigned long long int sizeAr)
 {
-    std::string nextName;
+    std::string gz;
 
-    if (LZ77Size > 0 && arithmeticSize > 0)
+    if (sizeLZ > 0 && sizeAr > 0)
     {
-        if (LZ77Size > arithmeticSize)
+        if (sizeLZ > sizeAr)
         {
-            nextName = fileName + ".ARI";
+            gz = fileName + ".ARI";
             Rm(fileName + ".LZ7");
         }
         else
         {
-            nextName = fileName + ".LZ7";
+            gz = fileName + ".LZ7";
             Rm(fileName + ".ARI");
         }
 
-        Mv(nextName, fileName + ".gz");
+        Mv(gz, fileName + ".gz");
     }
     else
-        if (LZ77Size == 0)
+        if (sizeLZ == 0)
             Mv(fileName + ".ARI", fileName + ".gz");
         else 
             Mv(fileName + ".LZ7", fileName + ".gz");
 
     if (!keys[2])//-k
         Rm(fileName);
-
-    return;
 }
 void ShowErrors(std::string directoryName)
 {
@@ -653,17 +573,14 @@ void ShowErrors(std::string directoryName)
             std::cout << "No file or directory with name " << directoryName << std::endl;
             break;
     }
-    return;
 }
-void Mv(std::string oldName, std::string nextName)
+void Mv(std::string oldName, std::string newName)
 {
-    std::string command = "mv ./" + oldName + " ./" + nextName;
+    std::string command = "mv ./" + oldName + " ./" + newName;
     system(command.c_str());
-    return;
 }
 void Rm(std::string fileName)
 {
     std::string command = "rm ./" + fileName;
     system(command.c_str());
-    return;
 }

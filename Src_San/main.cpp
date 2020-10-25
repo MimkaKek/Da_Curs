@@ -6,7 +6,7 @@ std::vector<bool> keys;
 int main(int argc, char *argv[])
 {
 	clock_t t0 = clock();
-	std::map<std::string, int> fileNames, directoryNames;
+	std::map<std::string, int> files, filesInDirectories;
 	std::map<std::string, int>::iterator finder;
 	keys = {false, false, false, false, false, false, false, false, false};
 //			c	   d	  k		 l		r	   t	  1		 9		a
@@ -28,38 +28,48 @@ int main(int argc, char *argv[])
 					keyFile.erase(0, 2);
 			
 			if (IsDirectory(keyFile, false))
-				GetFiles(keyFile, *directoryNames);
+				GetFiles(keyFile, *filesInDirectories);
 			else
 			{
 				bool got = false;
-				finder = fileNames.find(keyFile);
+				finder = files.find(keyFile);
 				
-				if (finder != fileNames.end()) //для избежания работы над одним и тем же файлом несколько раз
+				if (finder != files.end()) //для избежания работы над одним и тем же файлом несколько раз
 					got = true;
 				
 				if (!got)
-					fileNames.insert({keyFile, i});
+					files.insert({keyFile, i});
 			}
 		}
 	}
 	
-	if (fileNames.empty() && directoryNames.empty())
+	if (files.empty() && filesInDirectories.empty())
 	{
 		std::cout << "Compressed data not written to a terminal." << std::endl;
 		return 0;
 	}
 	
-	for (finder = directoryNames.begin(); finder != directoryNames.end() && keys[4]; ++finder) 
+	for (finder = filesInDirectories.begin(); finder != filesInDirectories.end() && keys[4]; ++finder) 
 		if (finder->first == "main") 
 			continue;
 		else 
-			ChangeFile(finder->first);
+			if (keys[3]) //-l
+				ArchiveInfo(finder->first)
+			else if (keys[1] || keys[5]) //-d или -t
+				Decompress(finder->first);
+			else
+				Compress(finder->first);
 
-	for (finder = fileNames.begin(); finder != fileNames.end(); ++finder)
+	for (finder = files.begin(); finder != files.end(); ++finder)
 		if (finder->first == "main") 
 			continue;
 		else 
-			ChangeFile(finder->first);
+			if (keys[3]) //-l
+				ArchiveInfo(finder->first);
+			else if (keys[1] || keys[5]) //-d или -t
+				Decompress(finder->first);
+			else
+				Compress(finder->first);
 
 	clock_t t1 = clock();
 
