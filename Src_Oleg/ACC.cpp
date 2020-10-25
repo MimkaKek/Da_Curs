@@ -57,11 +57,27 @@ void ACC::UpdateModel (int symbol) {
     }
 }
 
-//------------------------------------------------------------
-// Инициализация побитового ввода
-void ACC::StartInputingBits () {
-    bitsToGo = 0;
-    garbageBits = 0;
+void ACC::InputFileInfo() {
+    char tmp = 'A';
+    
+    if(!keys[0]) {
+        fwrite(&tmp, sizeof(char), 1, out);
+    }
+    else {
+        std::cout << tmp;
+    }
+    
+    unsigned long long savePos, sizeOfFile;
+    savePos = ftell(in);
+    fseek(in, 0, SEEK_END);
+    sizeOfFile = ftell(in);
+    fseek(in, savePos, SEEK_SET);
+    if(!keys[0]) {
+        fwrite(&sizeOfFile, sizeof(long long), 1, out);
+    }
+    else {
+        std::cout << sizeOfFile;
+    }
 }
 
 //------------------------------------------------------------
@@ -91,13 +107,6 @@ int ACC::InputBit () {
 }
 
 //------------------------------------------------------------
-// Инициализация побитового вывода
-void ACC::StartOutputingBits () {
-    buffer = 0;
-    bitsToGo = 8;
-}
-
-//------------------------------------------------------------
 // Вывод очередного бита сжатой информации
 void ACC::OutputBit (int bit) {
 
@@ -121,17 +130,6 @@ void ACC::OutputBit (int bit) {
 }
 
 //------------------------------------------------------------
-// Очистка буфера побитового вывода
-void ACC::DoneOutputingBits () {
-    if(keys[0]) {
-        std::cout << (buffer >> bitsToGo);
-    }
-    else {
-        putc(buffer >> bitsToGo, out);
-    }
-}
-
-//------------------------------------------------------------
 // Вывод указанного бита и отложенных ранее
 void ACC::OutputBitPlusFollow (int bit) {
     OutputBit (bit);
@@ -144,6 +142,10 @@ void ACC::OutputBitPlusFollow (int bit) {
 //------------------------------------------------------------
 // Инициализация регистров границ и кода перед началом сжатия
 void ACC::StartEncoding () {
+
+    buffer = 0;
+    bitsToGo = 8;
+    
     low            = 0l;
     high           = TOP_VALUE;
     bitsToFollow   = 0l;
@@ -160,6 +162,13 @@ void ACC::DoneEncoding () {
     else {
         OutputBitPlusFollow(1);
     }
+
+    if(keys[0]) {
+        std::cout << (buffer >> bitsToGo);
+    }
+    else {
+        putc(buffer >> bitsToGo, out);
+    }
 }
 
 //------------------------------------------------------------
@@ -168,6 +177,9 @@ void ACC::DoneEncoding () {
 */
 void ACC::StartDecoding () {
 
+    bitsToGo = 0;
+    garbageBits = 0;
+    
     value = 0l;
     for ( int i = 0; i < BITS_IN_REGISTER; ++i) {
         value = 2 * value + InputBit ();
@@ -257,8 +269,9 @@ int ACC::DecodeSymbol () {
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое кодирование
 bool ACC::Compress (const char *infile, const  char *outfile) {
+
     int ch, symbol;
-    char tmp = 'A'; 
+    
     
     in = fopen (infile, "r+b");
     if(!keys[0]) {
@@ -269,26 +282,6 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
         return false;
     }
 
-    if(!keys[0]) {
-        fwrite(&tmp, sizeof(char), 1, out);
-    }
-    else {
-        std::cout << tmp;
-    }
-    
-    unsigned long long savePos, sizeOfFile;
-    savePos = ftell(in);
-    fseek(in, 0, SEEK_END);
-    sizeOfFile = ftell(in);
-    fseek(in, savePos, SEEK_SET);
-    if(!keys[0]) {
-        fwrite(&sizeOfFile, sizeof(long long), 1, out);
-    }
-    else {
-        std::cout << sizeOfFile;
-    }
-
-    StartOutputingBits ();
     StartEncoding ();
     for (;;) {
         ch = getc (in);
@@ -301,7 +294,6 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     }
     EncodeSymbol (EOF_SYMBOL);
     DoneEncoding ();
-    DoneOutputingBits ();
     fclose (in);
     if(!keys[0]) {
         fclose (out);
@@ -328,7 +320,6 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
     fread(&typeC, sizeof(char), 1, in);
     fread(&oldSize, sizeof(long long), 1, in);
     
-    StartInputingBits ();
     StartDecoding ();
     for (;;) {
         symbol = DecodeSymbol ();
