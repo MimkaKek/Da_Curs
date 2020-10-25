@@ -243,7 +243,7 @@ int ACC::DecodeSymbol () {
         else
             break;
 
-        // сдвиг влево с "втягиванием очередного бита
+        // сдвиг влево с втягиванием очередного бита
         low   = 2 * low;
         high  = 2 * high + 1;
         value = 2 * value + InputBit ();
@@ -257,6 +257,7 @@ int ACC::DecodeSymbol () {
 //------------------------------------------------------------
 // Собственно адаптивное арифметическое кодирование
 bool ACC::Compress (const char *infile, const  char *outfile) {
+    
     int ch, symbol;
     char tmp = 'A'; 
     

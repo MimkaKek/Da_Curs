@@ -4,10 +4,10 @@ all: ACC.o BFile.o LZ77.o main.o main_help.o gen comparator
 	echo DONE
 
 gen:
-g++ -g gen.cpp -o gen
+	g++ -g gen.cpp -o gen
 
 comparator:
-g++ -g comparator.cpp -o comparator
+	g++ -g comparator.cpp -o comparator
 
 ACC.o:
 	g++ -c -g ACC.cpp

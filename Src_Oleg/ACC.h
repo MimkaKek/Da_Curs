@@ -71,17 +71,14 @@ class ACC {
         // Обновление модели очередным символом
         void                UpdateModel (int);
 
-        // Инициализация побитового ввода
-        void                StartInputingBits ();
-
-        // Инициализация побитового вывода
-        void                StartOutputingBits ();
-
         /* =============== Кодирование =============== */
 
         // Кодирование очередного символа
         void                EncodeSymbol (int);
 
+        // Запись информации о сжимаемом файле
+        void                InputFileInfo ();
+        
         // Инициализация регистров границ и кода перед началом сжатия
         void                StartEncoding ();
 
@@ -103,9 +100,6 @@ class ACC {
 
         // Вывод очередного бита сжатой информации
         void                OutputBit (int);
-
-        // Очистка буфера побитового вывода
-        void                DoneOutputingBits ();
 
         // Вывод указанного бита и отложенных ранее
         void                OutputBitPlusFollow (int);
