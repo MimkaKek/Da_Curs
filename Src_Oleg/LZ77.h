@@ -1,6 +1,5 @@
 /* LZ77.h */
 #pragma once
-#include "Compressor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,12 +11,10 @@
 #include <bitset>
 #include "BFile.h"
 
-class Compressor;
-
 
 // template <const int compressFloor = 2, const bool GREEDY = false, const int MAXCOMPARES = 75, const int CHARBITS = 8 , const int MATCHBITS = 4, const int DICTBITS = 13, const int HASHBITS = 10,
 //  const int SECTORBITS = 10>
-class LZ77: public Compressor
+class TLZ77
 {
 
 public:
@@ -37,16 +34,16 @@ public:
 		const unsigned int SECTORLEN	= 1 << SECTORBITS;
 		const unsigned int SECTORAND	= (0xFFFF << SECTORBITS) & 0xFFFF;
 	} IStruct;
-	LZ77();
-	LZ77(IStruct s){
+	TLZ77();
+	TLZ77(IStruct s){
 		dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
 		hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
 		nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
 	};
 	void InitEncode();
 
-	void Compress() override;
-	void Decompress() override;
+	void Compress();
+	void Decompress() ;
 
 	unsigned int LoadDict(unsigned int dictpos);
 	void DeleteData(unsigned int dictpos);
@@ -59,7 +56,7 @@ public:
 	
 	unsigned int ReadBits(unsigned int numbits);
 	void SendBits(unsigned int bits, unsigned int numbits);
-	virtual ~LZ77(){};
+	virtual ~TLZ77(){};
 //private:
 	const int compressFloor 		= 2;
 	const int comparesCeil 			= 75;

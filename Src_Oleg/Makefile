@@ -1,28 +1,20 @@
-all: ACC.o BFile.o LZ77.o main.o main_help.o gen comparator
+all: comparator gen ACC.o BFile.o main.o main_help.o LZ77.o
 	g++ ACC.o BFile.o LZ77.o main.o main_help.o -g -o main
 	rm *.o
 	echo DONE
-
 gen:
 	g++ -g gen.cpp -o gen
-
-comparator:
-	g++ -g comparator.cpp -o comparator
-
+comparator: BFile.o
+	g++ -g BFile.o comparator.cpp -o comparator
 ACC.o:
 	g++ -c -g ACC.cpp
-
 BFile.o:
 	g++ -c -g BFile.cpp
-
 LZ77.o:
 	g++ -c -g LZ77.cpp
-
 main.o:
 	g++ -c -g main.cpp
-
 main_help.o:
 	g++ -c -g main_help.cpp
-
 clean:
-	rm -rf tests gen comparator
+	rm -rf tests gen comparator *.o

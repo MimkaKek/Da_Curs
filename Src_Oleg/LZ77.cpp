@@ -6,14 +6,14 @@
 #define NIL 0xFFFF
 #define REM(x,y) ((double)((x)%(y)))/(y)
 
-LZ77::LZ77()
+TLZ77::TLZ77()
 {
 	dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
 	hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
 	nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
 }
 /* writes multiple bit codes to the output stream */
-void LZ77::SendBits(unsigned int bits, unsigned int numbits)
+void TLZ77::SendBits(unsigned int bits, unsigned int numbits)
 {
 
 	bitbuf |= (bits << bitsin);
@@ -34,7 +34,7 @@ void LZ77::SendBits(unsigned int bits, unsigned int numbits)
 
 }
 /* reads multiple bit codes from the input stream */
-unsigned int LZ77::ReadBits(unsigned int numbits)
+unsigned int TLZ77::ReadBits(unsigned int numbits)
 {
 
 	unsigned int i;
@@ -58,7 +58,7 @@ unsigned int LZ77::ReadBits(unsigned int numbits)
 
 }
 /* sends a match to the output stream */
-void LZ77::SendMatch(unsigned int matchlen, unsigned int matchdistance)
+void TLZ77::SendMatch(unsigned int matchlen, unsigned int matchdistance)
 {
 	SendBits(1, 1);
 
@@ -67,13 +67,13 @@ void LZ77::SendMatch(unsigned int matchlen, unsigned int matchdistance)
 	SendBits(matchdistance, DICTBITS);
 }
 /* sends one character (or literal) to the output stream */
-void LZ77::SendChar(unsigned int character)
+void TLZ77::SendChar(unsigned int character)
 {
 	SendBits(0, 1);
 
 	SendBits(character, CHARBITS);
 }
-void LZ77::InitEncode()
+void TLZ77::InitEncode()
 {
 	register unsigned int i;
 
@@ -83,7 +83,7 @@ void LZ77::InitEncode()
 
 }
 /* loads dictionary with characters from the input stream */
-unsigned int LZ77::LoadDict(unsigned int dictpos)
+unsigned int TLZ77::LoadDict(unsigned int dictpos)
 {
 	register unsigned int i, j;
 	
@@ -105,7 +105,7 @@ unsigned int LZ77::LoadDict(unsigned int dictpos)
 /* deletes data from the dictionary search structures */
 /* this is only done when the number of bytes to be
 		 compressed exceeds the dictionary's size */
-void LZ77::DeleteData(unsigned int dictpos)
+void TLZ77::DeleteData(unsigned int dictpos)
 {
 
 	register unsigned int i, j;
@@ -123,7 +123,7 @@ void LZ77::DeleteData(unsigned int dictpos)
 }
 /* hash data just entered into dictionary */
 /* XOR hashing is used here, but practically any hash function will work */
-void LZ77::HashData(unsigned int dictpos, unsigned int bytestodo)
+void TLZ77::HashData(unsigned int dictpos, unsigned int bytestodo)
 {
 	register unsigned int i, j, k;
 
@@ -149,7 +149,7 @@ void LZ77::HashData(unsigned int dictpos, unsigned int bytestodo)
 /* finds match for string at position dictpos */
 /* this search code finds the longest AND closest
 		 match for the string at dictpos */
-void LZ77::FindMatch(unsigned int dictpos, unsigned int startlen)
+void TLZ77::FindMatch(unsigned int dictpos, unsigned int startlen)
 {
 	register unsigned int i, j, k;
 	unsigned char l;
@@ -178,7 +178,7 @@ void LZ77::FindMatch(unsigned int dictpos, unsigned int startlen)
 
 }
 /* finds dictionary matches for characters in current sector */
-void LZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
+void TLZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
 {
 
 	register unsigned int i, j;
@@ -205,7 +205,7 @@ void LZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
 	}
 
 }
-void LZ77::Compress() {
+void TLZ77::Compress() {
 	unsigned int dictpos, deleteflag, sectorlen;
 	unsigned long bytescompressed;
 
@@ -251,7 +251,7 @@ void LZ77::Compress() {
 
 	return;
 }
-void LZ77::Decompress() {
+void TLZ77::Decompress() {
 	register unsigned int i, j, k;
 	unsigned long bytesdecompressed;
 	i = 0;
@@ -320,8 +320,8 @@ void LZ77::Decompress() {
 	
 }
 int main(int argc, char *argv[]){
-	LZ77::IStruct tstr;
-	LZ77 LZ77Archiver(tstr);
+	TLZ77::IStruct tstr;
+	TLZ77 LZ77Archiver(tstr);
 	char *s;
 
 	if (argc != 4)

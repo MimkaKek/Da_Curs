@@ -1,4 +1,3 @@
-/* main_help.h */
 #ifndef MAIN_HELP_H
 #define MAIN_HELP_H
 
@@ -7,33 +6,28 @@
 #include "ACC.h"
 #include <cstdio>
 #include <cstdlib>
+#include <string>
 
-bool KeyManager(std::string);
+void FileIterator(std::map<std::string, int>);
 
-bool DifferensOfSizes(TInBinary*, std::string);
- 
-void WorkWithDirectory(std::string);
+bool Parser(std::map<std::string, int>*, std::string);
 
-void WorkWithFile(std::string);
+bool AskDir(std::string, bool);
 
-bool IsDirectory(std::string, bool);
+void DirectoryWork(std::string);
 
-void PrintDirectoryErrors(std::string);
+void DeComPress(std::string);
 
-bool IsArchive(std::string);
+bool Rewrite(std::string);
 
-void Rename(std::string, std::string);
+void ErrorNotes(std::string);
 
-void Delete(std::string);
+bool KeyL(TInBinary*, std::string);
 
-void MainDecompress(TInBinary*, std::string);
+void PreCompress(TInBinary*, std::string);
 
-void MainCompress(TInBinary*, std::string);
+unsigned long long int Compress(std::string, TInBinary*, bool);
 
-unsigned long long int LZ77Compress(TInBinary* file, std::string, TOutBinary*);
-
-unsigned long long int ArithmeticCompress(std::string, TInBinary*);
-
-void KeepSmall(unsigned long long int, unsigned long long int, std::string);
+void PreDecompress(TInBinary*, std::string);
 
 #endif

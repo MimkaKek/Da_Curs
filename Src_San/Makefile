@@ -1,13 +1,13 @@
-all: Arithmetic.o BFile.o LZ77.o main.o preprocessing.o gen comparator
-	g++ Arithmetic.o BFile.o LZ77.o main.o preprocessing.o -g -o main
+all: Arithmetic.o LZ77.o main.o preprocessing.o gen comparator
+	g++ Arithmetic.o LZ77.o main.o preprocessing.o -g -o main
 	rm *.o
 	echo DONE
 
 gen:
-g++ -g gen.cpp -o gen
+	g++ -g gen.cpp -o gen
 
-comparator:
-g++ -g comparator.cpp -o comparator
+comparator: BFile.o
+	g++ -g BFile.o comparator.cpp -o comparator
 
 Arithmetic.o:
 	g++ -c -g Arithmetic.cpp

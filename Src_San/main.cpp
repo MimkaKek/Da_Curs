@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 				if (keyFile[0] == '.' && keyFile[1] == '/') 
 					keyFile.erase(0, 2);
 			
-			if (IsDirectory(keyFile, false))
-				GetFiles(keyFile, *filesInDirectories);
+			if (DirectoryCheck(keyFile, false))
+				GetFiles(keyFile, &filesInDirectories);
 			else
 			{
 				bool got = false;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 			continue;
 		else 
 			if (keys[3]) //-l
-				ArchiveInfo(finder->first)
+				ArchiveInfo(finder->first);
 			else if (keys[1] || keys[5]) //-d или -t
 				Decompress(finder->first);
 			else

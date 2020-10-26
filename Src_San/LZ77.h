@@ -1,6 +1,5 @@
 /* LZ77.h */
 #pragma once
-#include "Compressor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,12 +11,10 @@
 #include <bitset>
 #include "BFile.h"
 
-class Compressor;
-
 
 // template <const int compressFloor = 2, const bool GREEDY = false, const int MAXCOMPARES = 75, const int CHARBITS = 8 , const int MATCHBITS = 4, const int DICTBITS = 13, const int HASHBITS = 10,
 //  const int SECTORBITS = 10>
-class LZ77: public Compressor
+class LZ77
 {
 
 public:
@@ -45,8 +42,8 @@ public:
 	};
 	void InitEncode();
 
-	void Compress() override;
-	void Decompress() override;
+	void Compress() ;
+	void Decompress() ;
 
 	unsigned int LoadDict(unsigned int dictpos);
 	void DeleteData(unsigned int dictpos);

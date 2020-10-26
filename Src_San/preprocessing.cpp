@@ -14,7 +14,7 @@ void Compress(std::string fileName)
 	FILE *file;
 	
 	if (!keys[0])
-		if(file = fopen(compressFile.c_str(), 'r'))
+		if(file = fopen(compressFile.c_str(), "r"))
 		{
 			std::cout << compressFile << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
 			char save;
@@ -106,7 +106,7 @@ void Decompress(std::string fileName)
 	FILE* file = NULL;
 
 	if (!keys[0] && !keys[5])
-		if (file = fopen(decompresFile.c_str(), 'r'))
+		if (file = fopen(decompresFile.c_str(), "r"))
 		{
 			std::cout << decompresFile << " is already exists; do you wish to overwrite (y or n)?" << std::endl;
 			char save;
@@ -123,7 +123,7 @@ void Decompress(std::string fileName)
 	char algo = 0;
 	bool complete;
 
-	if (!file = fopen(fileName.c_str(), 'r'))
+	if (!(file = fopen(fileName.c_str(), "r")))
 	{
 		std::cout << "Can\'t open file " << fileName << std::endl;
 		return;
@@ -188,7 +188,7 @@ void Decompress(std::string fileName)
 		Rm(fileName);
 
 	if (!keys[0] && !keys[5])
-		Mv(tmp, nextName);
+		Mv(tmp, decompresFile);
 }
 bool ActivateKeys(std::string argvKeys)
 {
@@ -265,7 +265,7 @@ void ArchiveInfo(std::string fileName)
 {
     char algo = 0;
 	FILE *file;
-	if(!file = fopen(fileName.c_str(), 'r'))
+	if(!(file = fopen(fileName.c_str(), "r")))
 	{
 		std::cout << "Can't open file " << fileName << std::endl;
 		return;
@@ -351,7 +351,7 @@ unsigned long long int CompressA(std::string fileName)
 
 	FILE *file;
 	
-	if (!file = fopen(tmp.c_str(), 'r'))
+	if (!(file = fopen(tmp.c_str(), "r")))
 	{
 		std::cout << fileName << ": can't read file" << std::endl;
         return 0;
@@ -399,7 +399,7 @@ unsigned long long int CompressL(std::string fileName)
 
     FILE *file;
 	
-	if (!file = fopen(tmp.c_str(), 'r'))
+	if (!(file = fopen(tmp.c_str(), "r")))
 	{
 		std::cout << fileName << ": can't read file" << std::endl;
         return 0;
@@ -510,7 +510,7 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* filesInDire
 				got = true;
 
 			if (!got)
-				filesInDirectories->insert({tmp, filesInDirectories->size + 1});
+				filesInDirectories->insert({tmp, filesInDirectories->size() + 1});
 		}
 
 		directoryFile = readdir(directory);
