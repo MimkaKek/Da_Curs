@@ -1,7 +1,7 @@
 #ifndef MAIN_HELP_H
 #define MAIN_HELP_H
 
-#include "Globals.h"
+#include "Library.h"
 #include "LZ77.h"
 #include "ACC.h"
 #include <cstdio>
