@@ -1,4 +1,4 @@
-#include "main_help.h"
+#include "interface.h"
 
 void FileIterator(std::map<std::string, int> files) {
 	std::map<std::string, int>::iterator i;
@@ -354,7 +354,7 @@ void PreCompress(TInBinary* file, std::string fileName) {//TODO
 unsigned long long int Compress(std::string fileName, TInBinary* file, bool LZ) {
     std::string tmpName;
     if (LZ) {
-		tmpName = fileName + ".L";
+		/*tmpName = fileName + ".L";
 		TLZ77* algorithm = new TLZ77;
 		if (algorithm == nullptr) {
 			std::cout << fileName << ": unexpected memory error\n";
@@ -365,7 +365,7 @@ unsigned long long int Compress(std::string fileName, TInBinary* file, bool LZ) 
 			std::cout << "\t\tcompression failed\n";
 			return 0;
 		}
-		delete algorithm;
+		delete algorithm;*/
 	}
 	else {
 		tmpName = fileName + ".A";
@@ -428,15 +428,15 @@ void PreDecompress(TInBinary* archive, std::string archiveName) {//-t
 		decompression = algorithm->Decompress(archiveName.c_str(), decompressName.c_str());
 		delete algorithm;
 	}
-	else if (code == 'L') {
+	/*else if (code == 'L') {
 		TLZ77* algorithm = new TLZ77;//TODO YOU
 		if (algorithm == nullptr) {
 			std::cout << archiveName << ": unexpected memory error\n";
 			exit(1);
 		}
-		decompression = algorithm->Decompress(archiveName);
+		//decompression = algorithm->Decompress(archiveName);
 		delete algorithm;
-	}
+	}*/
 	else {
 		std::cout << archiveName << ": not compressed data\n";
 		return;

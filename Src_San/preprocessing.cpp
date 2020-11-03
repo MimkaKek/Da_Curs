@@ -156,7 +156,7 @@ void Decompress(std::string fileName)
 	}
 	else if (algo == 'L')
 	{
-		LZ77* algorithm = new LZ77;//TODO YOU
+		/*LZ77* algorithm = new LZ77;//TODO YOU
 
 		if (algorithm == nullptr)
 		{
@@ -165,7 +165,7 @@ void Decompress(std::string fileName)
 		}
 
 		complete = algorithm->Decompress(fileName, tmp);
-		delete algorithm;
+		delete algorithm;*/
 	}
 	else
 	{
@@ -377,7 +377,7 @@ unsigned long long int CompressL(std::string fileName)
 {
     std::string tmp = fileName + ".LZ7";
 
-    LZ77* algorithm = new LZ77;
+/*    LZ77* algorithm = new LZ77;
 
     if (algorithm == nullptr)
     {
@@ -393,7 +393,7 @@ unsigned long long int CompressL(std::string fileName)
     }
 
     delete algorithm;
-
+*/
     if (keys[0])
         return 1;
 

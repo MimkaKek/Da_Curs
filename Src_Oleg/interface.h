@@ -2,8 +2,8 @@
 #define MAIN_HELP_H
 
 #include "Library.h"
-#include "LZ77.h"
 #include "ACC.h"
+#include "LZ77.h"
 #include <cstdio>
 #include <cstdlib>
 #include <string>
