@@ -4,6 +4,7 @@
 #include "Library.h"
 #include "ACC.h"
 #include "LZ77.h"
+#include "BFile.h"
 #include <cstdio>
 #include <cstdlib>
 #include <string>

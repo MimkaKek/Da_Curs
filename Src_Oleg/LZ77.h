@@ -9,7 +9,10 @@
 #include <iostream>
 #include <memory>
 #include <bitset>
-#include "BFile.h"
+#include <string>
+#include "Library.h"
+
+class Compressor;
 
 
 // template <const int compressFloor = 2, const bool GREEDY = false, const int MAXCOMPARES = 75, const int CHARBITS = 8 , const int MATCHBITS = 4, const int DICTBITS = 13, const int HASHBITS = 10,
@@ -43,8 +46,9 @@ public:
 	void InitEncode();
 
 	void Compress();
-	void Decompress() ;
-
+	bool Compress(std::string in_str, std::string out_str);
+	void Decompress();
+	bool Decompress(std::string in_str, std::string out_str);
 	unsigned int LoadDict(unsigned int dictpos);
 	void DeleteData(unsigned int dictpos);
 	void HashData(unsigned int dictpos, unsigned int bytestodo);
@@ -56,7 +60,7 @@ public:
 	
 	unsigned int ReadBits(unsigned int numbits);
 	void SendBits(unsigned int bits, unsigned int numbits);
-	virtual ~TLZ77(){};
+	virtual ~TLZ77(){free(dict);free(hash);free(nextlink);};
 //private:
 	const int compressFloor 		= 2;
 	const int comparesCeil 			= 75;

@@ -281,7 +281,7 @@ bool ACC::Compress (const char *infile, const  char *outfile) {
     if (in == nullptr || (out == nullptr && !keys[0])) {
         return false;
     }
-
+	InputFileInfo();//это сюда?
     StartEncoding ();
     for (;;) {
         ch = getc (in);
@@ -310,7 +310,7 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
     char typeC = 0;
     unsigned long long oldSize = 0;
     in = fopen (infile, "r+b");
-    if(!keys[0]) {
+    if(!keys[0] && !keys[5]) {
         out = fopen (outfile, "w+b");
     }
     if (in == nullptr || (out == nullptr && !keys[0])) {
@@ -346,7 +346,7 @@ bool ACC::Decompress (const char *infile, const char *outfile) {
         UpdateModel (symbol);
     }
     fclose (in);
-    if(!keys[0]) {
+    if(!keys[0] && !keys[5]) {
         fclose (out);
     }
     return true;
