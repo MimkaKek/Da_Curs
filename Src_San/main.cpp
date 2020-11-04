@@ -1,4 +1,3 @@
-/* maip.cpp */
 #include "preprocessing.h"
 
 std::vector<bool> keys;
@@ -9,7 +8,6 @@ int main(int argc, char *argv[])
 	std::map<std::string, int> files, filesInDirectories;
 	std::map<std::string, int>::iterator finder;
 	keys = {false, false, false, false, false, false, false, false, false};
-//			c	   d	  k		 l		r	   t	  1		 9		a
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -18,13 +16,13 @@ int main(int argc, char *argv[])
 		
 		tmp >> keyFile;
 		
-		if (keyFile[0] == '-') //ключ(и)
+		if (keyFile[0] == '-') 
 		{
 			if (!ActivateKeys(keyFile)) 
 				return -1;
 		}
 		else
-		{// файлы и папки
+		{
 			if (keyFile.size() > 2) 
 				if (keyFile[0] == '.' && keyFile[1] == '/') 
 					keyFile.erase(0, 2);
@@ -36,7 +34,7 @@ int main(int argc, char *argv[])
 				bool got = false;
 				finder = files.find(keyFile);
 				
-				if (finder != files.end()) //для избежания работы над одним и тем же файлом несколько раз
+				if (finder != files.end())
 					got = true;
 				
 				if (!got)
@@ -55,9 +53,9 @@ int main(int argc, char *argv[])
 		if (finder->first == "main") 
 			continue;
 		else 
-			if (keys[3]) //-l
+			if (keys[3])
 				ArchiveInfo(finder->first);
-			else if (keys[1] || keys[5]) //-d или -t
+			else if (keys[1] || keys[5]) 
 				Decompress(finder->first);
 			else
 				Compress(finder->first);
@@ -66,9 +64,9 @@ int main(int argc, char *argv[])
 		if (finder->first == "main") 
 			continue;
 		else 
-			if (keys[3]) //-l
+			if (keys[3]) 
 				ArchiveInfo(finder->first);
-			else if (keys[1] || keys[5]) //-d или -t
+			else if (keys[1] || keys[5]) 
 				Decompress(finder->first);
 			else
 				Compress(finder->first);

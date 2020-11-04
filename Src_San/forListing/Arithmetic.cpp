@@ -1,15 +1,18 @@
 #include "Arithmetic.h"
 
-Arithmetic::Arithmetic () {
+Arithmetic::Arithmetic ()
+{
 
     int i;
     
-    for ( i = 0; i < NO_OF_CHARS; ++i) {
+    for ( i = 0; i < NO_OF_CHARS; ++i)
+    {
         charToIndex [i] = i + 1;
         indexToChar [i + 1] = i;
     }
     
-    for ( i = 0; i <= NO_OF_SYMBOLS; ++i) {
+    for ( i = 0; i <= NO_OF_SYMBOLS; ++i)
+    {
         freq [i] = 1;
         cumFreq [i] = NO_OF_SYMBOLS - i;
     }
@@ -19,19 +22,18 @@ Arithmetic::Arithmetic () {
     chError = 0;
     freq [0] = 0;
 }
-
-//------------------------------------------------------------
-void Arithmetic::UpdateModel (int symbol) {
+void Arithmetic::UpdateModel (int symbol)
+{
 
     int i;
     int chI, chSymbol;
     int cum;
     
-    // проверка на переполнение счетчика частоты
-    if (cumFreq [0] == MAX_FREQUENCY) {
+    if (cumFreq [0] == MAX_FREQUENCY)
+    {
         cum = 0;
-        // масштабирование частот при переполнении
-        for ( i = NO_OF_SYMBOLS; i >= 0; --i) {
+        for ( i = NO_OF_SYMBOLS; i >= 0; --i)
+        {
             freq [i] = (freq [i] + 1) / 2;
             cumFreq [i] = cum;
             cum += freq [i];
@@ -40,7 +42,8 @@ void Arithmetic::UpdateModel (int symbol) {
     
     for (i = symbol; freq [i] == freq [i - 1]; --i);
 
-    if (i < symbol) {
+    if (i < symbol)
+    {
         chI                       = indexToChar [i];
         chSymbol                  = indexToChar [symbol];
         indexToChar [i]           = chSymbol;
@@ -49,32 +52,31 @@ void Arithmetic::UpdateModel (int symbol) {
         charToIndex [chSymbol]    = i;
     }
 
-    // обновление значений в таблицах частот
     freq [i] += 1;
-    while (i > 0) {
+    while (i > 0)
+    {
         --i;
         cumFreq [i] += 1;
     }
 }
-
-//------------------------------------------------------------
-// Инициализация побитового ввода
-void Arithmetic::StartInputingBits () {
+void Arithmetic::StartInputingBits ()
+{
     bitsToGo = 0;
     garbageBits = 0;
 }
-
-//------------------------------------------------------------
-// Ввод очередного бита сжатой информации
-int Arithmetic::InputBit () {
+int Arithmetic::InputBit ()
+{
 
     int t;
 
-    if (bitsToGo == 0) {
+    if (bitsToGo == 0)
+    {
         buffer = getc (in);
-        if (buffer == EOF) {
+        if (buffer == EOF)
+        {
             ++garbageBits;
-            if (garbageBits > BITS_IN_REGISTER - 2) {
+            if (garbageBits > BITS_IN_REGISTER - 2)
+            {
                 printf ("ERROR: Incorrect compress file!\n");
                 chError = true;
                 return 0;
@@ -89,17 +91,13 @@ int Arithmetic::InputBit () {
 
     return t;
 }
-
-//------------------------------------------------------------
-// Инициализация побитового вывода
-void Arithmetic::StartOutputingBits () {
+void Arithmetic::StartOutputingBits ()
+{
     buffer = 0;
     bitsToGo = 8;
 }
-
-//------------------------------------------------------------
-// Вывод очередного бита сжатой информации
-void Arithmetic::OutputBit (int bit) {
+void Arithmetic::OutputBit (int bit)
+{
 
     buffer >>= 1;
 
@@ -109,133 +107,129 @@ void Arithmetic::OutputBit (int bit) {
 
     --bitsToGo;
 
-    if (bitsToGo == 0) {
-        if(keys[0]) {
+    if (bitsToGo == 0)
+    {
+        if(keys[0])
+        {
             std::cout << buffer;
         }
-        else {
+        else
+        {
             putc(buffer, out);
         }
         bitsToGo = 8;
     }
 }
-
-//------------------------------------------------------------
-// Очистка буфера побитового вывода
-void Arithmetic::DoneOutputingBits () {
-    if(keys[0]) {
+void Arithmetic::DoneOutputingBits ()
+{
+    if(keys[0])
+    {
         std::cout << (buffer >> bitsToGo);
     }
-    else {
+    else
+    {
         putc(buffer >> bitsToGo, out);
     }
 }
-
-//------------------------------------------------------------
-// Вывод указанного бита и отложенных ранее
-void Arithmetic::OutputBitPlusFollow (int bit) {
+void Arithmetic::OutputBitPlusFollow (int bit)
+{
     OutputBit (bit);
-    while (bitsToFollow > 0) {
+    while (bitsToFollow > 0)
+    {
         OutputBit (!bit);
         --bitsToFollow;
     }
 }
-
-//------------------------------------------------------------
-// Инициализация регистров границ и кода перед началом сжатия
-void Arithmetic::StartEncoding () {
+void Arithmetic::StartEncoding ()
+{
     low            = 0l;
     high           = TOP_VALUE;
     bitsToFollow   = 0l;
 }
-
-//------------------------------------------------------------
-// Очистка побитового вывода
-void Arithmetic::DoneEncoding () {
+void Arithmetic::DoneEncoding ()
+{
 
     ++bitsToFollow;
-    if (low < FIRST_QTR) {
+    if (low < FIRST_QTR)
+    {
         OutputBitPlusFollow(0);
     }
-    else {
+    else
+    {
         OutputBitPlusFollow(1);
     }
 }
-
-//------------------------------------------------------------
-/* Инициализация регистров перед декодированием.
-   Загрузка начала сжатого сообщения
-*/
-void Arithmetic::StartDecoding () {
+void Arithmetic::StartDecoding ()
+{
 
     value = 0l;
-    for ( int i = 0; i < BITS_IN_REGISTER; ++i) {
+    for ( int i = 0; i < BITS_IN_REGISTER; ++i)
+    {
         value = 2 * value + InputBit ();
     }
     low = 0l;
     high = TOP_VALUE;
 }
-
-//------------------------------------------------------------
-// Кодирование очередного символа
-void Arithmetic::EncodeSymbol (int symbol) {
+void Arithmetic::EncodeSymbol (int symbol)
+{
 
     long range;
-    
-    // пересчет значений границ
+
     range = (long) (high - low) + 1;
     high  = low + (range * cumFreq [symbol - 1]) / cumFreq [0] - 1;
     low   = low + (range * cumFreq [symbol]    ) / cumFreq [0];
-    // выдвигание очередных битов
-    for (;;) {
-        if (high < HALF) {
+    for (;;)
+    {
+        if (high < HALF)
+        {
             OutputBitPlusFollow (0);
         }
-        else if (low >= HALF) {
+        else if (low >= HALF)
+        {
             OutputBitPlusFollow (1);
             low -= HALF;
             high -= HALF;
         }
-        else if (low >= FIRST_QTR && high < THIRD_QTR) {
+        else if (low >= FIRST_QTR && high < THIRD_QTR)
+        {
             ++bitsToFollow;
             low -= FIRST_QTR;
             high -= FIRST_QTR;
         }
         else
             break;
-            
-        // сдвиг влево с "втягиванием" очередного бита
+
         low = 2 * low;
         high = 2 * high + 1;
     }
 }
-
-//------------------------------------------------------------
-// Декодирование очередного символа
-int Arithmetic::DecodeSymbol () {
+int Arithmetic::DecodeSymbol ()
+{
 
     long range;
     int cum, symbol;
- 
-    // определение текущего масштаба частот
+
     range = (long) (high - low) + 1;
-    // масштабирование значения в регистре кода
+
     cum = (int) ((((long) (value - low) + 1) * cumFreq [0] - 1) / range);
-    // поиск соответствующего символа в таблице частот
+
     for (symbol = 1; cumFreq [symbol] > cum; symbol++);
-    // пересчет границ
+
     high = low + (range * cumFreq [symbol - 1]) / cumFreq [0] - 1;
     low  = low + (range * cumFreq [symbol]    ) / cumFreq [0];
-    // удаление очередного символа из входного потока
-    for (;;) {
+
+    for (;;)
+    {
 
         if (high < HALF) {}
-        else if (low >= HALF) {
+        else if (low >= HALF)
+        {
             value -= HALF;
             low   -= HALF;
             high  -= HALF;
         }
-        else if (low >= FIRST_QTR && high < THIRD_QTR) {
+        else if (low >= FIRST_QTR && high < THIRD_QTR)
+        {
             value -= FIRST_QTR;
             low   -= FIRST_QTR;
             high  -= FIRST_QTR;
@@ -243,36 +237,38 @@ int Arithmetic::DecodeSymbol () {
         else
             break;
 
-        // сдвиг влево с "втягиванием очередного бита
         low   = 2 * low;
         high  = 2 * high + 1;
         value = 2 * value + InputBit ();
-        if(chError) {
+        if(chError)
+        {
             return 0;
         }
     }
     return symbol;
 }
-
-//------------------------------------------------------------
-// Собственно адаптивное арифметическое кодирование
-bool Arithmetic::Compress (const char *infile, const  char *outfile) {
+bool Arithmetic::Compress (const char *infile, const  char *outfile)
+{
     int ch, symbol;
     char tmp = 'A'; 
     
     in = fopen (infile, "r+b");
-    if(!keys[0]) {
+    if(!keys[0])
+    {
         out = fopen (outfile, "w+b");
     }
 
-    if (in == nullptr || (out == nullptr && !keys[0])) {
+    if (in == nullptr || (out == nullptr && !keys[0]))
+    {
         return false;
     }
 
-    if(!keys[0]) {
+    if(!keys[0])
+    {
         fwrite(&tmp, sizeof(char), 1, out);
     }
-    else {
+    else
+    {
         std::cout << tmp;
     }
     
@@ -281,18 +277,22 @@ bool Arithmetic::Compress (const char *infile, const  char *outfile) {
     fseek(in, 0, SEEK_END);
     sizeOfFile = ftell(in);
     fseek(in, savePos, SEEK_SET);
-    if(!keys[0]) {
+    if(!keys[0])
+    {
         fwrite(&sizeOfFile, sizeof(long long), 1, out);
     }
-    else {
+    else
+    {
         std::cout << sizeOfFile;
     }
 
     StartOutputingBits ();
     StartEncoding ();
-    for (;;) {
+    for (;;)
+    {
         ch = getc (in);
-        if (ch == EOF) {
+        if (ch == EOF)
+        {
             break;
         }
         symbol = charToIndex [ch];
@@ -303,25 +303,26 @@ bool Arithmetic::Compress (const char *infile, const  char *outfile) {
     DoneEncoding ();
     DoneOutputingBits ();
     fclose (in);
-    if(!keys[0]) {
+    if(!keys[0])
+    {
         fclose (out);
     }
     return true;
 }
-
-//------------------------------------------------------------
-// Собственно адаптивное арифметическое декодирование
-bool Arithmetic::Decompress (const char *infile, const char *outfile) {
+bool Arithmetic::Decompress (const char *infile, const char *outfile)
+{
     
     int symbol;
     unsigned char ch;
     char typeC = 0;
     unsigned long long oldSize = 0;
     in = fopen (infile, "r+b");
-    if(!keys[0] && !keys[5]) {
+    if(!keys[0] && !keys[5])
+    {
         out = fopen (outfile, "w+b");
     }
-    if (in == nullptr || (out == nullptr && !keys[0])) {
+    if (in == nullptr || (out == nullptr && !keys[0]))
+    {
         return false;
     }
     
@@ -330,24 +331,30 @@ bool Arithmetic::Decompress (const char *infile, const char *outfile) {
     
     StartInputingBits ();
     StartDecoding ();
-    for (;;) {
+    for (;;)
+    {
         symbol = DecodeSymbol ();
         
-        if(chError) {
+        if(chError)
+        {
             return false;
         }
         
-        if (symbol == EOF_SYMBOL) {
+        if (symbol == EOF_SYMBOL)
+        {
             break;
         }
         
         ch = indexToChar [symbol];
         
-        if(!keys[5]) {
-            if(keys[0]) {
+        if(!keys[5])
+        {
+            if(keys[0])
+            {
                 std::cout << ch;
             }
-            else {        
+            else
+            {        
                 putc(ch, out);
             }
         }
@@ -355,7 +362,8 @@ bool Arithmetic::Decompress (const char *infile, const char *outfile) {
         UpdateModel (symbol);
     }
     fclose (in);
-    if(!keys[0]) {
+    if(!keys[0])
+    {
         fclose (out);
     }
     return true;

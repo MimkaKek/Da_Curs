@@ -1,7 +1,7 @@
 #include "preprocessing.h"
 
 void Compress(std::string fileName)
-{//NEED_CHECK
+{
 	std::string compressFile = fileName + ".gz";
 
 	if (ArchiveCheck(fileName))
@@ -30,9 +30,8 @@ void Compress(std::string fileName)
 	unsigned long long int sizeLZ, sizeAr;
 
 	if (!keys[6] && !keys[7])
-	{//ключи 1 и 9 не указаны
-		/* LZ77 */
-		sizeLZ = CompressL(fileName);//TODO YOU
+	{
+		sizeLZ = CompressL(fileName);
 
 		if (sizeLZ == 0)
 		{
@@ -41,7 +40,7 @@ void Compress(std::string fileName)
 
 			return;
 		}
-		/* арифметика */
+		
 		sizeAr = CompressA(fileName);
 
 		if (sizeAr == 0)
@@ -57,9 +56,9 @@ void Compress(std::string fileName)
 		
 	}
 	else if (keys[6])
-	{/* LZ77 т.к. 1*/
+	{
 		sizeAr = 0;
-		sizeLZ = CompressL(fileName);//TODO
+		sizeLZ = CompressL(fileName);
 
 		if (sizeLZ == 0)
 		{
@@ -70,7 +69,7 @@ void Compress(std::string fileName)
 		}
 	}
 	else
-	{// Arif т.к. 9
+	{
 		sizeLZ = 0;
 		sizeAr = CompressA(fileName);
 
@@ -87,7 +86,7 @@ void Compress(std::string fileName)
 		SaveBest(fileName, sizeLZ, sizeAr);
 }
 void Decompress(std::string fileName)
-{//NEED_CHECK
+{
 	if (keys[1] && !keys[0])
 		if (!ArchiveCheck(fileName))
 		{
@@ -149,7 +148,7 @@ void Decompress(std::string fileName)
 	}
 	else if (algo == 'L')
 	{
-		LZ77* algorithm = new LZ77;//TODO YOU
+		LZ77* algorithm = new LZ77;
 
 		if (algorithm == nullptr)
 		{
@@ -177,7 +176,7 @@ void Decompress(std::string fileName)
 		return;
 	}
 
-	if (!keys[0] && !keys[2] && !keys[5]) //нет -c, -k и -t
+	if (!keys[0] && !keys[2] && !keys[5])
 		Rm(fileName);
 
 	if (!keys[0] && !keys[5])
@@ -487,7 +486,7 @@ void GetFiles(std::string directoryName, std::map<std::string, int>* filesInDire
 			bool got = false;
 			finder = filesInDirectories->find(tmp);
 
-			if (finder != filesInDirectories->end())//для избежания работы над одним и тем же файлом несколько раз
+			if (finder != filesInDirectories->end())
 				got = true;
 
 			if (!got)
@@ -527,7 +526,7 @@ void SaveBest(std::string fileName, unsigned long long int sizeLZ, unsigned long
         else 
             Mv(fileName + ".LZ7", fileName + ".gz");
 
-    if (!keys[2])//-k
+    if (!keys[2])
         Rm(fileName);
 }
 void ShowErrors(std::string directoryName)
