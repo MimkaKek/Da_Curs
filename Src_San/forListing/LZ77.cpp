@@ -1,4 +1,5 @@
 #include "LZ77.h"
+#include "LZ77.h"
 #include <exception>
 #include <iostream>
 #include <stdexcept>
@@ -10,6 +11,7 @@
 #define NIL 0xFFFF
 #define REM(x,y) ((double)((x)%(y)))/(y)
 
+bool keys[10]; //TODO: to delete
 
 LZ77::LZ77()
 {
