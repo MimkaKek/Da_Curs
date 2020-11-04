@@ -157,88 +157,89 @@ t & -     & -           & -           & -     & -           & t блокируе
 
 \subsection*{Описание методов и функций программы}
  
-\subsubsection*{Основные свойства и методы класса TACC}%TODO Слава внимательно посмотрите как я это оформил в своих subsubsection
+\subsubsection*{Основные свойства и методы класса TACC}
 \noindent
 public:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item bool Compress (const char*, const char*) - сжатие файла;
+	\item bool Decompress (const char*, const char*) - распаковка файла;
+	\item TACC() - конструктор, в котором задаются начальные значения для последующей работы со сжатием/распаковкой файла;
 \end{enumerate}
 \noindent
 private:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item bool chError - флаг ошибки при распаковке файла;
+	\item unsigned char indexToChar [NO\_OF\_SYMBOLS] - таблица перевода из индексов к символам;
+	\item int charToIndex [NO\_OF\_CHARS] - таблица перевода из символов в индексы;
+	\item int cumFreq [NO\_OF\_SYMBOLS + 1] - массив накопленных частот. Нужен для определения границ;
+	\item int freq [NO\_OF\_SYMBOLS + 1] - массив частот. В нём хранится число появлений тех или иных символов;
+	\item long low - нижняя граница отрезка; 
+	\item long high - верхняя граница отрезка;
+	\item long value - число, которое лежит в отрезке;
+	\item long bitsToFollow - количество бит, которые надо пустить в след за следующим выставляемым битом;
+	\item int buffer - буффер для работы с файлом;
+	\item int bitsToGo - число битов, которые ещё можно загрузить в буффер;
+	\item int garbageBits - счётчик плохих битов при распаковке файла. Как только их становится слишком много - распаковка отменяется и выводится сообщение об этом;
+	\item FILE *out - файл, в который мы записываем;
+	\item FILE *in - файл, из которого мы считываем;
+	\item void UpdateModel (int) - обновление модели под новый символ;
+	\item void EncodeSymbol (int) - кодировка символа;
+	\item void InputFileInfo() - запись информации о сжимаемом файле;
+	\item void StartEncoding() - подготовка к сжатию;
+	\item void DoneEncoding() - завершение кодирования. Загрузка последних битов в буффер;
+	\item void StartDecoding() - подготовка к распаковке;
+	\item int DecodeSymbol() - распаковка символа;
+	\item int InputBit() - получение одного бита из файла;
+	\item void OutputBit(int) - отправление одного бита в файл;
+	\item void OutputBitPlusFollow(int) - вывод указанного бита и отложенных ранее;
 \end{enumerate}
 
-\subsubsection*{Основные свойства и методы класса TOutBinary}%TODO Слава
+\subsubsection*{Основные свойства и методы класса TOutBinary}
 \noindent
 public:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item TOutBinary() - задаёт начальные значения. Файл не будет открыт.
+	\item bool Open(std::string*) - открывает файл;
+	\item bool Close() - закрывает файл;
+	\item bool Write(const char*, size\_t) - запись в файл;
+	\item bool WriteBin(size\_t bit) - запись бита в файл;
+	\item unsigned long long SizeFile() - подсчёт размера файла;
+	\item friend bool operator << (TOutBinary\& file, size\_t const \&bit) - запись бита в файл;
 \end{enumerate}
 \noindent
 private:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item std::ofstream out - файл вывода;
+    \item std::string name - имя файла;
+    \item unsigned char head - маска для заноса бита в block;
+    \item unsigned char block - временный буффер для хранения и записи битов в файл;
 \end{enumerate}
 
-\subsubsection*{Основные свойства и методы класса TInBinary}%TODO Слава
+\subsubsection*{Основные свойства и методы класса TInBinary}
 \noindent
 public:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item TInBinary() - задаёт начальные значения. Файл не будет открыт.
+	\item bool Open(std::string*) - открывает файл;
+	\item bool Close() - закрывает файл;
+	\item bool Read(char*, size\_t) - считывает из файла некоторое количество байт;
+	\item bool ReadBin(char* bit) - считывает из файла один бит;
+	\item unsigned long long SizeFile() - подсчёт размера файла;
+	\item friend bool operator >> (TInBinary\& iFile, char \&bit) - получение бита из файла;
 \end{enumerate}
 \noindent
 private:
 
 \begin{enumerate}
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
-	\item 
+	\item std::ifstream in - файл вывода;
+    \item std::string name - имя файла;
+    \item unsigned char head - маска для заноса бита в block;
+    \item unsigned char block - временный буффер для хранения битов из файла, через него получают биты;
 \end{enumerate}
 
 \subsubsection*{Основные свойства и методы класса TLZ77}%TODO Саня
