@@ -354,18 +354,18 @@ void PreCompress(TInBinary* file, std::string fileName) {//TODO
 unsigned long long int Compress(std::string fileName, TInBinary* file, bool LZ) {
     std::string tmpName;
     if (LZ) {
-		/*tmpName = fileName + ".L";
+		tmpName = fileName + ".L";
 		TLZ77* algorithm = new TLZ77;
 		if (algorithm == nullptr) {
 			std::cout << fileName << ": unexpected memory error\n";
 			exit(1);
 		}
-		if (!algorithm->Compress(fileName.c_str(), tmpName.c_str())) {
+		if (!algorithm->Compress(fileName, tmpName)) {
 			delete algorithm;
 			std::cout << "\t\tcompression failed\n";
 			return 0;
 		}
-		delete algorithm;*/
+		delete algorithm;
 	}
 	else {
 		tmpName = fileName + ".A";
@@ -428,15 +428,15 @@ void PreDecompress(TInBinary* archive, std::string archiveName) {//-t
 		decompression = algorithm->Decompress(archiveName.c_str(), decompressName.c_str());
 		delete algorithm;
 	}
-	/*else if (code == 'L') {
+	else if (code == 'L') {
 		TLZ77* algorithm = new TLZ77;//TODO YOU
 		if (algorithm == nullptr) {
 			std::cout << archiveName << ": unexpected memory error\n";
 			exit(1);
 		}
-		//decompression = algorithm->Decompress(archiveName);
+		decompression = algorithm->Decompress(archiveName, decompressName);
 		delete algorithm;
-	}*/
+	}
 	else {
 		std::cout << archiveName << ": not compressed data\n";
 		return;
@@ -451,14 +451,11 @@ void PreDecompress(TInBinary* archive, std::string archiveName) {//-t
 		}
 		return;
 	}
-	if (!keys[0] && !keys[2] && !keys[5]) {//нет -c, -k и -t
-		decompressName = "rm ./" + archiveName;
-	}
-	if (!keys[2]) {
+	if (!keys[0] && !keys[2] && !keys[5]) {//удаление старого файла
 		archiveName = "rm ./" + archiveName;
 		system(archiveName.c_str());
 	}
-	if (!keys[0] && !keys[5]) {
+	if (!keys[0] && !keys[5]) {//сохранение нового файла
 		decompressName = "mv ./" + decompressName + " ./" + fileName;
 		system(decompressName.c_str());
 	}
