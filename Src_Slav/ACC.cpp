@@ -27,10 +27,8 @@ void TACC::UpdateModel (int symbol) {
     int chI, chSymbol;
     int cum;
     
-    // проверка на переполнение счетчика частоты
     if (cumFreq [0] == MAX_FREQUENCY) {
         cum = 0;
-        // масштабирование частот при переполнении
         for ( i = NO_OF_SYMBOLS; i >= 0; --i) {
             freq [i] = (freq [i] + 1) / 2;
             cumFreq [i] = cum;
@@ -48,8 +46,6 @@ void TACC::UpdateModel (int symbol) {
         charToIndex [chI]         = symbol;
         charToIndex [chSymbol]    = i;
     }
-
-    // обновление значений в таблицах частот
     freq [i] += 1;
     while (i > 0) {
         --i;
@@ -58,14 +54,12 @@ void TACC::UpdateModel (int symbol) {
 }
 
 //------------------------------------------------------------
-// Инициализация побитового ввода
 void TACC::StartInputingBits () {
     bitsToGo = 0;
     garbageBits = 0;
 }
 
 //------------------------------------------------------------
-// Ввод очередного бита сжатой информации
 int TACC::InputBit () {
 
     int t;
@@ -91,14 +85,12 @@ int TACC::InputBit () {
 }
 
 //------------------------------------------------------------
-// Инициализация побитового вывода
 void TACC::StartOutputingBits () {
     buffer = 0;
     bitsToGo = 8;
 }
 
 //------------------------------------------------------------
-// Вывод очередного бита сжатой информации
 void TACC::OutputBit (int bit) {
 
     buffer >>= 1;
@@ -121,7 +113,6 @@ void TACC::OutputBit (int bit) {
 }
 
 //------------------------------------------------------------
-// Очистка буфера побитового вывода
 void TACC::DoneOutputingBits () {
     if(keys[0]) {
         std::cout << (buffer >> bitsToGo);
@@ -132,7 +123,6 @@ void TACC::DoneOutputingBits () {
 }
 
 //------------------------------------------------------------
-// Вывод указанного бита и отложенных ранее
 void TACC::OutputBitPlusFollow (int bit) {
     OutputBit (bit);
     while (bitsToFollow > 0) {
@@ -142,7 +132,6 @@ void TACC::OutputBitPlusFollow (int bit) {
 }
 
 //------------------------------------------------------------
-// Инициализация регистров границ и кода перед началом сжатия
 void TACC::StartEncoding () {
     low            = 0l;
     high           = TOP_VALUE;
@@ -150,7 +139,6 @@ void TACC::StartEncoding () {
 }
 
 //------------------------------------------------------------
-// Очистка побитового вывода
 void TACC::DoneEncoding () {
 
     ++bitsToFollow;
@@ -163,9 +151,6 @@ void TACC::DoneEncoding () {
 }
 
 //------------------------------------------------------------
-/* Инициализация регистров перед декодированием.
-   Загрузка начала сжатого сообщения
-*/
 void TACC::StartDecoding () {
 
     value = 0l;
@@ -177,16 +162,13 @@ void TACC::StartDecoding () {
 }
 
 //------------------------------------------------------------
-// Кодирование очередного символа
 void TACC::EncodeSymbol (int symbol) {
 
     long range;
     
-    // пересчет значений границ
     range = (long) (high - low) + 1;
     high  = low + (range * cumFreq [symbol - 1]) / cumFreq [0] - 1;
     low   = low + (range * cumFreq [symbol]    ) / cumFreq [0];
-    // выдвигание очередных битов
     for (;;) {
         if (high < HALF) {
             OutputBitPlusFollow (0);
@@ -204,29 +186,26 @@ void TACC::EncodeSymbol (int symbol) {
         else
             break;
             
-        // сдвиг влево с "втягиванием" очередного бита
         low = 2 * low;
         high = 2 * high + 1;
     }
 }
 
 //------------------------------------------------------------
-// Декодирование очередного символа
 int TACC::DecodeSymbol () {
 
     long range;
     int cum, symbol;
  
-    // определение текущего масштаба частот
     range = (long) (high - low) + 1;
-    // масштабирование значения в регистре кода
+	
     cum = (int) ((((long) (value - low) + 1) * cumFreq [0] - 1) / range);
-    // поиск соответствующего символа в таблице частот
+	
     for (symbol = 1; cumFreq [symbol] > cum; symbol++);
-    // пересчет границ
+	
     high = low + (range * cumFreq [symbol - 1]) / cumFreq [0] - 1;
     low  = low + (range * cumFreq [symbol]    ) / cumFreq [0];
-    // удаление очередного символа из входного потока
+	
     for (;;) {
 
         if (high < HALF) {}
@@ -243,7 +222,6 @@ int TACC::DecodeSymbol () {
         else
             break;
 
-        // сдвиг влево с "втягиванием очередного бита
         low   = 2 * low;
         high  = 2 * high + 1;
         value = 2 * value + InputBit ();
@@ -255,7 +233,6 @@ int TACC::DecodeSymbol () {
 }
 
 //------------------------------------------------------------
-// Собственно адаптивное арифметическое кодирование
 bool TACC::Compress (const char *infile, const  char *outfile) {
     int ch, symbol;
     char tmp = 'A'; 
@@ -310,7 +287,6 @@ bool TACC::Compress (const char *infile, const  char *outfile) {
 }
 
 //------------------------------------------------------------
-// Собственно адаптивное арифметическое декодирование
 bool TACC::Decompress (const char *infile, const char *outfile) {
     
     int symbol;
