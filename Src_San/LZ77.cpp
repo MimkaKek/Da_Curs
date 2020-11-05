@@ -11,32 +11,35 @@
 #define NIL 0xFFFF
 #define REM(x,y) ((double)((x)%(y)))/(y)
 
+bool keys[10]; //TODO: to delete
+
 LZ77::LZ77()
 {
-	dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
-	hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
-	nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
+	dict=(unsigned char*)calloc(dictSize_c + maxMatch_c, sizeof(char));
+	hash=(unsigned int*)calloc(hashSize_c, sizeof(unsigned int));
+	nextlink=(unsigned int*)calloc(dictSize_c, sizeof(unsigned int));
 }
 LZ77::LZ77(IStruct s):
-compressFloor	(s.compressFloor),
-comparesCeil	(s.comparesCeil),
-CHARBITS		(s.CHARBITS),
-MATCHBITS 		(s.MATCHBITS),
-DICTBITS 		(s.DICTBITS),
-HASHBITS 		(s.HASHBITS),
-SECTORBITS 		(s.SECTORBITS),
-MAXMATCH 		(s.MAXMATCH),
-DICTSIZE		(s.DICTSIZE),	
-HASHSIZE 		(s.HASHSIZE),
-SHIFTBITS		(s.SHIFTBITS),
-SECTORLEN		(s.SECTORLEN),
-SECTORAND		(s.SECTORAND)
+threshold_c	(s.threshold_c),
+maxCompares_c	(s.maxCompares_c),
+charBits_c		(s.charBits_c),
+lengthBits_c 		(s.lengthBits_c),
+dictBits_c 		(s.dictBits_c),
+hashBits_c 		(s.hashBits_c),
+sectorBits_c 		(s.sectorBits_c),
+maxMatch_c 		(s.maxMatch_c),
+dictSize_c		(s.dictSize_c),	
+hashSize_c 		(s.hashSize_c),
+shiftBits_c		(s.shiftBits_c),
+sectorSize_c		(s.sectorSize_c),
+sectorAND_c		(s.sectorAND_c)
 {
-	dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
-	hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
-	nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
+	dict=(unsigned char*)calloc(dictSize_c + maxMatch_c, sizeof(char));
+	hash=(unsigned int*)calloc(hashSize_c, sizeof(unsigned int));
+	nextlink=(unsigned int*)calloc(dictSize_c, sizeof(unsigned int));
 }
-void LZ77::SendBits(unsigned int bits, unsigned int numbits)
+/* writes multiple bit codes to the output stream */
+void LZ77::PutBits(unsigned int bits, unsigned int numbits)
 {
 
 	bitbuf |= (bits << bitsin);
@@ -49,14 +52,15 @@ void LZ77::SendBits(unsigned int bits, unsigned int numbits)
 		{
 			printf("\nerror writing to output file");
 			throw std::runtime_error("Error while writing to file\n");
+			//exit(EXIT_FAILURE);
 		}
 		bitbuf >>= 8;
 		bitsin -= 8;
-		counter++;
 	}
 
 }
-unsigned int LZ77::ReadBits(unsigned int numbits)
+/* reads multiple bit codes from the input stream */
+unsigned int LZ77::GetBits(unsigned int numbits)
 {
 
 	unsigned int i;
@@ -79,133 +83,171 @@ unsigned int LZ77::ReadBits(unsigned int numbits)
 	return (i & masks[numbits]);
 
 }
-void LZ77::SendMatch(unsigned int matchlen, unsigned int matchdistance)
+/* sends a match to the output stream */
+void LZ77::PutMatch(unsigned int matchlen, unsigned int matchdistance)
 {
-	SendBits(1, 1);
+	PutBits(1, 1);
 
-	SendBits(matchlen - (compressFloor + 1), MATCHBITS);
+	PutBits(matchlen - (threshold_c + 1), lengthBits_c);
 
-	SendBits(matchdistance, DICTBITS);
+	PutBits(matchdistance, dictBits_c);
 }
-void LZ77::SendChar(unsigned int character)
+/* sends one character (or literal) to the output stream */
+void LZ77::PutChar(unsigned int character)
 {
-	SendBits(0, 1);
+	PutBits(0, 1);
 
-	SendBits(character, CHARBITS);
+	PutBits(character, charBits_c);
 }
 void LZ77::InitEncode()
 {
 	register unsigned int i;
 
-	for (i = 0; i < HASHSIZE; i++) hash[i] = NIL;
+	for (i = 0; i < hashSize_c; i++) hash[i] = NIL;
 
-	nextlink[DICTSIZE] = NIL;
+	nextlink[dictSize_c] = NIL;
 
 }
+/* loads dictionary with characters from the input stream */
 unsigned int LZ77::LoadDict(unsigned int dictpos)
 {
 	register unsigned int i, j;
 	
-	if ((i = fread(&dict[dictpos], sizeof(char), SECTORLEN, infile)) == EOF)
+	if ((i = fread(&dict[dictpos], sizeof(char), sectorSize_c, infile)) == EOF)
 	{
 		printf("\nerror reading from input file");
 		throw std::runtime_error("Error while loading dictionary from file\n");
 	}
 
+	/* since the dictionary is a ring buffer, copy the characters at
+			 the very start of the dictionary to the end */
 	if (dictpos == 0)
 	{
-		for (j = 0; j < MAXMATCH; j++) dict[j + DICTSIZE] = dict[j];
+		for (j = 0; j < maxMatch_c; j++) dict[j + dictSize_c] = dict[j];
 	}
 
 	return i;
 } 
+/* deletes data from the dictionary search structures */
+/* this is only done when the number of bytes to be
+		 compressed exceeds the dictionary's size */
 void LZ77::DeleteData(unsigned int dictpos)
 {
 
 	register unsigned int i, j;
 
-	j = dictpos;    
+	j = dictpos;        /* put dictpos in register for more speed */
 
-	for (i = 0; i < DICTSIZE; i++)
-		if ((nextlink[i] & SECTORAND) == j) nextlink[i] = NIL;
+	/* delete all references to the sector being deleted */
 
-	for (i = 0; i < HASHSIZE; i++)
-		if ((hash[i] & SECTORAND) == j) hash[i] = NIL;
+	for (i = 0; i < dictSize_c; i++)
+		if ((nextlink[i] & sectorAND_c) == j) nextlink[i] = NIL;
+
+	for (i = 0; i < hashSize_c; i++)
+		if ((hash[i] & sectorAND_c) == j) hash[i] = NIL;
 
 }
+/* hash data just entered into dictionary */
 void LZ77::HashData(unsigned int dictpos, unsigned int bytestodo)
 {
 	register unsigned int i, j, k;
 
-	if (bytestodo <= compressFloor)   
+	if (bytestodo <= threshold_c)   /* not enough bytes in sector for match? */
 		for (i = 0; i < bytestodo; i++) nextlink[dictpos + i] = NIL;
 	else
 	{
-		
-		for (i = bytestodo - compressFloor; i < bytestodo; i++)
+		/* matches can't cross sector boundries */
+		for (i = bytestodo - threshold_c; i < bytestodo; i++)
 			nextlink[dictpos + i] = NIL;
-		j = (((unsigned int)dict[dictpos]) << SHIFTBITS) ^ dict[dictpos + 1];
-		
-		k = dictpos + bytestodo - compressFloor;  
+		j = (((unsigned int)dict[dictpos]) << shiftBits_c) ^ dict[dictpos + 1];//XOR
+		k = dictpos + bytestodo - threshold_c;  /* calculate end of sector */
 
 		for (i = dictpos; i < k; i++)
 		{
-			nextlink[i] = hash[j = (((j << SHIFTBITS) & (HASHSIZE - 1)) ^ dict[i + 2])];
+			nextlink[i] = hash[j = (((j << shiftBits_c) & (hashSize_c - 1)) ^ dict[i + 2])];
 			hash[j] = i;
 		}
 	}
 }
+/* finds match for string at position dictpos */
+/* this search code finds the longest AND closest
+		 match for the string at dictpos */
 void LZ77::FindMatch(unsigned int dictpos, unsigned int startlen)
 {
 	register unsigned int i, j, k;
 	unsigned char l;
 
-	i = dictpos; matchlength = startlen; k = comparesCeil;
+	i = dictpos; matchlength = startlen; k = maxCompares_c;
 	l = dict[dictpos + matchlength];
 
 	do
 	{
-		if ((i = nextlink[i]) == NIL) return;
+		if ((i = nextlink[i]) == NIL) return;   /* get next string in list */
 
-		if (dict[i + matchlength] == l)       
+		if (dict[i + matchlength] == l)        /* possible larger match? */
 		{
-			for (j = 0; j < MAXMATCH; j++)      
+			for (j = 0; j < maxMatch_c; j++)          /* compare strings */
 				if (dict[dictpos + j] != dict[i + j]) break;
 
-			if (j > matchlength) 
+			if (j > matchlength)  /* found larger match? */
 			{
 				matchlength = j;
 				matchpos = i;
-				if (matchlength == MAXMATCH) return;  
+				if (matchlength == maxMatch_c) return;  /* exit if largest possible match */
 				l = dict[dictpos + matchlength];
 			}
 		}
-	} while (--k);
+	} while (--k);  /* keep on trying until we run out of chances */
 
 }
+/* finds dictionary matches for characters in current sector */
 void LZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
 {
 
 	register unsigned int i, j;
 
+	unsigned int matchlen1, matchpos1;
+
 	i = dictpos; j = bytestodo;
 
-	while (j) 
+	while (j) /* loop while there are still characters left to be compressed */
 	{
-		FindMatch(i, compressFloor);
+		FindMatch(i, threshold_c);
 
-		if (matchlength > j) matchlength = j;   
-
-		if (matchlength > compressFloor) 
+		if (matchlength > threshold_c)
 		{
-			SendMatch(matchlength, (i - matchpos) & (DICTSIZE - 1));
-			i += matchlength;
-			j -= matchlength;
+			matchlen1 = matchlength;
+			matchpos1 = matchpos;
+
+			for (; ; )
+			{
+				FindMatch(i + 1, matchlen1);
+
+				if (matchlength > matchlen1)
+				{
+					matchlen1 = matchlength;
+					matchpos1 = matchpos;
+					PutChar(dict[i++]);
+					j--;
+				}
+				else
+				{
+					if (matchlen1 > j)
+					{
+						matchlen1 = j;
+						if (matchlen1 <= threshold_c) { PutChar(dict[i++]); j--; break; }
+					}
+
+					PutMatch(matchlen1, (i - matchpos1) & (dictSize_c - 1));
+					i += matchlen1;
+					j -= matchlen1;
+					break;
+				}
+			}
 		}
 		else
 		{
-			SendChar(dict[i]);
-			++i;
+			PutChar(dict[i++]);
 			j--;
 		}
 	}
@@ -231,8 +273,8 @@ bool LZ77::Compress(std::string in_str, std::string out_str) {
 				return false;
 			}
 		}
-		char tmp_char='L';
-		fwrite(&tmp_char, sizeof(char), 1, outfile);
+		char t_char='L';
+		fwrite(&t_char, sizeof(char), 1, outfile);
 		unsigned long long savePos, sizeOfFile;
 		savePos = ftell(infile);
 		fseek(infile, 0, SEEK_END);
@@ -251,30 +293,37 @@ bool LZ77::Compress(std::string in_str, std::string out_str) {
 
 		while (1)
 		{
+			/* delete old data from dictionary */
 			if (deleteflag) DeleteData(dictpos);
 
+			/* grab data to compress */
 			if ((sectorlen = LoadDict(dictpos)) == 0) break;
 
+			/* hash data */
 			HashData(dictpos, sectorlen);
 
+			/* find&write dictionary matches */
 			DictSearch(dictpos, sectorlen);
 
 			bytescompressed += sectorlen;
 
 			printf("\r%ld", bytescompressed);
 
-			dictpos += SECTORLEN;
+			dictpos += sectorSize_c;
 
-			if (dictpos == DICTSIZE)
+			/* wrap back to beginning of dictionary when its full */
+			if (dictpos == dictSize_c)
 			{
 				dictpos = 0;
-				deleteflag = 1; 
+				deleteflag = 1;   /* delete now */
 			}
 		}
 
-		SendMatch(MAXMATCH + 1, 0);
+		/* Send EOF flag */
+		PutMatch(maxMatch_c + 1, 0);
 
-		if (bitsin) SendBits(0, 8 - bitsin);
+		/* Flush bit buffer */
+		if (bitsin) PutBits(0, 8 - bitsin);
 
 		if(fclose(infile)){
 			std::cerr<<"Warning: input file closure failed.\n";
@@ -320,32 +369,33 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 		i = 0;
 		bytesdecompressed = 0;
 		int64_t countC=0,countM=0,countL=0;
-		for (; ; )
+		while(1)
 		{
-
-			if (ReadBits(1) == 0)
+			/* character or match? */
+			if (GetBits(1) == 0)	//Character
 			{
 				countC++;
-				dict[i++] = ReadBits(CHARBITS);
-				if (i == DICTSIZE)
+				dict[i++] = GetBits(charBits_c);
+				if (i == dictSize_c)
 				{
 					if(!keys[5]){
-						if (fwrite(dict, sizeof(char), DICTSIZE, outfile) == EOF)
+						if (fwrite(dict, sizeof(char), dictSize_c, outfile) == EOF)
 						{
 							printf("\nerror writing to output file");
 							throw std::runtime_error("Error while writing to output file\n");
 						}
 					}
 					i = 0;
-					bytesdecompressed += DICTSIZE;
+					bytesdecompressed += dictSize_c;
 					printf("\r%ld", bytesdecompressed);
 				}
 			}
-			else					
+			else					//Match
 			{
-				k = (compressFloor + 1) + ReadBits(MATCHBITS);
+				/* get match length from input stream */
+				k = (threshold_c + 1) + GetBits(lengthBits_c);
 				
-				if (k == (MAXMATCH + 1))      
+				if (k == (maxMatch_c + 1))      /* Check for EOF flag */
 				{
 					if(!keys[5]){
 						if (fwrite(dict, sizeof(char), i, outfile) == EOF)
@@ -359,23 +409,24 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 				}
 				countM++;
 				countL+=k;
-				j = ((i - ReadBits(DICTBITS)) & (DICTSIZE - 1));
+				/* get match position from input stream */
+				j = ((i - GetBits(dictBits_c)) & (dictSize_c - 1));
 				
 				do
 				{
 					dict[i++] = dict[j++];
-					j &= (DICTSIZE - 1);
-					if (i == DICTSIZE)
+					j &= (dictSize_c - 1);//Warp to begining, if reach end	(j + k) >= dictSize_c
+					if (i == dictSize_c)//Check for end of dictionary 	(i + k) >= dictSize_c
 					{
 						if(!keys[5]){
-							if (fwrite(dict, sizeof(char), DICTSIZE, outfile) == EOF)
+							if (fwrite(dict, sizeof(char), dictSize_c, outfile) == EOF)
 							{
 								printf("\nerror writing to output file");
 								throw std::runtime_error("Error while writing to output file\n");
 							}
 						}
 						i = 0;
-						bytesdecompressed += DICTSIZE;
+						bytesdecompressed += dictSize_c;
 						printf("\r%ld", bytesdecompressed);
 					}
 				} while (--k);
@@ -388,4 +439,39 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 		infile=temp_input, outfile=temp_output;
 		return false;
 	}
+}
+int main(int argc, char *argv[]){
+	LZ77::IStruct tstr;
+	LZ77 LZ77Archiver(tstr);
+	for(int i =0;i<10;i++){
+		keys[i]=false;
+	}
+	keys[0]=false;
+	keys[5]=false;
+	char *s;
+
+	if (argc != 4)
+	{
+		printf("\n'prog1 e file1 file2' encodes file1 into file2.\n"
+			"'prog1 d file2 file1' decodes file2 into file1.\n");
+		return EXIT_FAILURE;
+	}
+
+	if (toupper(*argv[1]) == 'E')
+	{
+		printf("Compressing %s to %s\n", argv[2], argv[3]);
+		std::string in_s(argv[2]);
+		std::string out_s(argv[3]);
+		LZ77Archiver.Compress(in_s,out_s);
+		
+	}
+	else
+	{
+		printf("Decompressing %s to %s\n", argv[2], argv[3]);
+		std::string in_s(argv[2]);
+		std::string out_s(argv[3]);
+		LZ77Archiver.Decompress(in_s,out_s);
+	}
+
+	return EXIT_SUCCESS;
 }
