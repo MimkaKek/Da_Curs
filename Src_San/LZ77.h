@@ -1,4 +1,5 @@
 #pragma once
+#include "Compressor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,25 +11,29 @@
 #include <bitset>
 #include <string>
 
+
+
+// template <const int threshold_c = 2, const bool GREEDY = false, const int MAXCOMPARES = 75, const int charBits_c = 8 , const int lengthBits_c = 4, const int dictBits_c = 13, const int hashBits_c = 10,
+//  const int sectorBits_c = 10>
 class LZ77
 {
 
 public:
 
 	typedef struct InitStruct{
-		int comparesCeil 		= 75;
-		int compressFloor 		= 2;
-		int MATCHBITS 			= 4; 
-		int DICTBITS 			= 13;
-		int HASHBITS 			= 10;
-		int SECTORBITS 			= 10;
-		int CHARBITS			= 8;
-		unsigned int MAXMATCH 	= (1 << MATCHBITS) + compressFloor - 1;
-		unsigned int DICTSIZE	= 1 << DICTBITS;
-		unsigned int HASHSIZE 	= 1 << HASHBITS;
-		unsigned int SHIFTBITS	= (HASHBITS + compressFloor) / (compressFloor + 1);
-		unsigned int SECTORLEN	= 1 << SECTORBITS;
-		unsigned int SECTORAND	= (0xFFFF << SECTORBITS) & 0xFFFF;
+		int threshold_c 		= 2;
+		int maxCompares_c 		= 75;
+		int lengthBits_c 		= 4; 
+		int dictBits_c 			= 13;
+		int hashBits_c 			= 10;
+		int sectorBits_c 		= 10;
+		int charBits_c			= 8;
+		unsigned int maxMatch_c 	= (1 << lengthBits_c) + threshold_c - 1;
+		unsigned int dictSize_c	= 1 << dictBits_c;
+		unsigned int hashSize_c 	= 1 << hashBits_c;
+		unsigned int shiftBits_c	= (hashBits_c + threshold_c) / (threshold_c + 1);
+		unsigned int sectorSize_c	= 1 << sectorBits_c;
+		unsigned int sectorAND_c	= (0xFFFF << sectorBits_c) & 0xFFFF;
 	} IStruct;
 	LZ77();
 	LZ77(IStruct s);
@@ -44,29 +49,31 @@ private:
 	void FindMatch(unsigned int dictpos, unsigned int startlen);
 	void DictSearch(unsigned int dictpos, unsigned int bytestodo);
 
-	void SendChar(unsigned int character);
-	void SendMatch(unsigned int matchlen, unsigned int matchdistance);
+	void PutChar(unsigned int character);
+	void PutMatch(unsigned int matchlen, unsigned int matchdistance);
 	
-	unsigned int ReadBits(unsigned int numbits);
-	void SendBits(unsigned int bits, unsigned int numbits);
+	unsigned int GetBits(unsigned int numbits);
+	void PutBits(unsigned int bits, unsigned int numbits);
 
-	const int compressFloor 		= 2;
-	const int comparesCeil 			= 75;
-	const int CHARBITS				= 8;
-	const int MATCHBITS 			= 4; 
-	const int DICTBITS 				= 13;
-	const int HASHBITS 				= 10;
-	const int SECTORBITS 			= 10;
-	const unsigned int MAXMATCH 	= (1 << MATCHBITS) + compressFloor - 1;
-	const unsigned int DICTSIZE		= 1 << DICTBITS;
-	const unsigned int HASHSIZE 	= 1 << HASHBITS;
-	const unsigned int SHIFTBITS	= (HASHBITS + compressFloor) / (compressFloor + 1);
-	const unsigned int SECTORLEN	= 1 << SECTORBITS;
-	const unsigned int SECTORAND	= (0xFFFF << SECTORBITS) & 0xFFFF;
+	const int threshold_c 		= 2;
+	const int maxCompares_c 			= 75;
+	const int charBits_c				= 8;
+	const int lengthBits_c 			= 4; 
+	const int dictBits_c 				= 13;
+	const int hashBits_c 				= 10;
+	const int sectorBits_c 			= 10;
+	const unsigned int maxMatch_c 	= (1 << lengthBits_c) + threshold_c - 1;
+	const unsigned int dictSize_c		= 1 << dictBits_c;
+	const unsigned int hashSize_c 	= 1 << hashBits_c;
+	const unsigned int shiftBits_c	= (hashBits_c + threshold_c) / (threshold_c + 1);
+	const unsigned int sectorSize_c	= 1 << sectorBits_c;
+	const unsigned int sectorAND_c	= (0xFFFF << sectorBits_c) & 0xFFFF;
+	/* dictionary plus maxMatch_c extra chars for string comparisions */
 	unsigned char* dict;
+	/* hashtable & link list table */
 	unsigned int *hash, *nextlink;
+	/* misc. global variables */
 	unsigned int
-		counter=0,
 		matchlength=0,
 		matchpos=0,
 		bitbuf=0,
