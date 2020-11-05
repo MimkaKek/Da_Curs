@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 	FileIterator(files);
 	clock_t t1 = clock();
 	if (keys[8]) {
-		std::cout << "\n" << ((double) t1 - t0) / CLOCKS_PER_SEC << " секунд\n";
+		std::cout << "\n" << ((double) t1 - t0) / CLOCKS_PER_SEC << " seconds\n";
 	}
 	return 0;
 }

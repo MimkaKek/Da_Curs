@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	clock_t t1 = clock();
 
 	if (keys[8])
-		std::cout << std::endl << ((double) t1 - t0) / CLOCKS_PER_SEC << " секунд" << std::endl;
+		std::cout << std::endl << ((double) t1 - t0) / CLOCKS_PER_SEC << " seconds" << std::endl;
 
 	return 0;
 }

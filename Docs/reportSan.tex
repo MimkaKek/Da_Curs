@@ -7,7 +7,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[russian]{babel}
 \usepackage{listings}
-
+\usepackage{color}
 \begin{document}
 \begin{titlepage}
 	\begin{center}
@@ -234,9 +234,36 @@ private:
 		
 \end{enumerate}
 
-\subsection*{Исходный код}%TODOпоходу его будем вставлять как всё закончим
+\subsection*{Исходный код}
 
-\subsection*{Тест производительности}%TODO это нормально затестить получится токо когда всё будет
+\lstset{language=C++,
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue}\ttfamily,
+	stringstyle=\color{red}\ttfamily,
+	commentstyle=\color{green}\ttfamily,
+	morecomment=[l][\color{magenta}]{\#},
+	frame=lines,
+	breaklines=true,
+	breakatwhitespace=false
+}
+\subsubsection*{Arithmetic.cpp}
+\lstinputlisting{Listings/Arithmetic.cpp}
+\subsubsection*{Arithmetic.h}
+\lstinputlisting{Listings/Arithmetic.h}
+\subsubsection*{Globals.h}
+\lstinputlisting{Listings/Globals.h}
+\subsubsection*{LZ77.cpp}
+\lstinputlisting{Listings/LZ77.cpp}
+\subsubsection*{LZ77.h}
+\lstinputlisting{Listings/LZ77.h}
+\subsubsection*{main.cpp}
+\lstinputlisting{Listings/main.cpp}
+\subsubsection*{preprocessing.cpp}
+\lstinputlisting{Listings/preprocessing.cpp}
+\subsubsection*{preprocessing.h}
+\lstinputlisting{Listings/preprocessing.h}
+
+\subsection*{Тест производительности}
 
 \noindent
 \begin{tabular}{| l | l | l | l | l | l | l |}
