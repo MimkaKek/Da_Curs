@@ -1,5 +1,5 @@
-all: Arithmetic.o  main.o preprocessing.o gen comparator
-	g++ Arithmetic.o main.o preprocessing.o -g -o main
+all: Arithmetic.o  main.o preprocessing.o gen comparator LZ77.o
+	g++ Arithmetic.o main.o preprocessing.o LZ77.o -g -o main
 	rm *.o
 	echo DONE
 

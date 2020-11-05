@@ -13,30 +13,30 @@
 
 LZ77::LZ77()
 {
-	dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
-	hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
-	nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
+	dict=(unsigned char*)calloc(dictSize_c + maxMatch_c, sizeof(char));
+	hash=(unsigned int*)calloc(hashSize_c, sizeof(unsigned int));
+	nextlink=(unsigned int*)calloc(dictSize_c, sizeof(unsigned int));
 }
 LZ77::LZ77(IStruct s):
-compressFloor	(s.compressFloor),
-comparesCeil	(s.comparesCeil),
-CHARBITS		(s.CHARBITS),
-MATCHBITS 		(s.MATCHBITS),
-DICTBITS 		(s.DICTBITS),
-HASHBITS 		(s.HASHBITS),
-SECTORBITS 		(s.SECTORBITS),
-MAXMATCH 		(s.MAXMATCH),
-DICTSIZE		(s.DICTSIZE),	
-HASHSIZE 		(s.HASHSIZE),
-SHIFTBITS		(s.SHIFTBITS),
-SECTORLEN		(s.SECTORLEN),
-SECTORAND		(s.SECTORAND)
+threshold_c	(s.threshold_c),
+maxCompares_c	(s.maxCompares_c),
+charBits_c		(s.charBits_c),
+lengthBits_c 		(s.lengthBits_c),
+dictBits_c 		(s.dictBits_c),
+hashBits_c 		(s.hashBits_c),
+sectorBits_c 		(s.sectorBits_c),
+maxMatch_c 		(s.maxMatch_c),
+dictSize_c		(s.dictSize_c),	
+hashSize_c 		(s.hashSize_c),
+shiftBits_c		(s.shiftBits_c),
+sectorSize_c		(s.sectorSize_c),
+sectorAND_c		(s.sectorAND_c)
 {
-	dict=(unsigned char*)calloc(DICTSIZE + MAXMATCH, sizeof(char));
-	hash=(unsigned int*)calloc(HASHSIZE, sizeof(unsigned int));
-	nextlink=(unsigned int*)calloc(DICTSIZE, sizeof(unsigned int));
+	dict=(unsigned char*)calloc(dictSize_c + maxMatch_c, sizeof(char));
+	hash=(unsigned int*)calloc(hashSize_c, sizeof(unsigned int));
+	nextlink=(unsigned int*)calloc(dictSize_c, sizeof(unsigned int));
 }
-void LZ77::SendBits(unsigned int bits, unsigned int numbits)
+void LZ77::PutBits(unsigned int bits, unsigned int numbits)
 {
 
 	bitbuf |= (bits << bitsin);
@@ -52,11 +52,10 @@ void LZ77::SendBits(unsigned int bits, unsigned int numbits)
 		}
 		bitbuf >>= 8;
 		bitsin -= 8;
-		counter++;
 	}
 
 }
-unsigned int LZ77::ReadBits(unsigned int numbits)
+unsigned int LZ77::GetBits(unsigned int numbits)
 {
 
 	unsigned int i;
@@ -79,34 +78,34 @@ unsigned int LZ77::ReadBits(unsigned int numbits)
 	return (i & masks[numbits]);
 
 }
-void LZ77::SendMatch(unsigned int matchlen, unsigned int matchdistance)
+void LZ77::PutMatch(unsigned int matchlen, unsigned int matchdistance)
 {
-	SendBits(1, 1);
+	PutBits(1, 1);
 
-	SendBits(matchlen - (compressFloor + 1), MATCHBITS);
+	PutBits(matchlen - (threshold_c + 1), lengthBits_c);
 
-	SendBits(matchdistance, DICTBITS);
+	PutBits(matchdistance, dictBits_c);
 }
-void LZ77::SendChar(unsigned int character)
+void LZ77::PutChar(unsigned int character)
 {
-	SendBits(0, 1);
+	PutBits(0, 1);
 
-	SendBits(character, CHARBITS);
+	PutBits(character, charBits_c);
 }
 void LZ77::InitEncode()
 {
 	register unsigned int i;
 
-	for (i = 0; i < HASHSIZE; i++) hash[i] = NIL;
+	for (i = 0; i < hashSize_c; i++) hash[i] = NIL;
 
-	nextlink[DICTSIZE] = NIL;
+	nextlink[dictSize_c] = NIL;
 
 }
 unsigned int LZ77::LoadDict(unsigned int dictpos)
 {
 	register unsigned int i, j;
 	
-	if ((i = fread(&dict[dictpos], sizeof(char), SECTORLEN, infile)) == EOF)
+	if ((i = fread(&dict[dictpos], sizeof(char), sectorSize_c, infile)) == EOF)
 	{
 		printf("\nerror reading from input file");
 		throw std::runtime_error("Error while loading dictionary from file\n");
@@ -114,7 +113,7 @@ unsigned int LZ77::LoadDict(unsigned int dictpos)
 
 	if (dictpos == 0)
 	{
-		for (j = 0; j < MAXMATCH; j++) dict[j + DICTSIZE] = dict[j];
+		for (j = 0; j < maxMatch_c; j++) dict[j + dictSize_c] = dict[j];
 	}
 
 	return i;
@@ -124,33 +123,31 @@ void LZ77::DeleteData(unsigned int dictpos)
 
 	register unsigned int i, j;
 
-	j = dictpos;    
+	j = dictpos;      
 
-	for (i = 0; i < DICTSIZE; i++)
-		if ((nextlink[i] & SECTORAND) == j) nextlink[i] = NIL;
+	for (i = 0; i < dictSize_c; i++)
+		if ((nextlink[i] & sectorAND_c) == j) nextlink[i] = NIL;
 
-	for (i = 0; i < HASHSIZE; i++)
-		if ((hash[i] & SECTORAND) == j) hash[i] = NIL;
+	for (i = 0; i < hashSize_c; i++)
+		if ((hash[i] & sectorAND_c) == j) hash[i] = NIL;
 
 }
 void LZ77::HashData(unsigned int dictpos, unsigned int bytestodo)
 {
 	register unsigned int i, j, k;
 
-	if (bytestodo <= compressFloor)   
+	if (bytestodo <= threshold_c) 
 		for (i = 0; i < bytestodo; i++) nextlink[dictpos + i] = NIL;
 	else
 	{
-		
-		for (i = bytestodo - compressFloor; i < bytestodo; i++)
+		for (i = bytestodo - threshold_c; i < bytestodo; i++)
 			nextlink[dictpos + i] = NIL;
-		j = (((unsigned int)dict[dictpos]) << SHIFTBITS) ^ dict[dictpos + 1];
-		
-		k = dictpos + bytestodo - compressFloor;  
+		j = (((unsigned int)dict[dictpos]) << shiftBits_c) ^ dict[dictpos + 1];
+		k = dictpos + bytestodo - threshold_c;  
 
 		for (i = dictpos; i < k; i++)
 		{
-			nextlink[i] = hash[j = (((j << SHIFTBITS) & (HASHSIZE - 1)) ^ dict[i + 2])];
+			nextlink[i] = hash[j = (((j << shiftBits_c) & (hashSize_c - 1)) ^ dict[i + 2])];
 			hash[j] = i;
 		}
 	}
@@ -160,27 +157,27 @@ void LZ77::FindMatch(unsigned int dictpos, unsigned int startlen)
 	register unsigned int i, j, k;
 	unsigned char l;
 
-	i = dictpos; matchlength = startlen; k = comparesCeil;
+	i = dictpos; matchlength = startlen; k = maxCompares_c;
 	l = dict[dictpos + matchlength];
 
 	do
 	{
-		if ((i = nextlink[i]) == NIL) return;
+		if ((i = nextlink[i]) == NIL) return; 
 
-		if (dict[i + matchlength] == l)       
+		if (dict[i + matchlength] == l)     
 		{
-			for (j = 0; j < MAXMATCH; j++)      
+			for (j = 0; j < maxMatch_c; j++)         
 				if (dict[dictpos + j] != dict[i + j]) break;
 
 			if (j > matchlength) 
 			{
 				matchlength = j;
 				matchpos = i;
-				if (matchlength == MAXMATCH) return;  
+				if (matchlength == maxMatch_c) return; 
 				l = dict[dictpos + matchlength];
 			}
 		}
-	} while (--k);
+	} while (--k); 
 
 }
 void LZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
@@ -188,24 +185,48 @@ void LZ77::DictSearch(unsigned int dictpos, unsigned int bytestodo)
 
 	register unsigned int i, j;
 
+	unsigned int matchlen1, matchpos1;
+
 	i = dictpos; j = bytestodo;
 
 	while (j) 
 	{
-		FindMatch(i, compressFloor);
+		FindMatch(i, threshold_c);
 
-		if (matchlength > j) matchlength = j;   
-
-		if (matchlength > compressFloor) 
+		if (matchlength > threshold_c)
 		{
-			SendMatch(matchlength, (i - matchpos) & (DICTSIZE - 1));
-			i += matchlength;
-			j -= matchlength;
+			matchlen1 = matchlength;
+			matchpos1 = matchpos;
+
+			for (; ; )
+			{
+				FindMatch(i + 1, matchlen1);
+
+				if (matchlength > matchlen1)
+				{
+					matchlen1 = matchlength;
+					matchpos1 = matchpos;
+					PutChar(dict[i++]);
+					j--;
+				}
+				else
+				{
+					if (matchlen1 > j)
+					{
+						matchlen1 = j;
+						if (matchlen1 <= threshold_c) { PutChar(dict[i++]); j--; break; }
+					}
+
+					PutMatch(matchlen1, (i - matchpos1) & (dictSize_c - 1));
+					i += matchlen1;
+					j -= matchlen1;
+					break;
+				}
+			}
 		}
 		else
 		{
-			SendChar(dict[i]);
-			++i;
+			PutChar(dict[i++]);
 			j--;
 		}
 	}
@@ -231,8 +252,8 @@ bool LZ77::Compress(std::string in_str, std::string out_str) {
 				return false;
 			}
 		}
-		char tmp_char='L';
-		fwrite(&tmp_char, sizeof(char), 1, outfile);
+		char t_char='L';
+		fwrite(&t_char, sizeof(char), 1, outfile);
 		unsigned long long savePos, sizeOfFile;
 		savePos = ftell(infile);
 		fseek(infile, 0, SEEK_END);
@@ -261,20 +282,18 @@ bool LZ77::Compress(std::string in_str, std::string out_str) {
 
 			bytescompressed += sectorlen;
 
-			printf("\r%ld", bytescompressed);
+			dictpos += sectorSize_c;
 
-			dictpos += SECTORLEN;
-
-			if (dictpos == DICTSIZE)
+			if (dictpos == dictSize_c)
 			{
 				dictpos = 0;
-				deleteflag = 1; 
+				deleteflag = 1;  
 			}
 		}
 
-		SendMatch(MAXMATCH + 1, 0);
+		PutMatch(maxMatch_c + 1, 0);
 
-		if (bitsin) SendBits(0, 8 - bitsin);
+		if (bitsin) PutBits(0, 8 - bitsin);
 
 		if(fclose(infile)){
 			std::cerr<<"Warning: input file closure failed.\n";
@@ -301,14 +320,22 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 			infile=temp_input, outfile=temp_output;
 			return false;
 		}
-		if(!keys[5]){
-			if((outfile = fopen(out_str.c_str(), "wb")) == NULL){
-				std::cerr<<"Error: can't open write file";
-				fclose(infile);
-				infile=temp_input, outfile=temp_output;
-				return false;
-			}
-		}
+		if(!keys[5])
+		{
+            if(keys[0])
+            {
+                outfile=stdout;
+            }
+            else{
+                if((outfile = fopen(out_str.c_str(), "wb")) == NULL)
+                {
+                    std::cerr<<"Error: can't open write file";
+                    fclose(infile);
+                    infile=temp_input, outfile=temp_output;
+                    return false;
+                }
+            }
+        }
 		
 		char typeC = 0;
 		unsigned long long oldSize = 0;
@@ -320,32 +347,30 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 		i = 0;
 		bytesdecompressed = 0;
 		int64_t countC=0,countM=0,countL=0;
-		for (; ; )
+		while(1)
 		{
-
-			if (ReadBits(1) == 0)
+			if (GetBits(1) == 0)
 			{
 				countC++;
-				dict[i++] = ReadBits(CHARBITS);
-				if (i == DICTSIZE)
+				dict[i++] = GetBits(charBits_c);
+				if (i == dictSize_c)
 				{
 					if(!keys[5]){
-						if (fwrite(dict, sizeof(char), DICTSIZE, outfile) == EOF)
+						if (fwrite(dict, sizeof(char), dictSize_c, outfile) == EOF)
 						{
 							printf("\nerror writing to output file");
 							throw std::runtime_error("Error while writing to output file\n");
 						}
 					}
 					i = 0;
-					bytesdecompressed += DICTSIZE;
-					printf("\r%ld", bytesdecompressed);
+					bytesdecompressed += dictSize_c;
 				}
 			}
 			else					
 			{
-				k = (compressFloor + 1) + ReadBits(MATCHBITS);
+				k = (threshold_c + 1) + GetBits(lengthBits_c);
 				
-				if (k == (MAXMATCH + 1))      
+				if (k == (maxMatch_c + 1))    
 				{
 					if(!keys[5]){
 						if (fwrite(dict, sizeof(char), i, outfile) == EOF)
@@ -359,24 +384,23 @@ bool LZ77::Decompress(std::string in_str, std::string out_str) {
 				}
 				countM++;
 				countL+=k;
-				j = ((i - ReadBits(DICTBITS)) & (DICTSIZE - 1));
+				j = ((i - GetBits(dictBits_c)) & (dictSize_c - 1));
 				
 				do
 				{
 					dict[i++] = dict[j++];
-					j &= (DICTSIZE - 1);
-					if (i == DICTSIZE)
+					j &= (dictSize_c - 1);
+					if (i == dictSize_c)
 					{
 						if(!keys[5]){
-							if (fwrite(dict, sizeof(char), DICTSIZE, outfile) == EOF)
+							if (fwrite(dict, sizeof(char), dictSize_c, outfile) == EOF)
 							{
 								printf("\nerror writing to output file");
 								throw std::runtime_error("Error while writing to output file\n");
 							}
 						}
 						i = 0;
-						bytesdecompressed += DICTSIZE;
-						printf("\r%ld", bytesdecompressed);
+						bytesdecompressed += dictSize_c;
 					}
 				} while (--k);
 			}

@@ -232,13 +232,18 @@ bool TLZ77::Decompress(std::string in_str, std::string out_str) {
 			return false;
 		}
 		if (!keys[5]) {
-			if ((outfile = fopen(out_str.c_str(), "wb")) == NULL) {
-				std::cerr << "Error: can't open write file";
-				fclose(infile);
-				infile = temp_input, outfile = temp_output;
-				return false;
-			}
-		}
+            if (keys[0]) {
+                outfile = stdout;
+            }
+            else {
+                if ((outfile = fopen(out_str.c_str(), "wb")) == NULL) {
+                    std::cerr<<"Error: can't open write file";
+                    fclose(infile);
+                    infile=temp_input, outfile=temp_output;
+                    return false;
+                }
+            }
+        }
 		char typeC = 0;
 		unsigned long long oldSize = 0;
 		fread(&typeC, sizeof(char), 1, infile);
