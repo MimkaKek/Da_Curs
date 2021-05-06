@@ -98,7 +98,23 @@
 	\item Завершающая фаза - после получения кода об EOF декомпрессия завершается. Весь результат декомпрессии по ходу заносится в новый файл.
 \end{itemize}
 
-\subsubsection*{LZ77}%TODO Саня
+\subsubsection*{LZ77 компрессия}
+LZ77 использует уже просмотренную часть сообщения как словарь. Чтобы добиться сжатия, он пытается заменить очередной фрагмент сообщения на указатель в содержимое словаря.
+
+В качестве модели данных LZ77 использует “скользящее” по сообщению окно, разделенное на две неравные части. Первая, большая по размеру, включает уже просмотренную часть сообщения и называется словарём. Вторая, намного меньшая, является буфером, содержащим еще не закодированные символы входного потока. Обычно размер окна составляет несколько килобайтов. Буфер намного меньше, обычно не более ста байтов. Алгоритм пытается найти в словаре фрагмент, совпадающий с содержимым буфера.
+
+Алгоритм LZ77 выдает набор бит, в котором закодировано три элемента:<offset,length,symbol>
+\begin{enumerate}
+    \item offset - смещение в словаре относительно текущего положения, до совпадающей подстроки;
+    \item length - длина подстроки;
+    \item symbol - первый символ в буфере, следующий за подстрокой.
+\end{enumerate}
+Если совпадение не было найдено, то алгоритм просто выдаст код <0, 0, первый символ в буфере> и продолжит работать, однако такое решение неэффективно, хоть и гарантирует, что алгоритм сможет закодировать любое сообщение.
+Можно улучшить алгоритм для подобных слчаев, если вместо кодирования набором бит <offset,length,symbol> кодировать либо <offset,length>, либо <symbol>.Такая версия алгоритма называется LZS и тратит на одиночные символы гораздо меньше бит.
+Также для ускорения сжатия при поиске совпадений в словаре использовалась хэш таблица и словарь был представлен циклицеским буфером.
+\subsubsection*{LZ77 декомпрессия}
+В стандартной версии LZ77 мы считывем количество бит, которым кодируется <offset,length,symbol>, после чего находим нужную позицию в тексте с помощью offset и копируем посимвольно length байтов, после чего пишем символ symbol.
+В LZS сначала считывается один бит, который определяет, закодирована ли пара <offset,length> или <symbol>. Если это символ, то считывается 8 битов которые и являются раскодированным символом. Иначе, если это не закодированный конец файла, считываются сначала биты длины, затем сдвига, после чего происходит раскодировка и соответствующее количество символов словаря помещается в окно.
 
 \subsection*{Описание файлов программы}
 
@@ -171,48 +187,49 @@ private:
 public:
 
 \begin{enumerate}
-	\item LZ77() - стандартный конструктор.
-	\item LZ77(IStruct s) - конструктор через вспомогательную структуру IStruct.
-	\item InitEncode() - инициализирует данные необходимые для сжатия.
-	\item Compress(std::string in\_str, std::string out\_str) - сжатие файла. 
-	\item Decompress(std::string in\_str, std::string out\_str) -  распаковка файла.
-	\item $\sim$LZ77() - деструктор.
+    \item LZ77() - стандартный конструктор
+    \item IStruct - вспомогательная структура, которая нужна только для удобной конструкции класса
+    \item LZ77(IStruct s) - конструктор через вспомогательную структуру IStruct
+	\item InitEncode() - инициализирует данные необходимые для сжатия
+	\item Compress(std::string in\_str, std::string out\_str) - сжатие файла 
+	\item Decompress(std::string in\_str, std::string out\_str) -  распаковка файла
+	\item ~LZ77() - деструктор
 \end{enumerate}
 \noindent
 private:
 
 \begin{enumerate}
-	\item LoadDict(unsigned int dictpos) - загрузка словаря из файла в циклический буфер на позиции dictpos.
-	\item DeleteData(unsigned int dictpos) - удаления всех ссылок на удаляемый сектор с началом в dictpos.
-	\item HashData(unsigned int dictpos, unsigned int bytestodo) - хэширование и запись ссылок на возможное преведущее совпадение в словаре.
-	\item FindMatch(unsigned int dictpos, unsigned int startlen) - поиск максимального совпадения в словаре с позицией dictpos, не меньше чем startlen. 
-	\item DictSearch(unsigned int dictpos, unsigned int bytestodo) - кодирование считанного сектора с началом в dictpos и длинной bytestodo.
-	\item SendChar(unsigned int character) - кодирование символа character.
-	\item SendMatch(unsigned int matchlen, unsigned int matchdistance) - кодирование пары <matchlen, matchdistance>.
-	\item ReadBits(unsigned int numbits) - считывание numbits битов из файла.
-	\item SendBits(unsigned int bits, unsigned int numbits) - отправка numbits битов записанных в bits в файл.
-	\item const int compressFloor - минимальное совпадение, для записи в виде<length,offset>.
-	\item const int comparesCeil  - максимальное число раз которое ищется совпадение в FindMatch.
-	\item const int CHARBITS    - сколькими битами кодируется символ.    
-	\item const int MATCHBITS     - сколькими битами кодируется длина совпадения.     
-	\item const int DICTBITS     - сколькими битами кодируется длина словаря(offset).     
-	\item const int HASHBITS     - сколько бит в хэше.
-	\item const int SECTORBITS     - сколько бит в секторе.    
-	\item const unsigned int MAXMATCH - максимальная кодируемая длина совпадения.
-	\item const unsigned int DICTSIZE - размер словаря.
-	\item const unsigned int HASHSIZE - размер хэша.
-	\item const unsigned int SHIFTBITS  - на сколько происходит сдвиг при хэшировании.
-	\item const unsigned int SECTORLEN  - размер сектора.
-	\item const unsigned int SECTORAND  - нужен для определения к какому сектору относится то или иное место в словаре.
-	\item unsigned char* dict - ссылка на словарь размером DICTSIZE.
-	\item unsigned int *hash - ссылка на хэш размером HASHSIZE.
-	\item unsigned int *nextlink - ссылка на массив, на каждой позиции которого хранится позиция предыдущего вхождения подстроки с совпадающим хэшем.
-	\item unsigned int matchlength - длина совпадения, применяется в FindMatch, DictSearch.
-	\item unsigned int  matchpos - позиция совпадения, применяется там же.
-	\item unsigned int  bitbuf - буфер, который используется для записи и чтения бит из файла.
-	\item unsigned int  bitsin - сколько битов находится в буфере в данный момент.
-	\item unsigned int  masks[17] - маски для побитового чтения/записи.
-	\item FILE *infile, *outfile; - файлы из которых идёт считывание/запись.
+	\item LoadDict(unsigned int dictpos) - загрузка словаря из файла в циклический буфер на позиции dictpos
+	\item DeleteData(unsigned int dictpos) - удаления всех ссылок на удаляемый сектор с началом в dictpos
+	\item HashData(unsigned int dictpos, unsigned int bytestodo) - хэширование и запись ссылок на возможное преведущее совпадение в словаре
+	\item FindMatch(unsigned int dictpos, unsigned int startlen) - поиск максимального совпадения в словаре с позицией dictpos, не меньше чем startlen 
+	\item DictSearch(unsigned int dictpos, unsigned int bytestodo) - кодирование считаного сектора с началом в dictpos и длинной bytestodo 
+	\item PutChar(unsigned int character) - кодирование символа character
+	\item PutMatch(unsigned int matchlen, unsigned int matchdistance) - кодирование пары <matchlen, matchdistance>
+	\item GetBits(unsigned int numbits) - считывание numbits битов из файла
+	\item PutBits(unsigned int bits, unsigned int numbits) - отправка numbits битов записанных в bits в файл
+    \item const int threshold\_c - минимальное совпадение, для записи в виде<length,offset>
+	\item const int maxCompares\_c   - максимальное число раз которое ищется совпадение в FindMatch
+	\item const int charBits\_c	  - сколькими битами кодируется символ		
+	\item const int lengthBits\_c  	  - сколькими битами кодируется длина совпадения		 
+	\item const int dictBits\_c 	  - сколькими битами кодируется длина словаря(offset) 		
+	\item const int hashBits\_c 	  - сколько бит в хэше
+	\item const int sectorBits\_c 	  - сколько бит в секторе		
+	\item const unsigned int maxMatch\_c - максимальная кодируемая длина совпадения
+	\item const unsigned int dictSize\_c - размер словаря
+	\item const unsigned int hashSize\_c - размер хэша
+	\item const unsigned int shiftBits\_c	- на сколько происходит сдвиг при хэшировании
+	\item const unsigned int sectorSize\_c	- размер сектора
+	\item const unsigned int sectorAND\_c	- нужен для определения к какому сектору относится то или иное место в словаре
+	\item unsigned char* dict - ссылка на словарь размером dictSize\_c
+	\item unsigned int *hash - ссылка на хэш размером hashSize\_c
+	\item unsigned int *nextlink - ссылка на массив, на каждой позиции которого хранится позиция преведущего вхождения подстроки с совпадающим хэшем
+	\item unsigned int matchlength - длина совпадения, применяется в FindMatch, DictSearch
+	\item unsigned int	matchpos - позиция совпдения, применяется там же
+	\item unsigned int	bitbuf - буфер, который испольуется для записи и чтения бит из файла
+	\item unsigned int	bitsin - сколько битов находится в буфере в данный момент
+	\item unsigned int	masks[17] - маски для побитного чтения/записи
+    \item FILE *infile, *outfile; - файлы из которых идёт считывание/запись
 \end{enumerate}
 
 \subsubsection*{Прочие функции} 
